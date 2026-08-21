@@ -12,14 +12,16 @@
 - `kumu-prototyp-zadani.md` — koncept a dramaturgie. Platí.
 - `kumu-design.md` — vizuální definice. Platí.
 - `kumu-copy-en.md` — anglické produktové texty. Platí, má přednost před řetězci uvedenými níže.
+- `kumu-tokeny-a-komponenty.md` — legenda tokenů a komponentní inventář. **Platí a má přednost před §7 a §8 níže.**
 - `kumu-claude-design-zadani.md` a `kumu-opravne-prompty.md` — **nahrazeny tímhle dokumentem.** Nestavěj z nich.
 - Stávající appka zůstává jako reference vedle. Needituje se.
 
-**Dva kroky, tohle je první**
+**Tři kroky, tohle je první**
 1. **Kostra** — struktura a obsah (tenhle dokument)
-2. **Stavba** — rovnou v paletě z `kumu-design.md`
+2. **Obrazovky** — statické návrhy, drží se legendy tokenů z `kumu-tokeny-a-komponenty.md`
+3. **Stavba** — z hotových obrazovek
 
-Mezikrok „šedá appka" odpadl. Plnoplošná plocha je v referenci hlavní kompoziční prvek — v šedé se nedá posoudit, protože bys posuzoval vztah ploch, který tam není. Zbytek palety je změřený a rozhodnutý, takže není na co čekat.
+Mezikrok „šedá appka" odpadl. Plnoplošná plocha je hlavní kompoziční prvek — v šedé se nedá posoudit, protože bys posuzoval vztah ploch, který tam není.
 
 ---
 
@@ -159,7 +161,7 @@ Přehled. Detail každé buňky je v §5.
 
 **Zákazník**
 
-Vstupní obrazovka existuje v návrhu (varianta 2a, rozvržení „nadpis vlevo, pole vpravo"). Kostra z ní přebírá **rozvržení a chování**; barvy a obrázky jsou provizorní.
+Vstupní obrazovka existuje v návrhu (varianta 3a). Kostra z ní přebírá **rozvržení a chování**; barvy jsou provizorní, dokud se nerozhodne paleta.
 
 #### Horní pruh
 
@@ -173,17 +175,25 @@ Značka Kumu vlevo, podtržený odkaz „Přihlásit se" vpravo, vlasová linka 
 
 Pod ním vlasová linka a sociální důkaz ve dvou sloupcích: Seznam 4,9 a Google 4,9, obojí s hvězdičkami.
 
-**Vpravo:** orámované pole s příkladovým textem. Uvnitř pole dole vlastní řádek oddělený linkou — vlevo popisek „Popište vlastními slovy", vpravo dvouřádkové pilulkové tlačítko: drobně **ZDARMA A NEZÁVAZNĚ**, pod tím **Získat odhad**.
+**Vpravo:** orámovaná karta, uvnitř ve třech pásmech oddělených linkami.
 
-Pod polem **tři pilulky fáze zralosti**, vodorovně:
+1. Textové pole s příkladovým textem.
+2. **Tři pilulky fáze zralosti** vodorovně, pod nimi ujišťovací věta. Obojí je **uvnitř karty**, ne pod ní — volba zralosti je součást zadávání, ne vedlejší filtr.
+3. Zápatí karty: vpravo dvouřádkové pilulkové tlačítko, drobně **ZDARMA A NEZÁVAZNĚ**, pod tím **Začít**.
+
+Ke kartě míří ručně kreslená šipka. Je to jediná dekorace v celém produktu — viz výjimka v `kumu-tokeny-a-komponenty.md` §3b.
+
+Pilulky:
 
 | Pilulka | Co dělá |
 |---|---|
-| Zatím jen nápad | Příklad v poli je vágní, asistent začíná orientačními otázkami |
-| **Mám představu** | Příklad obsahuje rozsah a rozpočtový strop. **Výchozí pro demo** |
+| **Zatím jen nápad** | Příklad v poli je vágní, asistent začíná orientačními otázkami. **Předvybraná v návrhu** |
+| Mám představu | Příklad obsahuje rozsah a rozpočtový strop |
 | Mám projekt, hledám dodavatele | Příklad zmiňuje hotovou dokumentaci, asistent přeskakuje k poptávce |
 
-Pod pilulkami věta: „Odhad rozpočtu a seznam prací obvykle připravíme do několika minut. Bez registrace a nezávazně."
+Ujišťovací věta pod pilulkami: „Odhad rozpočtu a seznam prací obvykle připravíme do několika minut. Bez registrace a nezávazně."
+
+> **Rozpor k rozhodnutí.** Návrh má předvybranou „Zatím jen nápad", ale demo scénář i ukázkový text jsou „Mám představu" — Petra a Martin mají rozsah i strop. Buď se předvybere druhá pilulka, nebo se v kroku 1 scénáře S1 klikne ručně. Druhá varianta je lepší: ukáže, že pilulky něco dělají.
 
 > **Rozsah:** proklikaná je jen cesta „Mám představu". Ostatní dvě mění příkladový text a první otázku asistenta, pak se sbíhají do stejného dialogu. Tři plné větve by prototyp ztrojnásobily.
 
@@ -204,6 +214,35 @@ Tahle sekce je ukázkou tří bloků z §3 — B3, B2 a B8. Vstupní obrazovka t
 > **Příkladový projekt je jiný než demo scénář** — je to byt 2+kk za 450 000 Kč, ne náš 3+1. Je to záměr, ukazuje to, že produkt zvládne i menší zakázku. Ukázkový text, který se v demu vloží do pole, je ale ten náš 3+1 (viz §2).
 
 Ukazatel 72 % je úplnost plánu, ne postup prací. Drobnost, ale jinde v kostře nefiguruje — pokud zůstane, patří i do F2.
+
+> **Konflikt se semantikou.** V návrhu jsou součty 450 000 Kč a 398 000 Kč obarvené akcentem. Karta ROZPOČET je přitom doslova náhled bloku B3, kde je barevné číslo vyhrazené pro nad/pod rozpočtem. Buď součty zneutrální, nebo v ukázce výstupu nebudou náhledy skutečných bloků. Rozbor v `kumu-tokeny-a-komponenty.md` §3a.
+
+#### Jak to funguje — tři kroky
+
+Pásmo pod ukázkou výstupu. Tři sloupce oddělené vlasovými linkami, každý s číslem `01`—`03`, nadpisem a dvěma větami.
+
+| # | Nadpis | Text |
+|---|---|---|
+| 01 | Popíšete, co chcete udělat | Vlastními slovy a jakkoli neúplně. Na to, co chybí, se doptáme. |
+| 02 | Dostanete nabídky řemeslníků | S cenami prací i materiálu. Rozsah a kvalitu můžete posouvat a rovnou vidíte, co to udělá s celkem. |
+| 03 | Vyberete si firmy pro realizaci | Ověření řemeslníci vidí konkrétní projekt, ne obecnou poptávku. Proto jsou jejich ceny srovnatelné. |
+
+Pod nimi uzavírací řádek: „Vše na jednom místě. Od nápadu až do konce projektu."
+
+> Krok 03 je **nejlepší zákaznická formulace celého konceptu**, jakou zatím máme — lepší než cokoli v `kumu-prototyp-zadani.md`. Stojí za to použít ji i v prezentaci.
+
+#### Fázový pruh a patička
+
+**Fázový pruh** — tmavý, přes celou šířku, mezi obsahem a patičkou. Pět položek oddělených hvězdičkami: Nápad · Projekt · Materiál a rozpočet · Nabídky · Realizace. Je to **produktový prvek, ne demo chrome** (viz §7).
+
+**Patička** — na základní ploše, oddělená od pruhu vlasovou linkou. Značka a jednořádkový popis vlevo, tři sloupce odkazů: Kumu (O nás · Jak to funguje · **Pro řemeslníky**) · Podpora (Časté dotazy · Kontakt · Nahlásit problém) · Právní informace (Obchodní podmínky · Zásady ochrany osobních údajů · Nastavení cookies). Dole provozovatel a copyright.
+
+Dvě věci z patičky sahají dál než do vzhledu:
+
+1. **Patička přiznává provozovatele: NejŘemeslníci.cz s.r.o.** Je to částečná odpověď na otevřenou otázku, jestli je Kumu nástupce, nebo paralelní produkt — navenek je to produkt NŘ. Stojí za to vědět, že to publikum uvidí dřív, než se na to zeptá.
+2. **„Pro řemeslníky" je druhý vstup do produktu.** V matici §4 žádný takový vstup není — nabídková strana se do prototypu dostává jen přes přepínač role. `[K rozhodnutí: má prototyp mít řemeslnickou vstupní obrazovku, nebo zůstane odkaz nefunkční?]`
+
+Všechny odkazy v patičce jsou v prototypu nefunkční. Cílové stránky neexistují.
 
 #### Dialog
 
@@ -431,30 +470,18 @@ F4 karta víceprací → schválení → přepočet 1 181 000 na 1 199 000. Pro 
 
 ## 7. Vizuální vrstva
 
-První průchod se staví **rovnou v paletě**, ne v šedé. Důvod je kompoziční: plnoplošná plocha je v referenci hlavní nosný prvek a vztah Cornsilku, bílých karet a tmavého pruhu je to, co drží obrazovku pohromadě. V šedé se to posoudit nedá — posuzoval bys vztah ploch, který tam není.
+První průchod se staví **rovnou v barvě**, ne v šedé. Důvod je kompoziční: plnoplošná plocha je hlavní nosný prvek a vztah základní plochy, bílých karet a tmavého pruhu je to, co drží obrazovku pohromadě. V šedé se to posoudit nedá — posuzoval bys vztah ploch, který tam není.
 
-Zbytek už je rozhodnutý a změřený v `kumu-design.md`. Otevřené zůstává jen písmo, ikonový set a jestli Cornsilk ustoupí u partnera. Nic z toho stavbu neblokuje.
+**Paleta je otevřená.** `kumu-design.md` popisuje Cornsilk, Glacier a Deep Atlantic; hotová vstupní obrazovka používá režnou plochu, černou a oranžovou. Dokud se to nerozhodne, platí **role, ne hodnoty** — legenda je v `kumu-tokeny-a-komponenty.md` §2. Ta je psaná tak, aby se na ni dalo naroubovat libovolné schéma.
 
 **Není to drátěný model složený z boxů.** Co v referencích působí moderně, není barva — je to typografický rozsah, prázdné místo a asymetrie. Barva dělá pocit, struktura dělá modernost. Obojí se staví najednou.
 
-### Plochy v prvním průchodu
+### Co platí bez ohledu na paletu
 
-| Token | Hodnota | Poznámka |
-|---|---|---|
-| `surface` | `F0DF87` Cornsilk | Plnoplošně, od kraje ke kraji |
-| `surfaceRaised` | `FFFFFF` | Karty s čísly |
-| `surfaceGreen` | `D4EAE0` | Panely bez čísel |
-| `surfaceCool` | `A0CED9` Glacier | Ustupující panely, partnerský agregát |
-| `surfaceInverse` | `133968` Deep Atlantic | Demo chrome |
-| `textPrimary` | `133968` | 8,61 na Cornsilku, 11,58 na bílé |
-| `textSecondary` | `133968` při 60 % | |
-| `border` | `133968` při 15 % | Vlasové linky |
-| `over` | `A66918` | Nad rozpočtem |
-| `under` | `33855F` | Úspora |
-
-Semantika je v prvním průchodu plnohodnotná, takže **peak dema funguje od začátku** — částka po odškrtání pák skutečně přeskočí z `over` do `under`. To byl jediný důvod, proč by se vyplatilo stavět nejdřív nabarevno.
-
-Zůstává v platnosti: karty s částkami stojí na bílé, ne na Cornsilku. Na žluté klesne kontrast semantiky na 3,35 a řádkové položky přestanou být čitelné.
+- **Karty s peněžní částkou stojí na `planeRaised`**, ne na základní ploše. Měřeno: na sytější ploše klesá kontrast semantiky pod čitelnou hranici pro řádkové položky.
+- **`over` a `under` jsou vyhrazené.** Nikde jinde než na rozpočtovém čísle se neobjeví, a naopak žádný jiný token se neobjeví na rozpočtovém čísle.
+- **`accent` nese výběr, aktivní stav, průběh a metriky.** Nikdy peněžní částku.
+- Semantika je v prvním průchodu plnohodnotná, takže **peak dema funguje od začátku** — částka po odškrtání pák skutečně přeskočí z `over` do `under`.
 
 ### Typografie — rozsah je to hlavní
 
@@ -462,7 +489,7 @@ Reference stojí na jediném kontrastu: obrovský displejový nadpis proti drobn
 
 | Úroveň | Desktop | Mobil | Váha | Proklad | Kde |
 |---|---|---|---|---|---|
-| Display XL | 88 px | 40 px | 800, tracking −0,03em | 0,95 | „Co chcete udělat?", „Hotovo" |
+| Display XL | 88 px | 40 px | 800, tracking −0,03em | 0,95 | Nadpis vstupní obrazovky, „Hotovo" |
 | Display | 56 px | 44 px | 800, tracking −0,02em | 1,0 | Součty v B3, částka v nabídce řemeslníka |
 | Nadpis | 20 px | 18 px | 600 | 1,3 | Nadpisy bloků |
 | Text | 15 px | 15 px | 400 | 1,5 | Vše ostatní |
@@ -499,7 +526,7 @@ Selhání není ošklivost, je to genericita. Vypadá takhle:
 - **Modální dialog pro rozhodnutí** — B8 je vždy vsazený do stránky, nikdy jako okno
 - Trojice ikona + titulek + popisek
 - Ikony jako dekorace
-- Cornsilk použitý jako zvýraznění místo jako prostředí
+- Základní plocha použitá jako zvýraznění místo jako prostředí
 
 ### Obsah
 
@@ -517,40 +544,23 @@ Selhání není ošklivost, je to genericita. Vypadá takhle:
 
 ### Co se doladí až potom
 
-Písmo (systémové bezpatkové v těžké váze dá většinu dojmu, vlastní font přes `@import` nemám v artifactech ověřený) · ikonový set · jestli Cornsilk ustoupí bílé v partnerském pohledu · tmavá varianta partnerského dashboardu · mikroanimace nad rámec přechodu barvy u pák.
+Volba palety · písmo (systémové bezpatkové v těžké váze dá většinu dojmu, vlastní font přes `@import` nemám v artifactech ověřený) · ikonový set · jestli základní plocha ustoupí bílé v partnerském pohledu · tmavá varianta partnerského dashboardu · mikroanimace nad rámec přechodu barvy u pák.
 
 ---
 
 ## 8. Rozhraní pro design
 
-Kostra definuje **sloty a pravidla**. Hodnoty jsou v `kumu-design.md`.
+**Legenda tokenů se přesunula do `kumu-tokeny-a-komponenty.md` §2.** Je psaná jako role, ne hodnoty, protože paleta zatím není rozhodnutá — a to je zároveň jediný způsob, jak zůstat vyměnitelný.
 
-| Token | Role v rozhraní | Hodnota podle reference |
-|---|---|---|
-| `surface` | základní plocha | `F0DF87` Cornsilk, plnoplošně |
-| `surfaceRaised` | karty nad plochou | `FFFFFF` — sem patří všechna čísla |
-| `surfaceGreen` | panely bez čísel | `D4EAE0` |
-| `surfaceCool` | ustupující panely | `A0CED9` Glacier |
-| `surfaceInverse` | demo chrome, spodní pruh | `133968` Deep Atlantic |
-| `border` / `borderStrong` | linky, oddělovače | |
-| `textPrimary` / `textSecondary` | text | |
-| `actionPrimary` | hlavní akce | `133968`, pilulka, bílý text |
-| `actionSecondary` | vedlejší akce, obrys | |
-| `accent` | výběr, aktivní stav | `133968` — není to hue |
-| `over` | nad rozpočtem | `A66918` — ztmavený Persimmon |
-| `under` | úspora, pod rozpočtem | `33855F` — ztmavený Malachite |
-| `focus` | klávesová navigace | |
-| `space-1` … `space-8` | odsazení | |
+Tam je i komponentní inventář vytažený z hotové vstupní obrazovky a kontrolní seznam, kterým má projít každá další obrazovka.
 
-**Pět pravidel, která design musí respektovat**
+**Pravidla, která platí nezávisle na paletě**
 
-1. **Karty s peněžní částkou stojí na bílé.** Na Cornsilku klesne kontrast semantiky na 3,35 a řádkové položky přestanou být čitelné. Není to preference, je to měřená čitelnost.
-2. **Cornsilk, Glacier ani zelený nádech se nikdy nedotknou čísla.** Jsou to plochy.
-3. **`accent` není hue, je to Deep Atlantic.** V kartě s částkou nese barvu výhradně semantika — týká se B3, B8 a vyúčtování.
-4. **Persimmon je vyhrazený pro „nad rozpočtem", Malachite pro „úsporu".** Nikde jinde dekorativně.
+1. **Karty s peněžní částkou stojí na `planeRaised`.** Na sytější ploše klesá kontrast semantiky pod čitelnou hranici pro řádkové položky.
+2. **Základní plocha ani žádný akcent se nedotknou peněžního čísla.**
+3. **`over` a `under` jsou vyhrazené** pro rozpočtové číslo a nikde jinde se neobjeví.
+4. **`accent` je jedna role**, ne šest — výběr, aktivní stav, průběh, metriky.
 5. **Design nemění strukturu, pořadí ani nezkratitelné věty.** Může měnit vše ostatní.
-
-Otevřené body designu jsou v `kumu-design.md` §8.
 
 ---
 
@@ -558,8 +568,9 @@ Otevřené body designu jsou v `kumu-design.md` §8.
 
 | # | Krok | Po něm máš |
 |---|---|---|
-| 1 | Datový model + tokeny z palety + přepínač role a fáze | Nic ukazatelného, ale drží to |
-| 2 | Bloky B1—B6, B8 ve třech režimech | 70 % obsahu, staticky |
+| 0 | Legenda tokenů zapsaná do souboru, se kterým se kreslí | Obrazovky jdou přebarvit výměnou hodnot |
+| 1 | Datový model + tokeny + přepínač role a fáze | Nic ukazatelného, ale drží to |
+| 2 | Položkový seznam s částkami a řádek součtu ve všech stavech, pak bloky B1—B6 a B8 ve třech režimech | 70 % obsahu, staticky |
 | 3 | Zákazník F1 a F2 | **Vize je čitelná. Kdyby došel čas, tohle stačí** |
 | 4 | Řemeslník F3 včetně plochy a navigace | Argument o platformě |
 | 5 | Partner F2 a F3 | Monetizační argument |
@@ -567,7 +578,7 @@ Otevřené body designu jsou v `kumu-design.md` §8.
 | 7 | F4 a F5 napříč rolemi | Uzavřený oblouk |
 | 8 | Scénáře S1—S5 | Prezentovatelné demo |
 | 9 | Živý AI dialog ve F1 s demo módem | Živost |
-| 10 | Doladění písma, ikon a partnerské plochy | Hotovo |
+| 10 | Volba palety, písma, ikon a partnerské plochy | Hotovo |
 
 Když dojde čas, obětuj krok 7 dřív než 4 a 5. Bez řemeslníka a partnera demo neukáže hlavní myšlenku; bez F4 a F5 ji ukáže, jen nedovypráví.
 
@@ -575,6 +586,6 @@ Když dojde čas, obětuj krok 7 dřív než 4 a 5. Bez řemeslníka a partnera 
 
 ## 10. Co kostra vědomě neřeší
 
-Funkční registrace a přihlášení (odkaz na vstupní obrazovce je vidět, ale neklikatelný) · správa účtu a nastavení · platby a platební brána · prázdné stavy pro nového uživatele · chybové stavy a validace · jiný projekt než tenhle · plné větve pilulek „Zatím jen nápad" a „Mám projekt" (mění jen příklad a první otázku) · druhá větev F4 a F5 na klíč · editace ceníku a profilu řemeslníka · admin a moderace · migrace uživatelů NŘ · cenotvorba pro partnery · responzivita mimo cílové zařízení každé role · blok B7.
+Funkční registrace a přihlášení (odkaz je vidět, ale neklikatelný) · **všechny cílové stránky odkazů z patičky** — O nás, Jak to funguje, Pro řemeslníky, Časté dotazy, Kontakt, Nahlásit problém, obchodní podmínky, ochrana údajů, cookies · řemeslnická vstupní obrazovka · správa účtu a nastavení · platby a platební brána · prázdné stavy pro nového uživatele · chybové stavy a validace · jiný projekt než tenhle · plné větve pilulek „Zatím jen nápad" a „Mám projekt" (mění jen příklad a první otázku) · druhá větev F4 a F5 na klíč · editace ceníku a profilu řemeslníka · admin a moderace · migrace uživatelů NŘ · cenotvorba pro partnery · responzivita mimo cílové zařízení každé role · blok B7.
 
 Uveď to v prezentaci sám, dřív než se někdo zeptá.
