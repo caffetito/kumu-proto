@@ -144,7 +144,7 @@
 :root {
   --font-sans: /* [?] §9 bod 4 */ system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  --type-display-xl:   88px;
+  --type-display-xl:   52px;  /* [upraveno] bylo 88px — na anglický čtyřřádkový nadpis se nevešlo, lámalo se na 7 řádků. 52px dá přesně 4 v hero sloupci (max-width 640px). Pozor: teď je menší než --type-display (56px) — Display XL už není "větší než Display" podle jména. Obě úrovně se zatím nepotkávají na stejné obrazovce, ale stojí za rozhodnutí, jestli přejmenovat nebo srovnat i Display. */
   --type-display:      56px;
   --type-heading:      20px;
   --type-body:         15px;
