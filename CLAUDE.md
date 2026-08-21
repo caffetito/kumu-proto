@@ -54,6 +54,20 @@ Britský pravopis. Druhá osoba, přímo. Žádné vykřičníky. Tlačítka poj
 
 ---
 
+## Architektura
+
+Jeden soubor `index.html` s HTML, CSS a JavaScriptem uvnitř, plus `styles/tokens.css` linkovaný přes `<link>`. Nic dalšího.
+
+Žádný framework, žádný build, žádné npm, žádný bundler. Soubor se otevře dvojklikem a funguje offline.
+
+Je to záměr, ne dočasné omezení: prototyp se prezentuje z jednoho souboru a nesmí záviset na běžícím serveru. Kdyby se zdálo, že to bez frameworku nejde, **nahlas to — nezaváděj ho.**
+
+Data projektu drž v jednom objektu na začátku skriptu, ne rozeseté po kódu. Čísla z `kumu-kostra.md` §2 jsou provázaná napříč fázemi a musí být na jednom místě, aby se dala zkontrolovat.
+
+Autor nekóduje. Vysvětluj, co jsi udělal, česky a bez žargonu, a piš to tak, aby šlo posoudit, jestli to sedí, bez čtení kódu. Když je potřeba rozhodnout, nabídni možnosti a jejich důsledky — ne názvy knihoven.
+
+---
+
 ## Stav
 
 Fáze (F1—F5) a role (zákazník / řemeslník / partner) jsou **dvě nezávislé osy globálního stavu**. Každá kombinace má definovaný obsah — žádná buňka není prázdná obrazovka. Když se role projektu v dané fázi netýká, je to samo o sobě informace a musí být vidět.
