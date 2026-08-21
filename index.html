@@ -230,12 +230,15 @@
     color: var(--text-secondary);
   }
 
-  /* Komponenta 8 — plovoucí bílá karta */
+  /* Komponenta 8 — plovoucí bílá karta. container-type umožňuje
+     komponentě 11 zmenšit Display podle skutečné šířky karty, ne
+     podle šířky okna — viz .amount-num níže. */
   .block-card {
     background: var(--surface-raised);
     border: var(--border-width) solid var(--border);
     border-radius: var(--radius-card);
     padding: var(--space-2);
+    container-type: inline-size;
   }
 
   .block-card__kicker {
@@ -307,14 +310,34 @@
   .total-row__label { font-size: var(--type-body); color: var(--text-secondary); }
 
   .total-row__amount {
-    font-size: var(--total-size);
-    font-weight: var(--total-weight);
-    font-variant-numeric: tabular-nums lining-nums;
     color: var(--text-primary);
   }
 
   .total-row--over  .total-row__amount { color: var(--color-over); }
   .total-row--under .total-row__amount { color: var(--color-under); }
+
+  /* Částka a měna vždy na jednom řádku. Číslo drží úroveň Display,
+     ale zmenšuje se podle skutečné šířky karty (container query),
+     ne podle okna — na úzké kartě (state-sample, offer-card) by se
+     jinak nevešlo. Měna dostává o úroveň menší stupeň, Nadpis. Obojí
+     zůstávají dvě z pěti úrovní z kostry §7, žádná nová velikost. */
+  .total-row__amount, .offer-card__amount {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  .amount-num {
+    font-size: clamp(var(--type-heading), 11cqi, var(--total-size));
+    font-weight: var(--total-weight);
+  }
+
+  .amount-ccy {
+    font-size: var(--type-heading);
+    font-weight: var(--weight-heading);
+  }
 
   /* Ukázka tří stavů komponenty 11 vedle sebe — kartička v pásmu nahoře */
   .state-sample {
@@ -416,10 +439,29 @@
   .package-list .row { flex-wrap: wrap; }
   .package-list .row__meta { color: var(--text-secondary); font-size: var(--type-caption); }
   .package-list .row__status {
+    display: block;
     font-size: var(--type-caption);
     text-transform: uppercase;
     letter-spacing: var(--tracking-caps);
     color: var(--text-secondary);
+  }
+
+  /* Stejný grafický jazyk jako harmonogram: plný puntík = nabídka
+     vybraná, obrysový = čekáme. Grafika, ne text — proto --graphic-
+     under, nikdy --color-under (ten je textová zeleň úspory). */
+  .package-list__dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1.5px solid var(--graphic-track);
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  .package-list__dot--filled {
+    background: var(--graphic-under);
+    border-color: var(--graphic-under);
   }
 
   /* Harmonogram — B6, komponenty s grafikou (nikdy text) */
@@ -517,13 +559,12 @@
     border: var(--border-width) solid var(--border);
     border-radius: var(--radius-card);
     padding: var(--space-2);
+    container-type: inline-size;
   }
   .offer-card__name { font-weight: var(--weight-heading); }
   .offer-card__amount {
-    font-size: var(--type-display);
-    font-weight: var(--weight-display);
-    font-variant-numeric: tabular-nums lining-nums;
     margin: 6px 0;
+    color: var(--text-primary);
   }
   .offer-card__meta { color: var(--text-secondary); font-size: var(--type-caption); }
 </style>
@@ -990,10 +1031,18 @@
     }).join('') + '</div>';
   }
 
+  // Odděluje číslo od "CZK", aby se dalo číslo a měna vysadit ve dvou
+  // různých velikostech a garantovaně na jednom řádku (viz .amount-num
+  // / .amount-ccy). czk()/formatKc() vždy vrací "<číslo> CZK".
+  function bigAmountHtml(amountText) {
+    var num = amountText.replace(/ CZK$/, "");
+    return '<span class="amount-num">' + num + '</span> <span class="amount-ccy">CZK</span>';
+  }
+
   function totalRowHtml(label, amountText, mode) {
     return '<div class="total-row total-row--' + mode + '">' +
       '<span class="total-row__label">' + label + '</span>' +
-      '<span class="total-row__amount">' + amountText + '</span>' +
+      '<span class="total-row__amount">' + bigAmountHtml(amountText) + '</span>' +
     '</div>';
   }
 
@@ -1134,9 +1183,12 @@
 
   function renderB5Prehled() {
     var rows = projekt.balicky.map(function (b) {
+      var dotClass = "package-list__dot" + (b.nabidka ? " package-list__dot--filled" : "");
       return '<div class="row">' +
         '<span class="row__label">' + b.nazev + '<span class="row__meta"> · ' + fmtRange(b.od, b.do) + '</span></span>' +
-        '<span class="row__amount">' + czk(b.odhad) + '<span class="row__status" style="display:block;">' + b.stav + '</span></span>' +
+        '<span class="row__amount">' + czk(b.odhad) +
+          '<span class="row__status"><span class="' + dotClass + '"></span>' + b.stav + '</span>' +
+        '</span>' +
       '</div>';
     }).join('');
     return blockCard("B5", "Trade packages", "overview", '<div class="package-list">' + rows + '</div>');
@@ -1224,7 +1276,7 @@
         : czk(f.rozdilOdStropu) + " over your ceiling";
       return '<div class="offer-card">' +
         '<div class="offer-card__name">' + f.nazev + '</div>' +
-        '<div class="offer-card__amount">' + czk(f.castka) + '</div>' +
+        '<div class="offer-card__amount">' + bigAmountHtml(czk(f.castka)) + '</div>' +
         '<div class="offer-card__meta">' + f.hodnoceni + ' · handover ' + fmtDate(f.predani) + '</div>' +
         '<div class="offer-card__meta">1 contract, one warranty on the whole job</div>' +
         '<div class="offer-card__meta">' + rozdilText + '</div>' +
