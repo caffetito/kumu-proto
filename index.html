@@ -182,6 +182,350 @@
 
   .debug-panel dt { color: var(--text-secondary); }
   .debug-panel dd { text-align: right; font-variant-numeric: tabular-nums lining-nums; }
+
+  /* ============================================================
+     KROK 2 — KATALOG BLOKŮ
+     kumu-kostra.md §9 krok 2: komponenty 10/11 ve všech stavech,
+     pak B1—B6 a B8 ve všech režimech. Staticky — klikací chování
+     (zaškrtnutí páky, výběr nabídky) přijde s obrazovkami v kroku 3.
+     ============================================================ */
+
+  .catalog {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 0 var(--space-2) var(--space-5);
+  }
+
+  .catalog__intro {
+    max-width: var(--container-prose);
+    color: var(--text-secondary);
+    font-size: var(--type-caption);
+    margin-bottom: var(--space-3);
+  }
+
+  .catalog__group {
+    margin-top: var(--space-4);
+  }
+
+  .catalog__group-title {
+    font-size: var(--type-heading);
+    font-weight: var(--weight-heading);
+    margin-bottom: var(--space-2);
+  }
+
+  .catalog__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: flex-start;
+  }
+
+  .catalog__row > * { flex: 1 1 360px; min-width: 0; }
+
+  /* Komponenta 9 — mikropopisek verzálkami */
+  .microlabel {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caps);
+    font-size: var(--type-caption);
+    color: var(--text-secondary);
+  }
+
+  /* Komponenta 8 — plovoucí bílá karta */
+  .block-card {
+    background: var(--surface-raised);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--space-2);
+  }
+
+  .block-card__kicker {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-1);
+  }
+
+  .block-card__title {
+    font-size: var(--type-heading);
+    font-weight: var(--weight-heading);
+    margin: 2px 0 var(--space-2);
+  }
+
+  .block-card__note {
+    font-size: var(--type-caption);
+    color: var(--text-secondary);
+    margin-top: var(--space-1);
+  }
+
+  .block-card__cta {
+    margin-top: var(--space-2);
+  }
+
+  /* Komponenta 10 — položkový seznam s částkami. Sdílená i s B2
+     (question-list) a B5 (package-list) — je to tentýž řádek,
+     jen v jiném kontextu, ne kreslený znovu jinak. */
+  .row-list, .question-list, .package-list { display: flex; flex-direction: column; }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-2);
+    min-height: var(--row-height);
+    border-bottom: var(--row-line);
+    padding: 6px 0;
+  }
+
+  .row:last-child { border-bottom: none; }
+
+  .row__label { color: var(--text-primary); }
+
+  .row__amount {
+    font-variant-numeric: tabular-nums lining-nums;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+
+  .row__amount--over  { color: var(--color-over); }
+  .row__amount--under { color: var(--color-under); }
+  .row__amount--muted { color: var(--text-secondary); }
+
+  .row__tag {
+    margin-left: 8px;
+    font-size: var(--type-caption);
+    color: var(--text-secondary);
+  }
+
+  /* Komponenta 11 — řádek součtu. Tři stavy: neutrální / nad / pod. */
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-top: var(--space-1);
+  }
+
+  .total-row__label { font-size: var(--type-body); color: var(--text-secondary); }
+
+  .total-row__amount {
+    font-size: var(--total-size);
+    font-weight: var(--total-weight);
+    font-variant-numeric: tabular-nums lining-nums;
+    color: var(--text-primary);
+  }
+
+  .total-row--over  .total-row__amount { color: var(--color-over); }
+  .total-row--under .total-row__amount { color: var(--color-under); }
+
+  /* Ukázka tří stavů komponenty 11 vedle sebe — kartička v pásmu nahoře */
+  .state-sample {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .state-sample > .block-card { flex: 1 1 260px; }
+
+  /* Definiční tabulka — B1 */
+  .def-list { display: grid; grid-template-columns: 40% 1fr; row-gap: 10px; }
+  .def-list dt { color: var(--text-secondary); }
+  .def-list dd { color: var(--text-primary); margin: 0; }
+
+  /* B2 — klíčové otázky */
+  .question-list { display: flex; flex-direction: column; gap: var(--space-2); }
+  .question-list .row__label { display: block; font-weight: var(--weight-heading); }
+  .question-list .row__impact { display: block; color: var(--text-secondary); font-size: var(--type-caption); margin-top: 2px; }
+
+  /* Pilulkové tlačítko — komponenta 7, jednořádková varianta */
+  .pill-btn {
+    display: inline-block;
+    font-family: inherit;
+    font-size: var(--type-body);
+    border-radius: var(--radius-pill);
+    padding: var(--pill-pad-y) var(--pill-pad-x);
+    min-height: var(--hit-min);
+    cursor: default;
+    border: var(--border-width) solid transparent;
+  }
+
+  .pill-btn--primary {
+    background: var(--action-primary);
+    color: var(--action-primary-fg);
+  }
+
+  .pill-btn--secondary {
+    background: var(--action-secondary);
+    color: var(--text-primary);
+    border-color: var(--action-secondary-border);
+  }
+
+  .pill-btn--small {
+    font-size: var(--type-caption);
+    padding: 6px 12px;
+    min-height: 32px;
+  }
+
+  /* Rozbalovací karta — B4 zákaznický, komponenta 6/9 */
+  .disclosure summary {
+    cursor: pointer;
+    font-weight: var(--weight-heading);
+    font-size: var(--type-heading);
+    list-style: none;
+  }
+
+  .disclosure summary::-webkit-details-marker { display: none; }
+
+  .disclosure[open] summary { margin-bottom: var(--space-2); }
+
+  .disclosure ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .disclosure li {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: var(--row-line);
+    padding: 6px 0;
+  }
+
+  .disclosure li:last-child { border-bottom: none; }
+
+  /* Materiálová tabulka — B4 partnerský */
+  .material-table { width: 100%; border-collapse: collapse; }
+  .material-table th {
+    text-align: left;
+    font-size: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caps);
+    color: var(--text-secondary);
+    font-weight: var(--weight-body);
+    border-bottom: var(--border-width) solid var(--border);
+    padding: 0 8px 8px 0;
+  }
+  .material-table td {
+    border-bottom: var(--row-line);
+    padding: 10px 8px 10px 0;
+    vertical-align: middle;
+  }
+  .material-table tr:last-child td { border-bottom: none; }
+  .material-table tr[data-neurceno] td { color: var(--text-secondary); }
+
+  /* Balíčky — B5 přehled */
+  .package-list { display: flex; flex-direction: column; }
+  .package-list .row { flex-wrap: wrap; }
+  .package-list .row__meta { color: var(--text-secondary); font-size: var(--type-caption); }
+  .package-list .row__status {
+    font-size: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caps);
+    color: var(--text-secondary);
+  }
+
+  /* Harmonogram — B6, komponenty s grafikou (nikdy text) */
+  .timeline { position: relative; height: 40px; margin: var(--space-2) 0 var(--space-1); }
+  .timeline__track {
+    position: absolute;
+    left: 0; right: 0; top: 50%;
+    height: 1px;
+    background: var(--graphic-track);
+    opacity: 0.3;
+  }
+  .timeline__segment {
+    position: absolute;
+    top: 6px;
+    height: 28px;
+    border-radius: var(--meter-radius);
+    border: 1.5px solid var(--graphic-track);
+    background: transparent;
+  }
+  .timeline__segment--done    { background: var(--graphic-under); border-color: var(--graphic-under); }
+  .timeline__segment--active  { background: var(--color-accent);  border-color: var(--color-accent); }
+  .timeline__segment--filled  { background: var(--graphic-under); border-color: var(--graphic-under); }
+  .timeline__marker {
+    position: absolute;
+    top: -2px;
+    width: 2px;
+    height: 44px;
+    background: var(--border-strong);
+  }
+  .timeline__caption {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--type-caption);
+    color: var(--text-secondary);
+  }
+  .timeline__legend {
+    display: flex;
+    gap: var(--space-2);
+    font-size: var(--type-caption);
+    color: var(--text-secondary);
+    margin-top: var(--space-1);
+  }
+  .timeline__legend-swatch {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  /* B8 výběr — zaškrtávací páka */
+  .lever-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: var(--row-line);
+  }
+  .lever-row:last-of-type { border-bottom: none; }
+  .lever-row__box {
+    flex: none;
+    width: var(--check-size);
+    height: var(--check-size);
+    border: 1.5px solid var(--check-border);
+    border-radius: 4px;
+    margin-top: 2px;
+  }
+  .lever-row__body { flex: 1; }
+  .lever-row__head { display: flex; justify-content: space-between; gap: var(--space-2); }
+  .lever-row__impact { color: var(--text-secondary); font-size: var(--type-caption); margin-top: 2px; }
+
+  /* B8 varianty — dvě cesty */
+  .choice-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .choice-card {
+    flex: 1 1 260px;
+    border: var(--border-width) solid var(--choice-border);
+    border-radius: var(--radius-card);
+    padding: var(--space-2);
+  }
+  .choice-card__title { font-weight: var(--weight-heading); margin-bottom: 4px; }
+  .choice-card__meta { color: var(--text-secondary); font-size: var(--type-caption); }
+  .choice-card__note { color: var(--text-secondary); font-size: var(--type-caption); margin-top: var(--space-1); }
+  .choice-default {
+    margin-top: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    background: var(--surface-accent);
+    border-radius: var(--radius-card);
+    font-size: var(--type-caption);
+  }
+
+  /* B8 nabídky — karty firem */
+  .offer-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .offer-card {
+    flex: 1 1 220px;
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--space-2);
+  }
+  .offer-card__name { font-weight: var(--weight-heading); }
+  .offer-card__amount {
+    font-size: var(--type-display);
+    font-weight: var(--weight-display);
+    font-variant-numeric: tabular-nums lining-nums;
+    margin: 6px 0;
+  }
+  .offer-card__meta { color: var(--text-secondary); font-size: var(--type-caption); }
 </style>
 </head>
 <body data-role="zakaznik" data-faze="F1">
@@ -217,6 +561,16 @@
         <dt>Pět vybraných nabídek F3 (musí = 564 000)</dt><dd data-debug="petnabidek"></dd>
       </dl>
     </div>
+
+    <div class="catalog">
+      <p class="catalog__intro" style="margin-top: var(--space-5);">
+        Krok 2 z kumu-kostra.md §9 — položkový seznam a řádek součtu ve všech
+        stavech, pak bloky B1—B6 a B8 ve svých režimech (B7 se v prototypu
+        nepoužívá). Statická ukázka obsahu — klikání na páky, výběr nabídky
+        a podobné mechaniky se zapojí až se skutečnými obrazovkami v kroku 3.
+      </p>
+      <div data-catalog><!-- vykresleno skriptem --></div>
+    </div>
   </main>
 
 <script>
@@ -249,19 +603,22 @@
       terminPevny: false
     },
 
+    // Názvy anglicky — kumu-copy-en.md B3, přesně v tomhle pořadí
+    // ("Sloupce | Položky"). Značky (Rigips/Weber/Isover) zůstávají
+    // beze změny, jsou to vlastní jména.
     polozky: [
-      { nazev: "Bourání a odvoz suti", castka: 85000 },
-      { nazev: "Elektroinstalace", castka: 165000 },
-      { nazev: "Voda a odpady", castka: 95000 },
-      { nazev: "Jádro", castka: 285000 },
-      { nazev: "SDK", castka: 62000, znacka: "Rigips" },
-      { nazev: "Omítky", castka: 78000, znacka: "Weber" },
-      { nazev: "Podlahy", castka: 138000 },
-      { nazev: "Malby", castka: 45000 },
-      { nazev: "Dveře", castka: 92000 },
-      { nazev: "Kuchyň", castka: 210000 },
-      { nazev: "Izolace", castka: 34000, znacka: "Isover" },
-      { nazev: "Rezerva", castka: 99000 }
+      { nazev: "Demolition and waste removal", castka: 85000 },
+      { nazev: "Electrical installation", castka: 165000 },
+      { nazev: "Water and drainage", castka: 95000 },
+      { nazev: "Bathroom and WC", castka: 285000 },
+      { nazev: "Plasterboard ceilings and linings", castka: 62000, znacka: "Rigips" },
+      { nazev: "Renders and skim", castka: 78000, znacka: "Weber" },
+      { nazev: "Flooring", castka: 138000 },
+      { nazev: "Painting", castka: 45000 },
+      { nazev: "Doors and frames", castka: 92000 },
+      { nazev: "Kitchen units and fitting", castka: 210000 },
+      { nazev: "Party wall insulation", castka: 34000, znacka: "Isover" },
+      { nazev: "Contingency", castka: 99000 }
     ],
 
     paky: [
@@ -289,28 +646,21 @@
       zpusob: "oboji"
     },
 
+    // Sedm balíčků z F3 (kumu-kostra.md §5). Názvy anglicky, přesně
+    // podle kumu-copy-en.md F3. Kde už dorazila a byla vybrána nabídka,
+    // je rovnou na balíčku (pole nabidka) — ne ve druhém, odděleném
+    // seznamu, který by se musel párovat podle jména a mohl se rozejít.
     balicky: [
-      { nazev: "Bourání a odvoz suti", odhad: 85000, od: "2026-02-16", do: "2026-02-20", stav: "3 nabídky" },
-      { nazev: "Voda a odpady", odhad: 95000, od: "2026-02-23", do: "2026-03-02", stav: "2 nabídky" },
-      { nazev: "Elektroinstalace", odhad: 165000, od: "2026-03-02", do: "2026-03-13", stav: "3 nabídky" },
-      { nazev: "Sádrokartony a povrchy", odhad: 174000, od: "2026-03-16", do: "2026-03-26", stav: "2 nabídky" },
-      { nazev: "Obklady a podlahy", odhad: 388000, od: "2026-03-30", do: "2026-04-14", stav: "čekáme na nabídky" },
-      { nazev: "Malby", odhad: 45000, od: "2026-04-15", do: "2026-04-20", stav: "3 nabídky" },
-      { nazev: "Kuchyň a dveře", odhad: 130000, od: "2026-04-21", do: "2026-04-27", stav: "čekáme na nabídky" }
+      { nazev: "Demolition and waste removal", odhad: 85000, od: "2026-02-16", do: "2026-02-20", stav: "3 bids", nabidka: { castka: 82000, odchylka: -3000 } },
+      { nazev: "Water and drainage", odhad: 95000, od: "2026-02-23", do: "2026-03-02", stav: "2 bids", nabidka: { castka: 98000, odchylka: 3000 } },
+      { nazev: "Electrical installation", odhad: 165000, od: "2026-03-02", do: "2026-03-13", stav: "3 bids", nabidka: { castka: 158000, odchylka: -7000, dodavatel: "Jiří Vaněk" } },
+      { nazev: "Plasterboard and surfaces", odhad: 174000, od: "2026-03-16", do: "2026-03-26", stav: "2 bids", nabidka: { castka: 181000, odchylka: 7000 } },
+      { nazev: "Tiling and flooring", odhad: 388000, od: "2026-03-30", do: "2026-04-14", stav: "Waiting on bids", nabidka: null },
+      { nazev: "Painting", odhad: 45000, od: "2026-04-15", do: "2026-04-20", stav: "3 bids", nabidka: { castka: 45000, odchylka: 0 } },
+      { nazev: "Kitchen and doors", odhad: 130000, od: "2026-04-21", do: "2026-04-27", stav: "Waiting on bids", nabidka: null }
     ],
     rezervaMimoBalicky: 99000,
     predani: "2026-04-27",
-
-    // Vybrané nabídky (F3, po profesích). Jen to, co kostra §5 skutečně
-    // uvádí — jména a ceny konkurenčních kandidátů, které kostra
-    // nepojmenovává, si nevymýšlím.
-    vybraneNabidky: [
-      { balicek: "Bourání a odvoz suti", castka: 82000, odchylka: -3000 },
-      { balicek: "Voda a odpady", castka: 98000, odchylka: 3000 },
-      { balicek: "Elektroinstalace", castka: 158000, odchylka: -7000, dodavatel: "Jiří Vaněk" },
-      { balicek: "Sádrokartony a povrchy", castka: 181000, odchylka: 7000 },
-      { balicek: "Malby", castka: 45000, odchylka: 0 }
-    ],
 
     nabidkyFirem: [
       { nazev: "Stavby Konečný s.r.o.", castka: 1124000, hodnoceni: "4.6 (18)", predani: "2026-05-11", rozdilOdStropu: -76000 },
@@ -324,18 +674,28 @@
       { jmeno: "Jiří Vaněk", castka: 158000, hodnoceni: "4.8 (31)", zakazek: 31, od: "2026-03-02", do: "2026-03-13", poznamka: "Based on your last 6 jobs in this category.", vybrana: true }
     ],
 
+    // B2 — tři rozhodnutí a jejich cenový rozptyl. Texty a částky
+    // opsané doslova z kumu-copy-en.md, ne dopočítané.
+    klicoveOtazky: [
+      { tema: "Bathroom fittings standard", dopad: "the gap between options runs to", castka: 90000 },
+      { tema: "Made-to-measure kitchen vs. off-the-shelf", dopad: "a difference of up to", castka: 120000 },
+      { tema: "Vinyl or timber flooring", dopad: "a difference of up to", castka: 70000 }
+    ],
+
     vicepráce: [
       {
         popis: "Damp was found in the bathroom wall during demolition. It needs treating before the tiling goes on.",
         castka: 18000,
         dopadNaTermin: "Adds 3 days. Handover moves to 30 April.",
-        stav: "schváleno 12. 3."
+        stav: "Approved 12 March"
       }
     ],
 
+    // F5 vyúčtování. Základ (1 181 000) se nikde neopisuje podruhé —
+    // dopočítá se ze stejné funkce jako v kroku 1 (soucetPak). Tady
+    // jsou jen tři odchylky, které k základu přičtou skutečnost.
     vyuctovani: [
-      { nazev: "Plán po pákách", castka: 1181000, duvod: "" },
-      { nazev: "Damp treatment in the bathroom", castka: 18000, duvod: "schváleno 12. 3." },
+      { nazev: "Damp treatment in the bathroom", castka: 18000, duvod: "Approved 12 March" },
       { nazev: "Less tile waste than allowed for", castka: -7000, duvod: "" },
       { nazev: "Two extra waste collections", castka: 12000, duvod: "" }
     ],
@@ -354,11 +714,19 @@
         { od: "2026-03-02", do: "2026-03-13", popis: "Byt 3+1, Královo Pole — elektroinstalace" }
       ],
       faktury: [
-        { projekt: "Byt 3+1, Královo Pole", castka: 158000, stav: "k vyfakturování až ve F5" }
+        // [+] stav zatím není nikde vykreslený (faktury přijdou až v F5,
+        // krok 7) — jen si tu drží místo, ne skutečný text z rozhraní.
+        { projekt: "Byt 3+1, Královo Pole", castka: 158000, stav: null }
       ]
     },
 
     partner: {
+      // kumu-kostra.md §5 (F2 partner) mluví o čtyřech sloupcích:
+      // položka, množství, navrženo, značka. Pro "navrženo" ale
+      // nikde není konkrétní hodnota — ani copy-en decku, ani
+      // v kostře. Tabulka v B4 proto má tři sloupce (položka,
+      // množství, značka), sloupec "navrženo" jsem nedomýšlel.
+      // Nahlas to prosím, až uvidíš B4 partnerský režim.
       polozkyMaterialu: [
         { nazev: "Plasterboard", mnozstvi: "18 m²", znacka: "Rigips" },
         { nazev: "Profiles and fixings", mnozstvi: "—", znacka: null },
@@ -467,8 +835,39 @@
     return projekt.paky.reduce(function (sum, p) { return sum + p.uspora; }, 0);
   }
 
+  // Rozpočet po sestavení týmu (F3): pět vybraných nabídek + odhad
+  // dvou zbývajících balíčků + rezerva mimo balíčky. Musí dát
+  // 1 181 000 — stejně jako soucetPak(), protože je to tentýž
+  // rozpočet, jen rozepsaný po profesích místo po položkách.
+  function balickyVybrane() {
+    return projekt.balicky.filter(function (b) { return b.nabidka; });
+  }
+
+  function balickyCekajici() {
+    return projekt.balicky.filter(function (b) { return !b.nabidka; });
+  }
+
   function soucetVybranychNabidek() {
-    return projekt.vybraneNabidky.reduce(function (sum, n) { return sum + n.castka; }, 0);
+    return balickyVybrane().reduce(function (sum, b) { return sum + b.nabidka.castka; }, 0);
+  }
+
+  function soucetPoSestaveniTymu() {
+    var cekajici = balickyCekajici().reduce(function (sum, b) { return sum + b.odhad; }, 0);
+    return soucetVybranychNabidek() + cekajici + projekt.rezervaMimoBalicky;
+  }
+
+  // soucetPak() vrací úsporu z pák (207 000), ne rozpočet po jejich
+  // uplatnění — proto samostatná funkce pro základ vyúčtování.
+  function rozpocetPoPakach() {
+    return soucetPolozek() - soucetPak();
+  }
+
+  function soucetVyuctovani() {
+    return projekt.vyuctovani.reduce(function (sum, r) { return sum + r.castka; }, rozpocetPoPakach());
+  }
+
+  function czk(castka) {
+    return castka.toLocaleString("en-US") + " CZK";
   }
 
   function formatKc(castka) {
@@ -527,9 +926,356 @@
     renderCell();
   }
 
+  /* ==========================================================
+     KROK 2 — KATALOG BLOKŮ
+     kumu-kostra.md §9 krok 2 a §3. Osm bloků (B7 se nepoužívá),
+     komponenty 10 a 11 ve všech stavech. Staticky — viz poznámka
+     v HTML nad katalogem.
+     ========================================================== */
+
+  var MESICE = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  function dayNum(iso) {
+    return Math.round(new Date(iso + "T00:00:00").getTime() / 86400000);
+  }
+
+  function fmtDate(iso) {
+    var d = new Date(iso + "T00:00:00");
+    return d.getDate() + " " + MESICE[d.getMonth()];
+  }
+
+  function fmtRange(od, doo) {
+    var a = new Date(od + "T00:00:00");
+    var b = new Date(doo + "T00:00:00");
+    if (a.getMonth() === b.getMonth()) {
+      return a.getDate() + "–" + b.getDate() + " " + MESICE[b.getMonth()];
+    }
+    return fmtDate(od) + " – " + fmtDate(doo);
+  }
+
+  function segStyle(od, doo) {
+    var start = projekt.balicky[0].od;
+    var end = projekt.predani;
+    var total = dayNum(end) - dayNum(start);
+    var left = (dayNum(od) - dayNum(start)) / total * 100;
+    var width = Math.max((dayNum(doo) - dayNum(od)) / total * 100, 2);
+    return "left:" + left.toFixed(2) + "%; width:" + width.toFixed(2) + "%;";
+  }
+
+  // --- Komponenty 8/10/11 -----------------------------------------
+
+  function blockCard(kicker, title, mode, bodyHtml, opts) {
+    opts = opts || {};
+    return '<div class="block-card">' +
+      '<div class="block-card__kicker">' +
+        '<span class="microlabel">' + kicker + (mode ? " · " + mode : "") + '</span>' +
+        (opts.badge ? '<span class="microlabel">' + opts.badge + '</span>' : "") +
+      '</div>' +
+      (title ? '<h3 class="block-card__title">' + title + '</h3>' : "") +
+      (opts.subtitle ? '<p class="block-card__note" style="margin-top:-6px;">' + opts.subtitle + '</p>' : "") +
+      bodyHtml +
+      (opts.note ? '<p class="block-card__note">' + opts.note + '</p>' : "") +
+      (opts.cta ? '<div class="block-card__cta"><span class="pill-btn pill-btn--primary">' + opts.cta + '</span></div>' : "") +
+    '</div>';
+  }
+
+  function rowListHtml(items) {
+    return '<div class="row-list">' + items.map(function (it) {
+      var amountClass = "row__amount" + (it.amountClass ? " " + it.amountClass : "");
+      var tag = it.tag ? '<span class="row__tag">' + it.tag + '</span>' : "";
+      return '<div class="row">' +
+        '<span class="row__label">' + it.label + tag + '</span>' +
+        '<span class="' + amountClass + '">' + it.amount + '</span>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+
+  function totalRowHtml(label, amountText, mode) {
+    return '<div class="total-row total-row--' + mode + '">' +
+      '<span class="total-row__label">' + label + '</span>' +
+      '<span class="total-row__amount">' + amountText + '</span>' +
+    '</div>';
+  }
+
+  function renderStateSample() {
+    var soucet = soucetPolozek();
+    var strop = projekt.zadani.strop;
+    var rozdilOdhad = soucet - strop;
+    var poTymu = soucetPoSestaveniTymu();
+    var rezerva = strop - poTymu;
+    var skutecnost = soucetVyuctovani();
+    var rozdilFinal = skutecnost - strop;
+
+    return '<div class="state-sample">' +
+      blockCard("Component 11", "Over budget", null, totalRowHtml("Difference", formatKc(rozdilOdhad), "over")) +
+      blockCard("Component 11", "Under budget", null, totalRowHtml("Headroom", czk(rezerva), "under")) +
+      blockCard("Component 11", "Neutral (accuracy, not overrun)", null, totalRowHtml("Difference", formatKc(rozdilFinal), "neutral")) +
+    '</div>';
+  }
+
+  // --- B1 / B2 -------------------------------------------------------
+
+  function renderB1() {
+    var z = projekt.zadani;
+    var id = projekt.identita;
+    var body = '<dl class="def-list">' +
+      '<dt>Scope</dt><dd>' + (z.jadroBourat ? "Full renovation, bathroom stripped to the shell" : "Full renovation, existing surfaces kept") + '</dd>' +
+      '<dt>Floor area</dt><dd>' + id.plocha + ' m²</dd>' +
+      '<dt>Condition</dt><dd>1970s block, original condition</dd>' +
+      '<dt>Standard</dt><dd>' + (z.kuchynNaMiru ? "Made-to-measure kitchen" : "Off-the-shelf kitchen, standard finish") + '</dd>' +
+      '<dt>Deadline</dt><dd>30 September 2026 (end of lease)</dd>' +
+      '<dt>Budget ceiling</dt><dd>' + czk(z.strop) + '</dd>' +
+    '</dl>';
+    return blockCard("B1", "Your brief", null, body, { cta: "That's right — calculate the budget" });
+  }
+
+  function renderB2() {
+    var body = '<div class="question-list">' + projekt.klicoveOtazky.map(function (q) {
+      return '<div class="row"><span class="row__label">' + q.tema +
+        '<span class="row__impact">' + q.dopad + " " + czk(q.castka) + '</span></span></div>';
+    }).join('') + '</div>';
+    return blockCard("B2", "What you'll need to decide", null, body);
+  }
+
+  // --- B3 — tři režimy -------------------------------------------------
+
+  function renderB3Odhad() {
+    var soucet = soucetPolozek();
+    var strop = projekt.zadani.strop;
+    var rozdil = soucet - strop;
+    var items = projekt.polozky.map(function (p) {
+      return { label: p.nazev, amount: czk(p.castka), tag: p.znacka };
+    });
+    var body = rowListHtml(items) +
+      totalRowHtml("Total", czk(soucet), "neutral") +
+      totalRowHtml("Your budget", czk(strop), "neutral") +
+      totalRowHtml("Difference", formatKc(rozdil), rozdil > 0 ? "over" : "under");
+    return blockCard("B3", "Budget estimate", "estimate", body, {
+      subtitle: "An indicative estimate based on your brief. It firms up once bids come in."
+    });
+  }
+
+  function renderB3PoNabidkach() {
+    var vybrane = balickyVybrane().map(function (b) {
+      return { label: b.nazev, amount: czk(b.nabidka.castka), tag: b.nabidka.dodavatel };
+    });
+    var cekajici = balickyCekajici().map(function (b) {
+      return { label: b.nazev, amount: czk(b.odhad), tag: "estimate", amountClass: "row__amount--muted" };
+    });
+    var items = vybrane.concat(cekajici).concat([{ label: "Contingency", amount: czk(projekt.rezervaMimoBalicky) }]);
+    var celkem = soucetPoSestaveniTymu();
+    var strop = projekt.zadani.strop;
+    var rezerva = strop - celkem;
+    var body = rowListHtml(items) +
+      totalRowHtml("Total", czk(celkem), "neutral") +
+      totalRowHtml("Your budget", czk(strop), "neutral") +
+      totalRowHtml("Headroom", czk(rezerva), "under");
+    return blockCard("B3", "Budget estimate", "after bids", body, {
+      subtitle: "5 of 7 trades chosen. Two are still waiting on bids."
+    });
+  }
+
+  function renderB3Vyuctovani() {
+    var zaklad = rozpocetPoPakach();
+    var items = [{ label: "Plan after levers", amount: czk(zaklad) }].concat(
+      projekt.vyuctovani.map(function (r) {
+        return {
+          label: r.nazev,
+          amount: formatKc(r.castka),
+          amountClass: r.castka > 0 ? "row__amount--over" : "row__amount--under",
+          tag: r.duvod || null
+        };
+      })
+    );
+    var skutecnost = soucetVyuctovani();
+    var strop = projekt.zadani.strop;
+    var rozdil = skutecnost - strop;
+    var body = rowListHtml(items) +
+      totalRowHtml("Actual", czk(skutecnost), "neutral") +
+      totalRowHtml("Your budget", czk(strop), "neutral") +
+      totalRowHtml("Difference", formatKc(rozdil), "neutral");
+    return blockCard("B3", "Plan and actual", "final account", body, {
+      note: "0.3% off plan. Every line has a reason."
+    });
+  }
+
+  // --- B4 — dva režimy -------------------------------------------------
+
+  function renderB4Zakaznicky() {
+    var items = projekt.partner.polozkyMaterialu;
+    var body = '<details class="disclosure" open><summary>Materials list</summary><ul>' +
+      items.map(function (m) {
+        return '<li><span>' + m.nazev + '</span><span>' + m.mnozstvi + '</span></li>';
+      }).join('') +
+    '</ul></details>';
+    return blockCard("B4", "", "customer", body);
+  }
+
+  function renderB4Partnersky() {
+    var items = projekt.partner.polozkyMaterialu;
+    var rows = items.map(function (m) {
+      var znacka = m.neurceno ? "Not specified" : (m.znacka || "—");
+      var akce = m.neurceno ? "Add a product" : "Quote a price";
+      return '<tr' + (m.neurceno ? ' data-neurceno' : '') + '>' +
+        '<td>' + m.nazev + '</td>' +
+        '<td>' + m.mnozstvi + '</td>' +
+        '<td>' + znacka + '</td>' +
+        '<td><span class="pill-btn pill-btn--secondary pill-btn--small">' + akce + '</span></td>' +
+      '</tr>';
+    }).join('');
+    var body = '<table class="material-table"><thead><tr><th>Item</th><th>Quantity</th><th>Brand</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>';
+    return blockCard("B4", "Materials list", "partner", body, {
+      subtitle: "3-room flat, Brno north, 74 m²",
+      badge: "ESTIMATE"
+    });
+  }
+
+  // --- B5 — dva režimy -------------------------------------------------
+
+  function renderB5Prehled() {
+    var rows = projekt.balicky.map(function (b) {
+      return '<div class="row">' +
+        '<span class="row__label">' + b.nazev + '<span class="row__meta"> · ' + fmtRange(b.od, b.do) + '</span></span>' +
+        '<span class="row__amount">' + czk(b.odhad) + '<span class="row__status" style="display:block;">' + b.stav + '</span></span>' +
+      '</div>';
+    }).join('');
+    return blockCard("B5", "Trade packages", "overview", '<div class="package-list">' + rows + '</div>');
+  }
+
+  function renderB5Rozbaleny() {
+    var elektro = projekt.balicky[2]; // Electrical installation
+    var body = '<dl class="def-list">' +
+      '<dt>Scope</dt><dd>Full rewire, consumer unit, 38 outlets, certification</dd>' +
+      '<dt>Dates</dt><dd>' + fmtRange(elektro.od, elektro.do) + '</dd>' +
+      '<dt>Calendar</dt><dd>You\'re free for these dates</dd>' +
+      '<dt>Sequencing</dt><dd>You start after demolition, before the plasterboard goes up.</dd>' +
+    '</dl>';
+    return blockCard("B5", elektro.nazev, "expanded package", body, { cta: "Draft a bid" });
+  }
+
+  // --- B6 — dva režimy -------------------------------------------------
+
+  function renderB6(mode) {
+    var segs = projekt.balicky.map(function (b, i) {
+      var cls = "timeline__segment";
+      if (mode === "plan") {
+        if (b.nabidka) cls += " timeline__segment--filled";
+      } else {
+        if (i < 3) cls += " timeline__segment--done";
+        else if (i === 3) cls += " timeline__segment--active";
+      }
+      return '<div class="' + cls + '" style="' + segStyle(b.od, b.do) + '" title="' + b.nazev + '"></div>';
+    }).join('');
+    var legend = mode === "plan"
+      ? '<div class="timeline__legend">' +
+          '<span><span class="timeline__legend-swatch" style="background:var(--graphic-under)"></span>Bid chosen</span>' +
+          '<span><span class="timeline__legend-swatch" style="border:1.5px solid var(--graphic-track)"></span>Waiting on bids</span>' +
+        '</div>'
+      : '<div class="timeline__legend">' +
+          '<span><span class="timeline__legend-swatch" style="background:var(--graphic-under)"></span>Done</span>' +
+          '<span><span class="timeline__legend-swatch" style="background:var(--color-accent)"></span>In progress</span>' +
+          '<span><span class="timeline__legend-swatch" style="border:1.5px solid var(--graphic-track)"></span>Waiting</span>' +
+        '</div>';
+    var body = '<div class="timeline"><div class="timeline__track"></div>' + segs +
+        '<div class="timeline__marker" style="left:100%;"></div></div>' +
+      '<div class="timeline__caption"><span>' + fmtDate(projekt.balicky[0].od) + '</span><span>Handover ' + fmtDate(projekt.predani) + '</span></div>' +
+      legend;
+    return blockCard("B6", "Schedule", mode === "plan" ? "plan" : "with status", body);
+  }
+
+  // --- B8 — tři režimy -------------------------------------------------
+
+  function renderB8Vyber() {
+    var rows = projekt.paky.map(function (p) {
+      return '<div class="lever-row">' +
+        '<span class="lever-row__box"></span>' +
+        '<span class="lever-row__body">' +
+          '<span class="lever-row__head"><span>' + p.popis + '</span>' +
+          '<span class="row__amount row__amount--under">−' + czk(p.uspora) + '</span></span>' +
+          '<span class="lever-row__impact">' + p.dopad + '</span>' +
+        '</span>' +
+      '</div>';
+    }).join('');
+    return blockCard("B8", "How to get under budget", "levers", rows, {
+      cta: "Continue to choosing trades",
+      note: "Static preview — checking a lever, and the Difference row flipping to Headroom, becomes live with the real F2 screen in step 3."
+    });
+  }
+
+  function renderB8Varianty() {
+    var body = '<div class="choice-row">' +
+      '<div class="choice-card"><div class="choice-card__title">Trade by trade</div>' +
+        '<div class="choice-card__meta">7 requests · 7 contracts · 7 separate warranties · you coordinate</div></div>' +
+      '<div class="choice-card"><div class="choice-card__title">One firm, whole job</div>' +
+        '<div class="choice-card__meta">1 request · 1 contract · one warranty on the works · the firm coordinates</div>' +
+        '<div class="choice-card__note">Firms bidding for a whole job typically come in between 8% below and 18% above the sum of individual trades. The range is drawn from 340 completed renovations of comparable size. You\'ll know the actual figure once they bid.</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="choice-default">Ask both and decide when the bids land — it costs you nothing. Bids arrive within days and you decide once there are numbers on the table.</div>';
+    return blockCard("B8", "How do you want to source this?", "paths", body, {
+      note: "The whole-job range overshoots your budget in both directions. An estimate can't tell you which route is cheaper. Bids can."
+    });
+  }
+
+  function renderB8Nabidky() {
+    var cards = projekt.nabidkyFirem.map(function (f) {
+      var rozdilText = f.rozdilOdStropu < 0
+        ? czk(Math.abs(f.rozdilOdStropu)) + " under your ceiling"
+        : czk(f.rozdilOdStropu) + " over your ceiling";
+      return '<div class="offer-card">' +
+        '<div class="offer-card__name">' + f.nazev + '</div>' +
+        '<div class="offer-card__amount">' + czk(f.castka) + '</div>' +
+        '<div class="offer-card__meta">' + f.hodnoceni + ' · handover ' + fmtDate(f.predani) + '</div>' +
+        '<div class="offer-card__meta">1 contract, one warranty on the whole job</div>' +
+        '<div class="offer-card__meta">' + rozdilText + '</div>' +
+      '</div>';
+    }).join('');
+    return blockCard("B8", "One firm, whole job", "bids", '<div class="offer-row">' + cards + '</div>', {
+      note: "The gap between the cheapest firm and the dearest is 234,000 CZK — more than all three budget savings put together."
+    });
+  }
+
+  function renderCatalog() {
+    var el = document.querySelector('[data-catalog]');
+    el.innerHTML =
+      '<div class="catalog__group">' +
+        '<p class="catalog__group-title">Components 10 &amp; 11 — every state of the total row</p>' +
+        renderStateSample() +
+      '</div>' +
+      '<div class="catalog__group">' +
+        '<p class="catalog__group-title">B1 — Your brief · B2 — Key decisions</p>' +
+        '<div class="catalog__row">' + renderB1() + renderB2() + '</div>' +
+      '</div>' +
+      '<div class="catalog__group">' +
+        '<p class="catalog__group-title">B3 — Budget, in its three modes</p>' +
+        '<div class="catalog__row">' + renderB3Odhad() + renderB3PoNabidkach() + renderB3Vyuctovani() + '</div>' +
+      '</div>' +
+      '<div class="catalog__group">' +
+        '<p class="catalog__group-title">B4 — Materials list, two audiences</p>' +
+        '<div class="catalog__row">' + renderB4Zakaznicky() + renderB4Partnersky() + '</div>' +
+      '</div>' +
+      '<div class="catalog__group">' +
+        '<p class="catalog__group-title">B5 — Trade packages</p>' +
+        '<div class="catalog__row">' + renderB5Prehled() + renderB5Rozbaleny() + '</div>' +
+      '</div>' +
+      '<div class="catalog__group">' +
+        '<p class="catalog__group-title">B6 — Schedule</p>' +
+        '<div class="catalog__row">' + renderB6("plan") + renderB6("status") + '</div>' +
+      '</div>' +
+      '<div class="catalog__group">' +
+        '<p class="catalog__group-title">B8 — Decision, in its three modes</p>' +
+        renderB8Vyber() +
+        '<div style="height: var(--space-2)"></div>' +
+        renderB8Varianty() +
+        '<div style="height: var(--space-2)"></div>' +
+        renderB8Nabidky() +
+      '</div>';
+  }
+
   subscribe(render);
   render();
   renderDebug(); // čísla se nemění klikáním v kroku 1, stačí spočítat jednou
+  renderCatalog(); // krok 2 — statický, nezávisí na přepínači role/fáze
 
 })();
 </script>
