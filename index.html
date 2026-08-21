@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kumu — prototyp</title>
+<link rel="stylesheet" href="styles/tokens.css" />
+<style>
+  /* ============================================================
+     RESET A ZÁKLAD
+     kumu-kostra.md §7: plochy od kraje ke kraji, žádné odsazení
+     na úrovni stránky.
+     ============================================================ */
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: var(--type-body);
+    font-weight: var(--weight-body);
+    line-height: var(--leading-body);
+    color: var(--text-primary);
+    background: var(--surface);
+  }
+
+  h1, h2, h3, p, dl, dd { margin: 0; }
+
+  /* ============================================================
+     DEMO CHROME
+     kumu-kostra.md §7 a CLAUDE.md „Stav": úzký proužek NAD horním
+     pruhem Kumu, na --surface-inverse. Ne tmavý pruh dole — ten
+     patří produktu (fázový pruh na vstupní obrazovce, krok 3).
+     ============================================================ */
+
+  .demo-chrome {
+    background: var(--surface-inverse);
+    color: var(--text-inverse);
+    padding: var(--space-1) var(--space-2);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--type-caption);
+  }
+
+  .demo-chrome__group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .demo-chrome__label {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caps);
+    opacity: 0.65;
+    margin-right: 4px;
+  }
+
+  .demo-chrome__pills {
+    display: flex;
+    gap: 4px;
+  }
+
+  .demo-chrome button {
+    font-family: inherit;
+    font-size: var(--type-caption);
+    color: var(--text-inverse);
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--text-inverse) 35%, transparent);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    min-height: 32px;
+    cursor: pointer;
+  }
+
+  .demo-chrome button[aria-pressed="true"] {
+    background: var(--text-inverse);
+    color: var(--surface-inverse);
+    border-color: var(--text-inverse);
+    font-weight: var(--weight-heading);
+  }
+
+  .demo-chrome button:focus-visible {
+    outline: var(--focus-width) solid var(--text-inverse);
+    outline-offset: var(--focus-offset);
+  }
+
+  /* ============================================================
+     PLOCHA KROKU 1
+     „Nic ukazatelného, ale drží to" — kumu-kostra.md §9. Tohle
+     NENÍ obrazovka F1—F5, je to důkaz, že stav a data drží
+     pohromadě pro všech 15 kombinací role × fáze. Skutečné
+     obrazovky přijdou v kroku 3.
+     ============================================================ */
+
+  .scaffold-note {
+    max-width: var(--container-prose);
+    margin: 0 auto;
+    padding: var(--space-3) var(--space-2) 0;
+    color: var(--text-secondary);
+    font-size: var(--type-caption);
+  }
+
+  .cell {
+    max-width: var(--container-prose);
+    margin: var(--space-2) auto var(--space-5);
+    padding: 0 var(--space-2);
+  }
+
+  .cell__heading {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    margin-bottom: var(--space-1);
+  }
+
+  .cell__combo {
+    font-size: var(--type-display);
+    font-weight: var(--weight-display);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-display);
+  }
+
+  .cell__badge {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caps);
+    font-size: var(--type-caption);
+    color: var(--text-secondary);
+  }
+
+  .cell__badge--inactive {
+    color: var(--text-primary);
+    background: var(--surface-raised);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 3px 10px;
+  }
+
+  .cell__text {
+    font-size: var(--type-body);
+    line-height: var(--leading-body);
+    max-width: 46ch;
+  }
+
+  hr.hairline {
+    border: none;
+    border-top: var(--border-width) solid var(--border);
+    margin: var(--space-2) 0;
+  }
+
+  /* ============================================================
+     DEBUG PANEL — důkaz jednoho zdroje čísel
+     Nic tady není karta s peněžní částkou v produktovém smyslu
+     (žádné B3), takže tenhle panel schválně NEpoužívá --color-over
+     / --color-under — ta jsou vyhrazená pro skutečný blok B3.
+     ============================================================ */
+
+  .debug-panel {
+    max-width: var(--container-prose);
+    margin: var(--space-4) auto var(--space-3);
+    padding: var(--space-2);
+    background: var(--surface-raised);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-card);
+  }
+
+  .debug-panel__title {
+    font-size: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caps);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-1);
+  }
+
+  .debug-panel dl {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    row-gap: 6px;
+    column-gap: var(--space-2);
+  }
+
+  .debug-panel dt { color: var(--text-secondary); }
+  .debug-panel dd { text-align: right; font-variant-numeric: tabular-nums lining-nums; }
+</style>
+</head>
+<body data-role="zakaznik" data-faze="F1">
+
+  <header class="demo-chrome" aria-label="Demo chrome">
+    <div class="demo-chrome__group">
+      <span class="demo-chrome__label">Role</span>
+      <div class="demo-chrome__pills" data-pills="role"></div>
+    </div>
+    <div class="demo-chrome__group">
+      <span class="demo-chrome__label">Fáze</span>
+      <div class="demo-chrome__pills" data-pills="faze"></div>
+    </div>
+  </header>
+
+  <main id="app">
+    <p class="scaffold-note">
+      Krok 1 z kumu-kostra.md §9 — datový model, tokeny, přepínač role a fáze.
+      Tohle není obrazovka. Skutečné obrazovky (B1—B8, F1—F5) přijdou v kroku 3.
+    </p>
+
+    <div class="cell" data-cell>
+      <!-- vykresleno skriptem -->
+    </div>
+
+    <div class="debug-panel">
+      <p class="debug-panel__title">Jeden zdroj čísel — projekt.polozky</p>
+      <dl>
+        <dt>Součet položek</dt><dd data-debug="soucet"></dd>
+        <dt>Rozpočtový strop</dt><dd data-debug="strop"></dd>
+        <dt>Rozdíl</dt><dd data-debug="rozdil"></dd>
+        <dt>Po třech pákách</dt><dd data-debug="popakach"></dd>
+        <dt>Pět vybraných nabídek F3 (musí = 564 000)</dt><dd data-debug="petnabidek"></dd>
+      </dl>
+    </div>
+  </main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ==========================================================
+     DATOVÝ MODEL
+     kumu-kostra.md §2. Čísla opsaná ze zdroje pravdy, ne
+     dopočítaná. Ověřeno: součet položek = 1 388 000,
+     po třech pákách = 1 181 000, pět vybraných nabídek F3 = 564 000.
+     ========================================================== */
+
+  var projekt = {
+    identita: {
+      nazev: "Byt 3+1, Královo Pole",
+      plocha: 74,
+      typ: "panelák 1978, původní stav",
+      lokalita: "Brno-Královo Pole",
+      zakaznici: "Petra a Martin"
+    },
+
+    zadani: {
+      strop: 1200000,
+      terminDo: "30. 9. 2026 (konec nájmu)",
+      bydliBehem: false,
+      jadroBourat: true,
+      kuchynNaMiru: false,
+      svepomoci: ["malby"],
+      terminPevny: false
+    },
+
+    polozky: [
+      { nazev: "Bourání a odvoz suti", castka: 85000 },
+      { nazev: "Elektroinstalace", castka: 165000 },
+      { nazev: "Voda a odpady", castka: 95000 },
+      { nazev: "Jádro", castka: 285000 },
+      { nazev: "SDK", castka: 62000, znacka: "Rigips" },
+      { nazev: "Omítky", castka: 78000, znacka: "Weber" },
+      { nazev: "Podlahy", castka: 138000 },
+      { nazev: "Malby", castka: 45000 },
+      { nazev: "Dveře", castka: 92000 },
+      { nazev: "Kuchyň", castka: 210000 },
+      { nazev: "Izolace", castka: 34000, znacka: "Isover" },
+      { nazev: "Rezerva", castka: 99000 }
+    ],
+
+    paky: [
+      {
+        id: "kuchyn-bez-spotrebicu",
+        popis: "Kitchen units without appliances",
+        uspora: 80000,
+        dopad: "You buy the appliances yourself, outside the renovation budget."
+      },
+      {
+        id: "vinyl-nizsi-trida",
+        popis: "Lower-wear vinyl",
+        uspora: 35000,
+        dopad: "Fine in the bedrooms and living room. Not in the hallway."
+      },
+      {
+        id: "dvere-odlozit",
+        popis: "Put doors and frames off for a year",
+        uspora: 92000,
+        dopad: "The originals will hold. Replacing them doesn't disturb anything else."
+      }
+    ],
+
+    poptavka: {
+      zpusob: "oboji"
+    },
+
+    balicky: [
+      { nazev: "Bourání a odvoz suti", odhad: 85000, od: "2026-02-16", do: "2026-02-20", stav: "3 nabídky" },
+      { nazev: "Voda a odpady", odhad: 95000, od: "2026-02-23", do: "2026-03-02", stav: "2 nabídky" },
+      { nazev: "Elektroinstalace", odhad: 165000, od: "2026-03-02", do: "2026-03-13", stav: "3 nabídky" },
+      { nazev: "Sádrokartony a povrchy", odhad: 174000, od: "2026-03-16", do: "2026-03-26", stav: "2 nabídky" },
+      { nazev: "Obklady a podlahy", odhad: 388000, od: "2026-03-30", do: "2026-04-14", stav: "čekáme na nabídky" },
+      { nazev: "Malby", odhad: 45000, od: "2026-04-15", do: "2026-04-20", stav: "3 nabídky" },
+      { nazev: "Kuchyň a dveře", odhad: 130000, od: "2026-04-21", do: "2026-04-27", stav: "čekáme na nabídky" }
+    ],
+    rezervaMimoBalicky: 99000,
+    predani: "2026-04-27",
+
+    // Vybrané nabídky (F3, po profesích). Jen to, co kostra §5 skutečně
+    // uvádí — jména a ceny konkurenčních kandidátů, které kostra
+    // nepojmenovává, si nevymýšlím.
+    vybraneNabidky: [
+      { balicek: "Bourání a odvoz suti", castka: 82000, odchylka: -3000 },
+      { balicek: "Voda a odpady", castka: 98000, odchylka: 3000 },
+      { balicek: "Elektroinstalace", castka: 158000, odchylka: -7000, dodavatel: "Jiří Vaněk" },
+      { balicek: "Sádrokartony a povrchy", castka: 181000, odchylka: 7000 },
+      { balicek: "Malby", castka: 45000, odchylka: 0 }
+    ],
+
+    nabidkyFirem: [
+      { nazev: "Stavby Konečný s.r.o.", castka: 1124000, hodnoceni: "4.6 (18)", predani: "2026-05-11", rozdilOdStropu: -76000 },
+      { nazev: "RenovaBrno s.r.o.", castka: 1219000, hodnoceni: "4.8 (54)", predani: "2026-04-27", rozdilOdStropu: 19000 },
+      { nazev: "Dům a byt s.r.o.", castka: 1358000, hodnoceni: "4.9 (112)", predani: "2026-04-20", rozdilOdStropu: 158000 }
+    ],
+
+    // Kandidát na elektroinstalaci, jehož nabídka posouvá harmonogram —
+    // viz F3 §5, „mechanika, která musí být funkční".
+    nabidkyElektro: [
+      { jmeno: "Jiří Vaněk", castka: 158000, hodnoceni: "4.8 (31)", zakazek: 31, od: "2026-03-02", do: "2026-03-13", poznamka: "Based on your last 6 jobs in this category.", vybrana: true }
+    ],
+
+    vicepráce: [
+      {
+        popis: "Damp was found in the bathroom wall during demolition. It needs treating before the tiling goes on.",
+        castka: 18000,
+        dopadNaTermin: "Adds 3 days. Handover moves to 30 April.",
+        stav: "schváleno 12. 3."
+      }
+    ],
+
+    vyuctovani: [
+      { nazev: "Plán po pákách", castka: 1181000, duvod: "" },
+      { nazev: "Damp treatment in the bathroom", castka: 18000, duvod: "schváleno 12. 3." },
+      { nazev: "Less tile waste than allowed for", castka: -7000, duvod: "" },
+      { nazev: "Two extra waste collections", castka: 12000, duvod: "" }
+    ],
+
+    remeslnik: {
+      jmeno: "Jiří Vaněk",
+      obor: "Electrical installation",
+      lokalita: "Brno",
+      hodnoceni: "4.8 (31)",
+      realizaci: 3,
+      overeni: ["Company registered", "Trade licence", "Certified for inspections"],
+      realizace: [
+        { naProjektu: "Byt 3+1, Královo Pole", dodrzenRozpocet: true, predani: "on time" }
+      ],
+      kalendar: [
+        { od: "2026-03-02", do: "2026-03-13", popis: "Byt 3+1, Královo Pole — elektroinstalace" }
+      ],
+      faktury: [
+        { projekt: "Byt 3+1, Královo Pole", castka: 158000, stav: "k vyfakturování až ve F5" }
+      ]
+    },
+
+    partner: {
+      polozkyMaterialu: [
+        { nazev: "Plasterboard", mnozstvi: "18 m²", znacka: "Rigips" },
+        { nazev: "Profiles and fixings", mnozstvi: "—", znacka: null },
+        { nazev: "Skim coat", mnozstvi: "210 kg", znacka: "Weber" },
+        { nazev: "Party wall insulation", mnozstvi: "22 m²", znacka: "Isover" },
+        { nazev: "Bathroom tanking", mnozstvi: "14 m²", znacka: null, neurceno: true }
+      ],
+      agregat: {
+        projektuVPriprave: 340,
+        obsahujeVaseKategorie: 0.61,
+        prumernaHodnotaMaterialu: 84000,
+        konverzeNavrhNaObjednavku: 0.23
+      },
+      f5RealizovanaSpotreba: {
+        navrzeno: 41000,
+        objednanoPresKumu: 33000,
+        objednanoJinde: 8000
+      }
+    }
+  };
+
+  /* ==========================================================
+     GLOBÁLNÍ STAV
+     kumu-kostra.md §1 „Stavový model". Fáze a role jsou dvě
+     nezávislé osy — přepínají se samostatně, žádná kombinace
+     nesmí zůstat bez obsahu.
+     ========================================================== */
+
+  var state = {
+    faze: "F1",
+    role: "zakaznik",
+    projekt: projekt,
+    scenar: null,
+    krok: 0
+  };
+
+  var listeners = [];
+
+  function setState(patch) {
+    Object.assign(state, patch);
+    listeners.forEach(function (fn) { fn(state); });
+  }
+
+  function subscribe(fn) {
+    listeners.push(fn);
+  }
+
+  /* ==========================================================
+     MATICE OBSAHU — 5 fází × 3 role
+     kumu-kostra.md §4 a §5. Popisuje, CO by se v dané buňce
+     ukázalo — skutečné bloky přijdou v kroku 3. Žádná buňka
+     není prázdná; kde se role projektu netýká, je to napsané.
+     ========================================================== */
+
+  var FAZE = [
+    { id: "F1", label: "Brief" },
+    { id: "F2", label: "Budget" },
+    { id: "F3", label: "Bids" },
+    { id: "F4", label: "Build" },
+    { id: "F5", label: "Done" }
+  ];
+
+  var ROLE = [
+    { id: "zakaznik", label: "Customer" },
+    { id: "remeslnik", label: "Trade" },
+    { id: "partner", label: "Partner" }
+  ];
+
+  var matrix = {
+    F1: {
+      zakaznik: { active: true, text: "Vstupní obrazovka s pilulkami zralosti a ukázkou výstupu → dialog → B1 shrnutí zadání → B2 klíčové otázky." },
+      remeslnik: { active: false, text: "Plocha, záložka Dnes — dnešní zakázka na jiném projektu. Tenhle projekt řemeslníka ještě nezná; nula příležitostí navázaných na Královo Pole." },
+      partner: { active: false, text: "Prázdný stav — projekt ještě neexistuje, poptávka nevznikla. Agregát nad ostatními projekty zůstává dostupný." }
+    },
+    F2: {
+      zakaznik: { active: true, text: "B3 odhad (1 388 000 Kč, přes strop) · B4 materiál · B8 páky · B8 jak poptáme." },
+      remeslnik: { active: false, text: "Beze změny proti F1 — projekt ho stále nezná." },
+      partner: { active: true, text: "Anonymní materiálová poptávka (Byt 3+1, Brno-sever, 74 m²) + agregát nad 340 projekty." }
+    },
+    F3: {
+      zakaznik: { active: true, text: "Skládání týmu do panelu 'Váš tým' · B6 harmonogram · B8 nabídky · živá cesta na klíč." },
+      remeslnik: { active: true, text: "Plocha → příležitost → balíček práce → nabídka (elektro, 165 000 → 158 000 Kč)." },
+      partner: { active: true, text: "Stejná materiálová poptávka jako F2, teď s akcí 'Nabídnout cenu'." }
+    },
+    F4: {
+      zakaznik: { active: true, text: "B6 se stavem · vícepráce ke schválení (sanace vlhké stěny, +18 000 Kč)." },
+      remeslnik: { active: true, text: "Plocha: dnešní úkol · průběh · hlášení změny." },
+      partner: { active: true, text: "Objednávka a expedice — identita zákazníka se poprvé odkrývá." }
+    },
+    F5: {
+      zakaznik: { active: true, text: "B3 vyúčtování (1 204 000 Kč, +4 000 nad stropem) · hodnocení řemeslníků · dokumentace." },
+      remeslnik: { active: true, text: "Plocha: k vyfakturování → faktura (158 000 Kč)." },
+      partner: { active: true, text: "Realizovaná spotřeba vs. navrženo." }
+    }
+  };
+
+  /* ==========================================================
+     VÝPOČTY — jeden zdroj čísel
+     ========================================================== */
+
+  function soucetPolozek() {
+    return projekt.polozky.reduce(function (sum, p) { return sum + p.castka; }, 0);
+  }
+
+  function soucetPak() {
+    return projekt.paky.reduce(function (sum, p) { return sum + p.uspora; }, 0);
+  }
+
+  function soucetVybranychNabidek() {
+    return projekt.vybraneNabidky.reduce(function (sum, n) { return sum + n.castka; }, 0);
+  }
+
+  function formatKc(castka) {
+    var sign = castka > 0 ? "+" : "";
+    return sign + castka.toLocaleString("en-US") + " CZK";
+  }
+
+  /* ==========================================================
+     VYKRESLENÍ
+     ========================================================== */
+
+  function renderPills(container, items, activeId, onPick) {
+    container.innerHTML = "";
+    items.forEach(function (item) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = item.label;
+      btn.setAttribute("aria-pressed", String(item.id === activeId));
+      btn.addEventListener("click", function () { onPick(item.id); });
+      container.appendChild(btn);
+    });
+  }
+
+  function renderCell() {
+    var cellEl = document.querySelector("[data-cell]");
+    var cell = matrix[state.faze][state.role];
+    var faLabel = FAZE.filter(function (f) { return f.id === state.faze; })[0].label;
+    var roLabel = ROLE.filter(function (r) { return r.id === state.role; })[0].label;
+
+    cellEl.innerHTML =
+      '<div class="cell__heading">' +
+        '<h2 class="cell__combo">' + state.faze + ' · ' + roLabel + '</h2>' +
+        (cell.active
+          ? '<span class="cell__badge">' + faLabel + '</span>'
+          : '<span class="cell__badge cell__badge--inactive">Mimo tuto fázi</span>') +
+      '</div>' +
+      '<hr class="hairline" />' +
+      '<p class="cell__text">' + cell.text + '</p>';
+  }
+
+  function renderDebug() {
+    var soucet = soucetPolozek();
+    var strop = projekt.zadani.strop;
+    document.querySelector('[data-debug="soucet"]').textContent = soucet.toLocaleString("en-US") + " CZK";
+    document.querySelector('[data-debug="strop"]').textContent = strop.toLocaleString("en-US") + " CZK";
+    document.querySelector('[data-debug="rozdil"]').textContent = formatKc(soucet - strop);
+    document.querySelector('[data-debug="popakach"]').textContent = (soucet - soucetPak()).toLocaleString("en-US") + " CZK";
+    document.querySelector('[data-debug="petnabidek"]').textContent = soucetVybranychNabidek().toLocaleString("en-US") + " CZK";
+  }
+
+  function render() {
+    document.body.setAttribute("data-role", state.role);
+    document.body.setAttribute("data-faze", state.faze);
+    renderPills(document.querySelector('[data-pills="role"]'), ROLE, state.role, function (id) { setState({ role: id }); });
+    renderPills(document.querySelector('[data-pills="faze"]'), FAZE, state.faze, function (id) { setState({ faze: id }); });
+    renderCell();
+  }
+
+  subscribe(render);
+  render();
+  renderDebug(); // čísla se nemění klikáním v kroku 1, stačí spočítat jednou
+
+})();
+</script>
+
+</body>
+</html>
