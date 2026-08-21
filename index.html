@@ -537,6 +537,7 @@
     border-radius: var(--radius-card);
     padding: var(--space-2);
   }
+  .choice-card--selected { border-color: var(--choice-border-on); background: var(--choice-bg-on); }
   .choice-card__title { font-weight: var(--weight-heading); margin-bottom: 4px; }
   .choice-card__meta { color: var(--text-secondary); font-size: var(--type-caption); }
   .choice-card__note { color: var(--text-secondary); font-size: var(--type-caption); margin-top: var(--space-1); }
@@ -562,6 +563,347 @@
     color: var(--text-primary);
   }
   .offer-card__meta { color: var(--text-secondary); font-size: var(--type-caption); }
+
+  /* ============================================================
+     KROK 3 — SKUTEČNÉ OBRAZOVKY (F1, F2 zákazník)
+     Rozvržení, proporce a hierarchie podle reference/entry-screen.html
+     (Claude Design). Barvy a velikosti výhradně z tokens.css — reference
+     vznikla před volbou palety a má vlastní plynulou škálu, tu nepřebírám.
+     ============================================================ */
+
+  .screen { background: var(--surface); }
+
+  /* Horní pruh produktu — NE demo chrome. Demo chrome je nad tímhle. */
+  .kumu-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: var(--space-2) clamp(20px, 5vw, 80px);
+    border-bottom: var(--border-width) solid var(--border);
+  }
+  .kumu-wordmark {
+    font-size: var(--type-heading);
+    font-weight: var(--weight-display);
+    letter-spacing: var(--tracking-display);
+  }
+  .kumu-login {
+    font-size: var(--type-caption);
+    text-decoration: none;
+    color: var(--text-primary);
+    border-bottom: var(--border-width) solid var(--border-strong);
+    padding-bottom: 3px;
+  }
+
+  /* Hero — dva sloupce, asymetrické (~55/45), ne na střed */
+  .hero {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(var(--space-3), 4vw, var(--space-4));
+    align-items: flex-start;
+    padding: clamp(var(--space-4), 6vw, var(--space-5)) clamp(20px, 5vw, 80px);
+  }
+  .hero__headline { flex: 1 1 380px; min-width: 0; max-width: 640px; }
+  .hero__field { flex: 1 1 420px; min-width: 0; max-width: 560px; }
+
+  .hero__headline h1 {
+    margin: 0;
+    font-size: var(--type-display-xl);
+    font-weight: var(--weight-display);
+    line-height: var(--leading-display-xl);
+    letter-spacing: var(--tracking-display-xl);
+  }
+
+  .proof {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+    padding-top: var(--space-2);
+    border-top: var(--border-width) solid var(--border);
+  }
+  .proof__item { display: flex; flex-direction: column; gap: 6px; }
+  .proof__source {
+    font-size: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caps);
+    color: var(--text-secondary);
+  }
+  .proof__score { display: flex; align-items: baseline; gap: 8px; color: var(--color-accent); }
+  .proof__num { font-size: var(--type-heading); font-weight: var(--weight-display); }
+  .proof__stars { font-size: var(--type-caption); letter-spacing: 2px; }
+  .proof__divider { width: var(--border-width); background: var(--border-strong); }
+
+  /* Pole — orámovaná karta, tři pásma oddělená linkami. Jediná
+     dekorace v produktu (šipka) sedí nad ní — kumu-tokeny-a-
+     komponenty.md §3b. */
+  .field-callout { position: relative; }
+  .field-callout__arrow { position: absolute; top: -56px; left: -4px; pointer-events: none; }
+  .field-callout__label {
+    position: absolute;
+    top: -54px;
+    left: 4px;
+    transform: translateX(-100%);
+    font-size: var(--type-caption);
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+
+  .field-card {
+    background: var(--surface-raised);
+    border: var(--border-width) solid var(--border-strong);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+  .field-card textarea {
+    display: block;
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: vertical;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: var(--type-body);
+    line-height: var(--leading-body);
+    padding: var(--space-2);
+    min-height: 132px;
+  }
+  .field-card textarea::placeholder { color: var(--text-secondary); }
+  .field-card__meta {
+    padding: var(--space-2);
+    border-top: var(--border-width) solid var(--border);
+  }
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: var(--space-1); }
+  .chip {
+    font-family: inherit;
+    padding: 7px 14px;
+    border-radius: var(--radius-pill);
+    border: var(--border-width) solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: var(--type-caption);
+    cursor: pointer;
+    min-height: 32px;
+  }
+  .chip[aria-pressed="true"] {
+    border-color: var(--color-accent);
+    background: var(--surface-accent);
+    color: var(--color-accent);
+    font-weight: var(--weight-heading);
+  }
+  .reassurance { margin: 0; font-size: var(--type-caption); line-height: var(--leading-caption); color: var(--text-secondary); }
+  .field-card__actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--space-1) 10px;
+    border-top: var(--border-width) solid var(--border);
+  }
+
+  /* Dialog — po odeslání pole zmizí, nastoupí konverzace */
+  .dialog { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-2); }
+  .dialog__msg { display: flex; }
+  .dialog__msg--user { justify-content: flex-end; }
+  .dialog__bubble {
+    max-width: 80%;
+    padding: 10px 14px;
+    border-radius: var(--radius-card);
+    font-size: var(--type-body);
+    line-height: var(--leading-body);
+  }
+  .dialog__msg--assistant .dialog__bubble { background: var(--surface); border: var(--border-width) solid var(--border); }
+  .dialog__msg--user .dialog__bubble { background: var(--action-primary); color: var(--action-primary-fg); }
+  .dialog__choices { display: flex; gap: 8px; flex-wrap: wrap; padding-left: 2px; }
+  .dialog__choice {
+    font-family: inherit;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    border: var(--border-width) solid var(--border-strong);
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    font-size: var(--type-body);
+    cursor: pointer;
+    min-height: var(--hit-min);
+  }
+  .dialog__choice:hover { border-color: var(--color-accent); }
+
+  /* Ukázka výstupu — obrys telefonu s přesahujícími kartami */
+  .collage-section {
+    padding: clamp(var(--space-4), 6vw, var(--space-4)) clamp(20px, 5vw, 80px);
+    border-top: var(--border-width) solid var(--border);
+  }
+  .collage-section__label {
+    text-align: center;
+    font-size: var(--type-caption);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin: 0 0 var(--space-3);
+  }
+  .collage {
+    position: relative;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .collage__stage {
+    position: relative;
+    width: 1100px;
+    height: 660px;
+    transform-origin: top left;
+  }
+
+  .phone-mock {
+    position: absolute;
+    left: 50%;
+    top: 24px;
+    transform: translateX(-50%);
+    width: 280px;
+    height: 570px;
+    border-radius: 40px;
+    background: var(--surface-inverse);
+    padding: 12px;
+  }
+  .phone-mock__screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 30px;
+    background: var(--surface);
+    padding: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    overflow: hidden;
+  }
+  .phone-mock__top { display: flex; justify-content: space-between; align-items: center; }
+  .phone-mock__brand { font-size: var(--type-body); font-weight: var(--weight-display); }
+  .phone-mock__tag { font-size: var(--type-caption); color: var(--text-secondary); }
+  .phone-mock__label { font-size: var(--type-caption); text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--text-secondary); }
+  .phone-mock__title { font-size: var(--type-heading); font-weight: var(--weight-heading); line-height: var(--leading-heading); }
+  .phone-mock__rows { display: flex; flex-direction: column; gap: var(--space-1); }
+  .phone-mock__row { display: flex; justify-content: space-between; font-size: var(--type-caption); }
+  .phone-mock__row-strong { font-weight: var(--weight-heading); color: var(--text-primary); }
+  .phone-mock__meter-track { height: 6px; border-radius: 999px; background: var(--border); overflow: hidden; margin-top: 6px; }
+  .phone-mock__meter-fill { height: 100%; background: var(--color-accent); }
+  .phone-mock__bottom {
+    margin-top: auto;
+    padding-top: var(--space-1);
+    border-top: var(--border-width) solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .phone-mock__bottom-label { font-size: var(--type-caption); text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--text-secondary); }
+  .phone-mock__bottom-value { font-size: var(--type-body); font-weight: var(--weight-display); }
+
+  .frag { position: absolute; width: 260px; }
+  .frag--budget   { top: 150px; left: 190px; }
+  .frag--question { top: 10px; right: 130px; }
+  .frag--quote    { bottom: 10px; right: 170px; }
+  .frag__card {
+    background: var(--surface-raised);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--space-2);
+    box-shadow: 0 18px 40px -18px color-mix(in srgb, var(--text-primary) 35%, transparent);
+  }
+  .frag__label { font-size: var(--type-caption); text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--text-secondary); margin-bottom: var(--space-1); }
+  .frag__rows { display: flex; flex-direction: column; gap: 8px; font-size: var(--type-caption); }
+  .frag__row { display: flex; justify-content: space-between; }
+  .frag__row-value { color: var(--color-accent); }
+  .frag__total { display: flex; justify-content: space-between; align-items: baseline; margin-top: var(--space-1); padding-top: var(--space-1); border-top: var(--border-width) solid var(--border); }
+  .frag__total-value { font-size: var(--type-heading); font-weight: var(--weight-display); color: var(--text-primary); }
+  .frag__caption { text-align: center; font-size: var(--type-caption); color: var(--text-secondary); margin-top: var(--space-1); }
+  .frag__question-text { margin: 0 0 var(--space-1); font-size: var(--type-body); line-height: var(--leading-body); }
+  .frag__pills { display: flex; gap: 8px; }
+  .frag__pill { padding: 6px 12px; border-radius: var(--radius-pill); border: var(--border-width) solid var(--border-strong); font-size: var(--type-caption); }
+  .frag__pill--accent { border-color: var(--color-accent); color: var(--color-accent); font-weight: var(--weight-heading); }
+  .frag__quote-top { display: flex; justify-content: space-between; margin-bottom: var(--space-1); }
+  .frag__quote-price { font-size: var(--type-heading); font-weight: var(--weight-display); margin: 4px 0 var(--space-1); }
+  .frag__quote-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: var(--action-primary);
+    color: var(--action-primary-fg);
+    font-family: inherit;
+    font-size: var(--type-caption);
+    font-weight: var(--weight-heading);
+  }
+
+  /* Jak to funguje */
+  .how-it-works {
+    padding: clamp(var(--space-4), 6vw, var(--space-4)) clamp(20px, 5vw, 80px);
+    border-top: var(--border-width) solid var(--border);
+    border-bottom: var(--border-width) solid var(--border);
+  }
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: var(--space-3) 0;
+  }
+  .how-col { padding: 0 clamp(var(--space-2), 3vw, var(--space-3)); border-left: var(--border-width) solid var(--border); }
+  .how-col:first-child { padding-left: 0; border-left: none; }
+  .how-num { font-size: var(--type-caption); letter-spacing: var(--tracking-caps); color: var(--text-secondary); margin-bottom: var(--space-2); }
+  .how-col h3 { margin: 0 0 var(--space-1); font-size: var(--type-heading); font-weight: var(--weight-heading); line-height: var(--leading-heading); }
+  .how-col p { margin: 0; font-size: var(--type-body); line-height: var(--leading-body); color: var(--text-secondary); }
+  .how-closing { margin-top: var(--space-3); padding-top: var(--space-2); border-top: var(--border-width) solid var(--border); }
+  .how-closing p { margin: 0; font-size: var(--type-heading); font-weight: var(--weight-heading); line-height: var(--leading-heading); }
+
+  /* Fázový pruh — produktový prvek, ne demo chrome */
+  .phase-bar {
+    background: var(--surface-inverse);
+    color: var(--text-inverse);
+    padding: var(--space-2) clamp(20px, 4vw, 40px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: clamp(10px, 2vw, var(--space-2));
+    font-size: var(--type-caption);
+    font-weight: var(--weight-heading);
+    letter-spacing: 0.04em;
+  }
+  .phase-bar__sep { opacity: 0.45; }
+
+  /* Patička */
+  .site-footer {
+    padding: clamp(var(--space-3), 4vw, var(--space-4)) clamp(20px, 5vw, 80px) var(--space-3);
+    border-top: var(--border-width) solid var(--border);
+  }
+  .site-footer__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-3);
+  }
+  .site-footer__wordmark { font-size: var(--type-heading); font-weight: var(--weight-display); margin-bottom: var(--space-1); }
+  .site-footer__about p { margin: 0; font-size: var(--type-body); line-height: var(--leading-body); color: var(--text-secondary); }
+  .site-footer__label { font-size: var(--type-caption); text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--text-secondary); margin-bottom: var(--space-2); }
+  .site-footer__col { display: flex; flex-direction: column; }
+  .site-footer__col a { color: var(--text-primary); text-decoration: none; font-size: var(--type-body); margin-bottom: 10px; }
+  .site-footer__col a:last-child { margin-bottom: 0; }
+  .site-footer__bottom {
+    margin-top: var(--space-3);
+    padding-top: var(--space-2);
+    border-top: var(--border-width) solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    font-size: var(--type-caption);
+    color: var(--text-secondary);
+  }
+
+  /* F2 — rozpočet a rozhodnutí, jednosloupcová sekvence bloků */
+  .f2-screen {
+    max-width: var(--container-prose);
+    margin: 0 auto;
+    padding: clamp(var(--space-3), 5vw, var(--space-4)) var(--space-2) var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
 </style>
 </head>
 <body data-role="zakaznik" data-faze="F1">
@@ -578,6 +920,9 @@
   </header>
 
   <main id="app">
+    <div data-screen><!-- vykresleno skriptem, když pro kombinaci existuje skutečná obrazovka --></div>
+
+    <div data-scaffold>
     <p class="scaffold-note">
       Krok 1 z kumu-kostra.md §9 — datový model, tokeny, přepínač role a fáze.
       Tohle není obrazovka. Skutečné obrazovky (B1—B8, F1—F5) přijdou v kroku 3.
@@ -606,6 +951,7 @@
         a podobné mechaniky se zapojí až se skutečnými obrazovkami v kroku 3.
       </p>
       <div data-catalog><!-- vykresleno skriptem --></div>
+    </div>
     </div>
   </main>
 
@@ -796,13 +1142,27 @@
     role: "zakaznik",
     projekt: projekt,
     scenar: null,
-    krok: 0
+    krok: 0,
+    // Stav samotných obrazovek — mimo stavový model z kostry §1
+    // (ten drží faze/role/projekt/scenar/krok). Dialog a výběr pák
+    // jsou interakce uvnitř jedné obrazovky, ne osy matice.
+    ui: {
+      f1: { pilulka: "napad", odeslano: false, krokDialogu: 0, odpovedi: [] },
+      f2: { vybranePaky: [], poptavka: "oboji" }
+    }
   };
 
   var listeners = [];
 
   function setState(patch) {
     Object.assign(state, patch);
+    listeners.forEach(function (fn) { fn(state); });
+  }
+
+  // Mění jen state.ui (dialog, výběr pák) — mimo faze/role/projekt,
+  // ale musí stejně spustit překreslení.
+  function updateUi(mutator) {
+    mutator(state.ui);
     listeners.forEach(function (fn) { fn(state); });
   }
 
@@ -960,6 +1320,7 @@
     renderPills(document.querySelector('[data-pills="role"]'), ROLE, state.role, function (id) { setState({ role: id }); });
     renderPills(document.querySelector('[data-pills="faze"]'), FAZE, state.faze, function (id) { setState({ faze: id }); });
     renderCell();
+    renderScreen();
   }
 
   /* ==========================================================
@@ -1011,7 +1372,8 @@
       (opts.subtitle ? '<p class="block-card__note" style="margin-top:-6px;">' + opts.subtitle + '</p>' : "") +
       bodyHtml +
       (opts.note ? '<p class="block-card__note">' + opts.note + '</p>' : "") +
-      (opts.cta ? '<div class="block-card__cta"><span class="pill-btn pill-btn--primary">' + opts.cta + '</span></div>' : "") +
+      (opts.cta ? '<div class="block-card__cta"><button type="button" class="pill-btn pill-btn--primary"' +
+        (opts.ctaAction ? ' data-action="' + opts.ctaAction + '"' : '') + '>' + opts.cta + '</button></div>' : "") +
     '</div>';
   }
 
@@ -1070,7 +1432,7 @@
       '<dt>Deadline</dt><dd>30 September 2026 (end of lease)</dd>' +
       '<dt>Budget ceiling</dt><dd>' + czk(z.strop) + '</dd>' +
     '</dl>';
-    return blockCard("B1", "Your brief", null, body, { cta: "That's right — calculate the budget" });
+    return blockCard("B1", "Your brief", null, body, { cta: "That's right — calculate the budget", ctaAction: "goto-f2" });
   }
 
   function renderB2() {
@@ -1318,6 +1680,350 @@
         renderB8Nabidky() +
       '</div>';
   }
+
+  /* ==========================================================
+     KROK 3 — SKUTEČNÉ OBRAZOVKY (F1, F2 zákazník)
+     kumu-kostra.md §5. Texty z kumu-copy-en.md, kde existují.
+     Dvě věci jsem musela přeložit sama, protože copy-en.md pro ně
+     anglický text nedává (jen kostra česky) — sekce „Jak to funguje"
+     a patička. Označeno [+] a shrnuto i mimo kód.
+     ========================================================== */
+
+  var F1_COPY = {
+    priklad: "For example: we've bought an older two-room flat in Brno. We want to redo the bathroom and the kitchen, put a new floor in the living room and repaint. Our budget is around 550,000 and we'd like to start in spring.",
+    pilulky: [
+      { id: "napad", label: "Just an idea so far" },
+      { id: "predstava", label: "I have a rough idea" },
+      { id: "projekt", label: "I have drawings, I need a contractor" }
+    ],
+    ujisteni: "We usually have a budget estimate and a list of works ready within minutes. No account, no commitment.",
+    // [+] „Jak to funguje" — copy-en.md tuhle sekci anglicky nedává,
+    // jen kostra česky. Přeložila jsem věrně, nahlas prosím, pokud
+    // to nesedí.
+    jakToFunguje: [
+      { cislo: "01", nadpis: "You describe what you want done", text: "In your own words, however incomplete. We'll ask about what's missing." },
+      { cislo: "02", nadpis: "You get quotes from trades", text: "With prices for labour and materials. You can adjust scope and quality and see straight away what it does to the total." },
+      { cislo: "03", nadpis: "You choose firms for the job", text: "Vetted trades see the actual project, not a generic enquiry. That's why their prices are comparable." }
+    ],
+    jakToFungujeZaver: "Everything in one place. From idea to the end of the project.",
+    faze: ["Idea", "Project", "Materials & budget", "Bids", "Build"],
+    // [+] Patička — stejná situace, copy-en.md nedává anglický text.
+    footer: {
+      tagline: "You describe the project, we work out the budget, materials and trades.",
+      sloupce: [
+        { label: "KUMU", odkazy: ["About us", "How it works", "For trades"] },
+        { label: "SUPPORT", odkazy: ["FAQ", "Contact", "Report a problem"] },
+        { label: "LEGAL", odkazy: ["Terms of service", "Privacy policy", "Cookie settings"] }
+      ],
+      provozovatel: "Operated by NejŘemeslníci.cz s.r.o. · Company no. 00000000 · Prague"
+    }
+  };
+
+  // Dialog (F1) — pět otázek přesně podle kumu-copy-en.md. Odpověď,
+  // na kterou uživatel klikne, se objeví jako jeho bublina — ale
+  // výsledné B1 vždycky ukáže projekt.zadani, jediný zdroj pravdy,
+  // ne to, co by se z klikané cesty dalo domyslet (kostra §5:
+  // "Rozsah: proklikaná je jen cesta Mám představu").
+  var DIALOG = [
+    { otazka: "Will you be living in the flat while the work is going on?", moznosti: ["No, we're renting elsewhere", "Yes"] },
+    { otazka: "Should the bathroom be stripped back to the shell, or just resurfaced?", moznosti: ["Strip it out", "Surfaces only", "Not sure"] },
+    { otazka: "Fitted kitchen made to measure, or an off-the-shelf range?", moznosti: ["Made to measure", "Off-the-shelf", "Undecided"] },
+    { otazka: "Anything you'll do yourselves?", moznosti: ["Painting", "Nothing", "Undecided"] },
+    { otazka: "How firm is the end-of-September deadline?", moznosti: ["Fixed", "We have a month's slack"] }
+  ];
+
+  function renderKumuTopbar() {
+    return '<header class="kumu-topbar">' +
+      '<span class="kumu-wordmark">Kumu</span>' +
+      '<a href="#" class="kumu-login" data-action="noop">Log in</a>' +
+    '</header>';
+  }
+
+  function renderProof() {
+    return '<div class="proof">' +
+      '<div class="proof__item"><span class="proof__source">Google</span>' +
+        '<span class="proof__score"><span class="proof__num">4.9</span><span class="proof__stars">★★★★★</span></span></div>' +
+      '<div class="proof__divider"></div>' +
+      '<div class="proof__item"><span class="proof__source">Trustpilot</span>' +
+        '<span class="proof__score"><span class="proof__num">4.9</span><span class="proof__stars">★★★★★</span></span></div>' +
+    '</div>';
+  }
+
+  function renderFieldCard() {
+    var ui = state.ui.f1;
+    var chips = F1_COPY.pilulky.map(function (p) {
+      return '<button type="button" class="chip" aria-pressed="' + (ui.pilulka === p.id) + '" data-action="f1-pilulka" data-pilulka-id="' + p.id + '">' + p.label + '</button>';
+    }).join('');
+    return '<div class="field-card">' +
+      '<textarea rows="4" placeholder="' + F1_COPY.priklad.replace(/"/g, '&quot;') + '"></textarea>' +
+      '<div class="field-card__meta">' +
+        '<div class="chip-row">' + chips + '</div>' +
+        '<p class="reassurance">' + F1_COPY.ujisteni + '</p>' +
+      '</div>' +
+      '<div class="field-card__actions">' +
+        '<button type="button" class="pill-btn pill-btn--primary" data-action="f1-submit" style="display:flex;flex-direction:column;gap:1px;line-height:1.2;">' +
+          '<span class="microlabel" style="color:inherit;">Free, no commitment</span>' +
+          '<span>Get an estimate</span>' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderDialogView() {
+    var ui = state.ui.f1;
+    var messages = "";
+    for (var i = 0; i < ui.krokDialogu; i++) {
+      messages += '<div class="dialog__msg dialog__msg--assistant"><span class="dialog__bubble">' + DIALOG[i].otazka + '</span></div>';
+      messages += '<div class="dialog__msg dialog__msg--user"><span class="dialog__bubble">' + ui.odpovedi[i] + '</span></div>';
+    }
+    var body = messages;
+    if (ui.krokDialogu < DIALOG.length) {
+      var q = DIALOG[ui.krokDialogu];
+      var choices = q.moznosti.map(function (m) {
+        return '<button type="button" class="dialog__choice" data-action="f1-dialog-choice" data-answer="' + m.replace(/"/g, '&quot;') + '">' + m + '</button>';
+      }).join('');
+      body += '<div class="dialog__msg dialog__msg--assistant"><span class="dialog__bubble">' + q.otazka + '</span></div>' +
+        '<div class="dialog__choices">' + choices + '</div>';
+    }
+    return '<div class="field-card"><div class="dialog">' + body + '</div></div>';
+  }
+
+  function renderHero() {
+    // Volá se jen dokud se neodešle pole (viz renderF1Screen) — jakmile
+    // se odešle, celá marketingová stránka mizí, tenhle blok se
+    // nevykresluje vůbec. Proto tu žádné odeslano rozhodování není.
+    var arrow = '<div class="field-callout__arrow"><svg viewBox="0 0 190 74" width="150" height="58" fill="none" aria-hidden="true">' +
+        '<path d="M6 30 C 40 6, 120 6, 158 46" stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round"></path>' +
+        '<path d="M158 46 L 143 44 M158 46 L 154 30" stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round"></path>' +
+      '</svg></div><span class="field-callout__label">Start here</span>';
+    return '<div class="hero">' +
+      '<div class="hero__headline">' +
+        '<h1>Describe your project. We\'ll handle the budget, the materials and the trades.</h1>' +
+        renderProof() +
+      '</div>' +
+      '<div class="hero__field"><div class="field-callout">' + arrow + renderFieldCard() + '</div></div>' +
+    '</div>';
+  }
+
+  function renderCollage() {
+    return '<section class="collage-section">' +
+      '<p class="collage-section__label">What you get</p>' +
+      '<div class="collage"><div class="collage__stage">' +
+        '<div class="phone-mock"><div class="phone-mock__screen">' +
+          '<div class="phone-mock__top"><span class="phone-mock__brand">Kumu</span><span class="phone-mock__tag">Your plan</span></div>' +
+          '<div><div class="phone-mock__label">Project</div><div class="phone-mock__title">Two-room flat, Brno</div></div>' +
+          '<hr class="hairline" />' +
+          '<div class="phone-mock__rows">' +
+            '<div class="phone-mock__row"><span>Items</span><span class="phone-mock__row-strong">12 items</span></div>' +
+            '<div class="phone-mock__row"><span>Estimated time</span><span class="phone-mock__row-strong">6—8 weeks</span></div>' +
+          '</div>' +
+          '<div class="phone-mock__meter-track"><div class="phone-mock__meter-fill" style="width:72%"></div></div>' +
+          '<div class="phone-mock__bottom"><span class="phone-mock__bottom-label">Budget</span><span class="phone-mock__bottom-value">450,000 CZK</span></div>' +
+        '</div></div>' +
+
+        '<div class="frag frag--budget"><div class="frag__card">' +
+          '<div class="frag__label">Budget</div>' +
+          '<div class="frag__rows">' +
+            '<div class="frag__row"><span>Demolition</span><span class="frag__row-value">42,000</span></div>' +
+            '<div class="frag__row"><span>Bathroom</span><span class="frag__row-value">138,000</span></div>' +
+            '<div class="frag__row"><span>Kitchen</span><span class="frag__row-value">176,000</span></div>' +
+            '<div class="frag__row"><span>Materials</span><span class="frag__row-value">94,000</span></div>' +
+          '</div>' +
+          '<div class="frag__total"><span>Total</span><span class="frag__total-value">450,000 CZK</span></div>' +
+        '</div><p class="frag__caption">An itemised budget</p></div>' +
+
+        '<div class="frag frag--question"><div class="frag__card">' +
+          '<div class="frag__label">Question</div>' +
+          '<p class="frag__question-text">Do you want to keep the existing bathroom pipework, or replace it?</p>' +
+          '<div class="frag__pills"><span class="frag__pill">Keep</span><span class="frag__pill frag__pill--accent">Replace</span></div>' +
+        '</div><p class="frag__caption">Follow-up questions</p></div>' +
+
+        '<div class="frag frag--quote"><div class="frag__card">' +
+          '<div class="frag__quote-top"><span class="frag__label" style="margin-bottom:0;">Bid</span><span>Rating <b>4.9</b></span></div>' +
+          '<div>Vetted building team</div>' +
+          '<div class="frag__quote-price">398,000 CZK</div>' +
+          '<button type="button" class="frag__quote-btn" data-action="noop">Accept bid</button>' +
+        '</div><p class="frag__caption">A bid in one click</p></div>' +
+      '</div></div>' +
+    '</section>';
+  }
+
+  function renderHowItWorks() {
+    var cols = F1_COPY.jakToFunguje.map(function (s) {
+      return '<div class="how-col"><div class="how-num">' + s.cislo + '</div><h3>' + s.nadpis + '</h3><p>' + s.text + '</p></div>';
+    }).join('');
+    return '<section class="how-it-works">' +
+      '<div class="how-grid">' + cols + '</div>' +
+      '<div class="how-closing"><p>' + F1_COPY.jakToFungujeZaver + '</p></div>' +
+    '</section>';
+  }
+
+  function renderPhaseBarReal() {
+    return '<div class="phase-bar">' + F1_COPY.faze.map(function (f) { return '<span>' + f + '</span>'; }).join('<span class="phase-bar__sep">✳</span>') + '</div>';
+  }
+
+  function renderSiteFooter() {
+    var cols = F1_COPY.footer.sloupce.map(function (c) {
+      return '<div class="site-footer__col"><div class="site-footer__label">' + c.label + '</div>' +
+        c.odkazy.map(function (a) { return '<a href="#" data-action="noop">' + a + '</a>'; }).join('') +
+      '</div>';
+    }).join('');
+    return '<footer class="site-footer">' +
+      '<div class="site-footer__grid">' +
+        '<div class="site-footer__about"><div class="site-footer__wordmark">Kumu</div><p>' + F1_COPY.footer.tagline + '</p></div>' +
+        cols +
+      '</div>' +
+      '<div class="site-footer__bottom"><span>' + F1_COPY.footer.provozovatel + '</span><span>© 2026 Kumu</span></div>' +
+    '</footer>';
+  }
+
+  function renderF1Screen() {
+    var ui = state.ui.f1;
+
+    // Po odeslání zmizí celá marketingová stránka — nadpis, hodnocení,
+    // koláž, "jak to funguje", patička. Nahradí ji samostatný,
+    // vycentrovaný pohled: jen horní pruh a dialog (pak B1+B2). Je to
+    // přechod ze stránky do produktu, ne rozbalení sekce uvnitř hera.
+    if (ui.odeslano) {
+      var content = ui.krokDialogu >= DIALOG.length
+        ? renderB1() + renderB2()
+        : renderDialogView();
+      return '<div class="screen">' +
+        renderKumuTopbar() +
+        '<div class="f2-screen">' + content + '</div>' +
+      '</div>';
+    }
+
+    return '<div class="screen">' +
+      renderKumuTopbar() +
+      renderHero() +
+      renderCollage() +
+      renderHowItWorks() +
+      renderPhaseBarReal() +
+      renderSiteFooter() +
+    '</div>';
+  }
+
+  // --- F2 — živé B3/B8, ne statická ukázka z katalogu -----------------
+
+  function renderF2Rozpocet() {
+    var vybrane = state.ui.f2.vybranePaky;
+    var uspora = projekt.paky.filter(function (p) { return vybrane.indexOf(p.id) !== -1; })
+      .reduce(function (sum, p) { return sum + p.uspora; }, 0);
+    var soucet = soucetPolozek() - uspora;
+    var strop = projekt.zadani.strop;
+    var rozdil = soucet - strop;
+    var items = projekt.polozky.map(function (p) {
+      return { label: p.nazev, amount: czk(p.castka), tag: p.znacka };
+    });
+    var body = rowListHtml(items) +
+      totalRowHtml("Total", czk(soucet), "neutral") +
+      totalRowHtml("Your budget", czk(strop), "neutral") +
+      (rozdil > 0
+        ? totalRowHtml("Difference", formatKc(rozdil), "over")
+        : totalRowHtml("Headroom", czk(-rozdil), "under"));
+    return blockCard("B3", "Budget estimate", "estimate", body, {
+      subtitle: "An indicative estimate based on your brief. It firms up once bids come in."
+    });
+  }
+
+  function renderB8VyberInteractive() {
+    var vybrane = state.ui.f2.vybranePaky;
+    var rows = projekt.paky.map(function (p) {
+      var checked = vybrane.indexOf(p.id) !== -1;
+      return '<div class="lever-row" data-action="f2-toggle-lever" data-lever-id="' + p.id + '" style="cursor:pointer;">' +
+        '<span class="lever-row__box" style="' + (checked ? "background:var(--check-fill-on);border-color:var(--check-fill-on);" : "") + '"></span>' +
+        '<span class="lever-row__body">' +
+          '<span class="lever-row__head"><span>' + p.popis + '</span>' +
+          '<span class="row__amount row__amount--under">−' + czk(p.uspora) + '</span></span>' +
+          '<span class="lever-row__impact">' + p.dopad + '</span>' +
+        '</span>' +
+      '</div>';
+    }).join('');
+    return blockCard("B8", "How to get under budget", "levers", rows, {
+      cta: null
+    });
+  }
+
+  function renderB8VariantyInteractive() {
+    var current = state.ui.f2.poptavka;
+    function cardClass(id) { return "choice-card" + (current === id ? " choice-card--selected" : ""); }
+    var body = '<div class="choice-row">' +
+      '<div class="' + cardClass("profese") + '" data-action="f2-set-poptavka" data-value="profese" style="cursor:pointer;">' +
+        '<div class="choice-card__title">Trade by trade</div>' +
+        '<div class="choice-card__meta">7 requests · 7 contracts · 7 separate warranties · you coordinate</div></div>' +
+      '<div class="' + cardClass("naklic") + '" data-action="f2-set-poptavka" data-value="naklic" style="cursor:pointer;">' +
+        '<div class="choice-card__title">One firm, whole job</div>' +
+        '<div class="choice-card__meta">1 request · 1 contract · one warranty on the works · the firm coordinates</div>' +
+        '<div class="choice-card__note">Firms bidding for a whole job typically come in between 8% below and 18% above the sum of individual trades. The range is drawn from 340 completed renovations of comparable size. You\'ll know the actual figure once they bid.</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="choice-default" data-action="f2-set-poptavka" data-value="oboji" style="cursor:pointer; ' +
+      (current === "oboji" ? "border:1.5px solid var(--color-accent);" : "border:1.5px solid transparent;") + '">' +
+      (current === "oboji" ? "✓ " : "") + 'Ask both and decide when the bids land — it costs you nothing. Bids arrive within days and you decide once there are numbers on the table.</div>';
+    return blockCard("B8", "How do you want to source this?", "paths", body, {
+      note: "The whole-job range overshoots your budget in both directions. An estimate can't tell you which route is cheaper. Bids can."
+    });
+  }
+
+  function renderF2Screen() {
+    return '<div class="screen">' +
+      renderKumuTopbar() +
+      '<div class="f2-screen">' +
+        renderF2Rozpocet() +
+        renderB4Zakaznicky() +
+        renderB8VyberInteractive() +
+        renderB8VariantyInteractive() +
+      '</div>' +
+      renderPhaseBarReal() +
+    '</div>';
+  }
+
+  function renderScreen() {
+    var el = document.querySelector('[data-screen]');
+    var scaffold = document.querySelector('[data-scaffold]');
+    var hasScreen = state.role === "zakaznik" && (state.faze === "F1" || state.faze === "F2");
+    if (hasScreen) {
+      el.innerHTML = state.faze === "F1" ? renderF1Screen() : renderF2Screen();
+      scaffold.style.display = "none";
+    } else {
+      el.innerHTML = "";
+      scaffold.style.display = "";
+    }
+  }
+
+  // --- Obsluha kliknutí — jedno delegované místo pro celý dokument ----
+
+  function handleAction(action, el) {
+    if (action === "noop") return;
+    if (action === "f1-pilulka") {
+      updateUi(function (ui) { ui.f1.pilulka = el.getAttribute("data-pilulka-id"); });
+    } else if (action === "f1-submit") {
+      updateUi(function (ui) { ui.f1.odeslano = true; });
+    } else if (action === "f1-dialog-choice") {
+      updateUi(function (ui) {
+        ui.f1.odpovedi.push(el.getAttribute("data-answer"));
+        ui.f1.krokDialogu++;
+      });
+    } else if (action === "f2-toggle-lever") {
+      var id = el.getAttribute("data-lever-id");
+      updateUi(function (ui) {
+        var i = ui.f2.vybranePaky.indexOf(id);
+        if (i === -1) ui.f2.vybranePaky.push(id); else ui.f2.vybranePaky.splice(i, 1);
+      });
+    } else if (action === "f2-set-poptavka") {
+      updateUi(function (ui) { ui.f2.poptavka = el.getAttribute("data-value"); });
+    } else if (action === "goto-f2") {
+      setState({ faze: "F2" });
+    }
+  }
+
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-action]");
+    if (!el) return;
+    e.preventDefault();
+    handleAction(el.getAttribute("data-action"), el);
+  });
 
   subscribe(render);
   render();
