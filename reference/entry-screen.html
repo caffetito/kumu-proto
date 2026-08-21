@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kumu — popište projekt, rozpočet vyřešíme my</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --flood: #EFEAE1;
+  --ink: #1A1714;
+  --accent: oklch(0.58 0.16 42);
+  --frag-bg: #FFFFFF;
+
+  --hair: color-mix(in srgb, var(--ink) 14%, transparent);
+  --hair-strong: color-mix(in srgb, var(--ink) 32%, transparent);
+  --muted: color-mix(in srgb, var(--ink) 58%, transparent);
+  --faint: color-mix(in srgb, var(--ink) 8%, transparent);
+  --bar-sep: color-mix(in srgb, var(--flood) 45%, transparent);
+  --field-bg: color-mix(in srgb, var(--flood) 50%, white);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--flood);
+  color: var(--ink);
+}
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+a { color: inherit; }
+a:hover { opacity: 0.7; }
+
+.hair-line { height: 1px; background: var(--hair); }
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 22px clamp(20px, 5vw, 80px);
+  border-bottom: 1px solid var(--hair);
+}
+.wordmark {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+.login-link {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  border-bottom: 1px solid var(--hair-strong);
+  padding-bottom: 3px;
+}
+
+/* Hero */
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(32px, 4vw, 56px);
+  align-items: flex-start;
+  padding: clamp(48px, 6vw, 88px) clamp(20px, 5vw, 80px);
+}
+.hero-headline { flex: 1 1 380px; min-width: 0; }
+.hero-field { flex: 1 1 420px; min-width: 0; }
+
+.hero-headline h1 {
+  margin: 0;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: clamp(34px, 5.6vw, 60px);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.proof {
+  display: flex;
+  align-items: stretch;
+  gap: 28px;
+  margin-top: 26px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hair);
+}
+.proof-item { display: flex; flex-direction: column; gap: 7px; }
+.proof-source {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.proof-score { display: flex; align-items: baseline; gap: 9px; }
+.proof-num {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--accent);
+}
+.proof-stars { letter-spacing: 2px; font-size: 13px; color: var(--accent); }
+.proof-divider { width: 1px; background: var(--hair-strong); }
+
+/* Field */
+.field-callout { position: relative; }
+.callout-arrow {
+  position: absolute;
+  top: -58px;
+  left: -4px;
+  overflow: visible;
+  pointer-events: none;
+}
+.callout-label {
+  position: absolute;
+  top: -56px;
+  left: 6px;
+  transform: translateX(-100%);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.field-box {
+  border: 1px solid var(--hair-strong);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--field-bg);
+}
+
+.field-box textarea {
+  display: block;
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: vertical;
+  background: transparent;
+  caret-color: var(--accent);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  padding: 22px;
+  min-height: 132px;
+}
+
+.field-meta {
+  padding: 18px 22px 20px;
+  border-top: 1px solid var(--hair);
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.chip {
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--hair);
+  background: transparent;
+  color: var(--muted);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.chip.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.reassurance {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.field-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 12px 14px;
+  border-top: 1px solid var(--hair);
+}
+.cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 9px 22px;
+  border: none;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--flood);
+  cursor: pointer;
+}
+.cta-kicker {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.cta-label {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Collage */
+.collage-section {
+  padding: clamp(48px, 6vw, 72px) clamp(20px, 5vw, 80px);
+  border-top: 1px solid var(--hair);
+}
+.collage-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 1160px;
+  height: 700px;
+  margin: 0 auto;
+}
+.collage-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1160px;
+  height: 700px;
+  transform-origin: top left;
+}
+
+.phone {
+  position: absolute;
+  left: 50%;
+  top: 32px;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 606px;
+  border-radius: 44px;
+  background: var(--ink);
+  padding: 12px;
+}
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  border-radius: 34px;
+  background: var(--flood);
+  padding: 26px 22px;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.phone-top { display: flex; align-items: center; justify-content: space-between; }
+.phone-wordmark {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+.phone-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
+.phone-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.phone-title {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.phone-rows { display: flex; flex-direction: column; gap: 14px; }
+.phone-row { display: flex; align-items: baseline; justify-content: space-between; font-size: 13px; }
+.muted-text { color: var(--muted); }
+.phone-strong { font-weight: 600; }
+.phone-accent { color: var(--accent); }
+.progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--faint);
+  overflow: hidden;
+}
+.progress-fill { width: 72%; height: 100%; background: var(--accent); }
+.phone-bottom {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--hair);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.phone-bottom-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.phone-bottom-value {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--accent);
+}
+
+.frag { position: absolute; }
+.frag-budget { top: 104px; left: 248px; width: 278px; }
+.frag-question { top: 20px; right: 150px; width: 300px; }
+.frag-quote { bottom: 18px; right: 200px; width: 262px; }
+
+.frag-card {
+  background: var(--frag-bg);
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 22px 46px -16px rgba(0, 0, 0, 0.30);
+}
+.frag-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.frag-rows { display: flex; flex-direction: column; gap: 11px; font-size: 14px; }
+.frag-row { display: flex; justify-content: space-between; }
+.frag-accent { font-weight: 600; color: var(--accent); }
+.frag-total { display: flex; justify-content: space-between; align-items: baseline; }
+.frag-total span:first-child { font-weight: 600; font-size: 14px; }
+.frag-total-value {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--accent);
+}
+.frag-caption {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+.frag-question-text { margin: 0 0 16px; font-size: 15px; line-height: 1.45; }
+.frag-pills { display: flex; gap: 8px; }
+.pill {
+  padding: 8px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--hair-strong);
+  font-size: 13px;
+}
+.pill-accent {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.frag-quote-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.frag-quote-team { font-size: 14px; margin-bottom: 4px; }
+.frag-quote-price {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 30px;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.frag-quote-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--flood);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* How it works */
+.how-it-works {
+  padding: clamp(48px, 6vw, 78px) clamp(20px, 5vw, 80px);
+  border-top: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+}
+.how-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 36px 0;
+}
+.how-col { padding: 0 clamp(24px, 3vw, 56px); }
+.how-col:first-child { padding-left: 0; }
+.how-col:last-child { padding-right: 0; }
+.how-col-bordered { border-left: 1px solid var(--hair); }
+.how-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.how-col h3 {
+  margin: 0 0 12px;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  letter-spacing: -0.01em;
+  line-height: 1.22;
+}
+.how-col p { margin: 0; font-size: 15px; line-height: 1.6; color: var(--muted); }
+
+.how-closing {
+  margin-top: 56px;
+  padding-top: 34px;
+  border-top: 1px solid var(--hair);
+}
+.how-closing p {
+  margin: 0;
+  font-family: 'Archivo', sans-serif;
+  font-size: 22px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+}
+
+/* Phase bar */
+.phase-bar {
+  background: var(--ink);
+  color: var(--flood);
+  padding: clamp(18px, 2.4vw, 24px) clamp(20px, 4vw, 40px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(12px, 2vw, 22px);
+  font-size: clamp(12px, 1.5vw, 15px);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.phase-sep { color: var(--bar-sep); }
+
+/* Footer */
+.footer {
+  background: var(--flood);
+  color: var(--ink);
+  padding: clamp(36px, 4vw, 48px) clamp(20px, 5vw, 80px) clamp(30px, 3vw, 38px);
+  border-top: 1px solid var(--hair);
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: clamp(28px, 3vw, 48px);
+}
+.footer-about { min-width: 0; }
+.footer-wordmark {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  margin-bottom: 14px;
+}
+.footer-about p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.footer-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.footer-col { display: flex; flex-direction: column; }
+.footer-col a {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 11px;
+}
+.footer-col a:last-child { margin-bottom: 0; }
+
+.footer-bottom {
+  margin-top: 38px;
+  padding-top: 22px;
+  border-top: 1px solid var(--hair);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <span class="wordmark">Kumu</span>
+  <a href="#" class="login-link">Přihlásit se</a>
+</header>
+
+<main>
+
+  <div class="hero">
+    <div class="hero-headline">
+      <h1>Popište projekt. Rozpočet, materiál i řemeslníky vyřešíme my.</h1>
+
+      <div class="proof">
+        <div class="proof-item">
+          <span class="proof-source">Seznam</span>
+          <span class="proof-score"><span class="proof-num">4,9</span><span class="proof-stars">★★★★★</span></span>
+        </div>
+        <div class="proof-divider"></div>
+        <div class="proof-item">
+          <span class="proof-source">Google</span>
+          <span class="proof-score"><span class="proof-num">4,9</span><span class="proof-stars">★★★★★</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-field">
+      <div class="field-callout">
+        <svg viewBox="0 0 190 74" width="180" height="70" fill="none" class="callout-arrow" aria-hidden="true">
+          <path d="M6 30 C 40 6, 120 6, 158 46" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round"></path>
+          <path d="M158 46 L 143 44 M158 46 L 154 30" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round"></path>
+        </svg>
+        <span class="callout-label">Začněte tady</span>
+
+        <div class="field-box">
+          <textarea rows="4" placeholder="Například: koupili jsme starší byt 2+kk v Brně, chceme předělat koupelnu a kuchyň, novou podlahu v obýváku a vymalovat. Rozpočet máme zhruba 550 000 Kč a rádi bychom začali na jaře."></textarea>
+
+          <div class="field-meta">
+            <div class="chips" role="group" aria-label="Fáze projektu">
+              <button type="button" class="chip is-active" data-chip>Zatím jen nápad</button>
+              <button type="button" class="chip" data-chip>Mám představu</button>
+              <button type="button" class="chip" data-chip>Mám projekt, hledám dodavatele</button>
+            </div>
+            <p class="reassurance">Odhad rozpočtu a seznam prací obvykle připravíme do několika minut. Bez registrace a nezávazně.</p>
+          </div>
+
+          <div class="field-actions">
+            <button type="button" class="cta">
+              <span class="cta-kicker">Zdarma a nezávazně</span>
+              <span class="cta-label">Začít</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="collage-section">
+    <div class="collage-wrap" id="collageWrap">
+      <div class="collage-inner" id="collageInner">
+
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="phone-top">
+              <span class="phone-wordmark">Kumu</span>
+              <span class="phone-tag">Váš plán</span>
+            </div>
+            <div>
+              <div class="phone-label">Projekt</div>
+              <div class="phone-title">Rekonstrukce bytu 2+kk</div>
+            </div>
+            <div class="hair-line"></div>
+            <div class="phone-rows">
+              <div class="phone-row">
+                <span class="muted-text">Rozsah prací</span>
+                <span class="phone-strong">12 položek</span>
+              </div>
+              <div class="phone-row">
+                <span class="muted-text">Odhad délky</span>
+                <span class="phone-strong">6–8 týdnů</span>
+              </div>
+              <div>
+                <div class="phone-row" style="margin-bottom:8px">
+                  <span class="muted-text">Naplánováno</span>
+                  <span class="phone-strong phone-accent">72&nbsp;%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill"></div></div>
+              </div>
+            </div>
+            <div class="phone-bottom">
+              <span class="phone-bottom-label">Rozpočet</span>
+              <span class="phone-bottom-value">450 000 Kč</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="frag frag-budget">
+          <div class="frag-card">
+            <div class="frag-label">Rozpočet</div>
+            <div class="frag-rows">
+              <div class="frag-row"><span class="muted-text">Bourací práce</span><span class="frag-accent">42 000</span></div>
+              <div class="frag-row"><span class="muted-text">Koupelna</span><span class="frag-accent">138 000</span></div>
+              <div class="frag-row"><span class="muted-text">Kuchyň</span><span class="frag-accent">176 000</span></div>
+              <div class="frag-row"><span class="muted-text">Materiál</span><span class="frag-accent">94 000</span></div>
+            </div>
+            <div class="hair-line" style="margin:14px 0"></div>
+            <div class="frag-total"><span>Celkem</span><span class="frag-total-value">450 000 Kč</span></div>
+          </div>
+          <div class="frag-caption">Rozpočet po položkách</div>
+        </div>
+
+        <div class="frag frag-question">
+          <div class="frag-card">
+            <div class="frag-label">Otázka</div>
+            <p class="frag-question-text">Přejete si u koupelny zachovat stávající rozvody, nebo je vyměnit za nové?</p>
+            <div class="frag-pills">
+              <span class="pill">Zachovat</span>
+              <span class="pill pill-accent">Vyměnit</span>
+            </div>
+          </div>
+          <div class="frag-caption">Doplňující otázky</div>
+        </div>
+
+        <div class="frag frag-quote">
+          <div class="frag-card">
+            <div class="frag-quote-top">
+              <span class="frag-label" style="margin-bottom:0">Nabídka</span>
+              <span class="muted-text">Hodnocení <span class="frag-accent">4,9</span></span>
+            </div>
+            <div class="frag-quote-team muted-text">Prověřený stavební tým</div>
+            <div class="frag-quote-price">398 000 Kč</div>
+            <button type="button" class="frag-quote-btn">Přijmout nabídku</button>
+          </div>
+          <div class="frag-caption">Nabídka na jedno kliknutí</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <div class="how-grid">
+      <div class="how-col">
+        <div class="how-num">01</div>
+        <h3>Popíšete, co chcete udělat</h3>
+        <p>Vlastními slovy a jakkoli neúplně. Na to, co chybí, se doptáme.</p>
+      </div>
+      <div class="how-col how-col-bordered">
+        <div class="how-num">02</div>
+        <h3>Dostanete nabídky řemeslníků</h3>
+        <p>S cenami prací i materiálu. Rozsah a kvalitu můžete posouvat a rovnou vidíte, co to udělá s celkem.</p>
+      </div>
+      <div class="how-col how-col-bordered">
+        <div class="how-num">03</div>
+        <h3>Vyberete si firmy pro realizaci</h3>
+        <p>Ověření řemeslníci vidí konkrétní projekt, ne obecnou poptávku. Proto jsou jejich ceny srovnatelné.</p>
+      </div>
+    </div>
+    <div class="how-closing">
+      <p>Vše na jednom místě. Od nápadu až do konce projektu.</p>
+    </div>
+  </section>
+
+</main>
+
+<div class="phase-bar">
+  <span>Nápad</span><span class="phase-sep">✳</span>
+  <span>Projekt</span><span class="phase-sep">✳</span>
+  <span>Materiál a rozpočet</span><span class="phase-sep">✳</span>
+  <span>Nabídky</span><span class="phase-sep">✳</span>
+  <span>Realizace</span>
+</div>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-about">
+      <div class="footer-wordmark">Kumu</div>
+      <p>Popíšete projekt, my dopočítáme rozpočet, materiál i řemeslníky.</p>
+    </div>
+    <div class="footer-col">
+      <div class="footer-label">KUMU</div>
+      <a href="#">O nás</a>
+      <a href="#">Jak to funguje</a>
+      <a href="#">Pro řemeslníky</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-label">PODPORA</div>
+      <a href="#">Časté dotazy</a>
+      <a href="#">Kontakt</a>
+      <a href="#">Nahlásit problém</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-label">PRÁVNÍ INFORMACE</div>
+      <a href="#">Obchodní podmínky</a>
+      <a href="#">Zásady ochrany osobních údajů</a>
+      <a href="#">Nastavení cookies</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>Provozuje NejŘemeslníci.cz s.r.o. · IČO 00000000 · Praha</span>
+    <span>© 2026 Kumu</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const wrap = document.getElementById('collageWrap');
+  const inner = document.getElementById('collageInner');
+  if (wrap && inner) {
+    const COLLAGE_WIDTH = 1160;
+    const COLLAGE_HEIGHT = 700;
+    const fit = () => {
+      const scale = Math.min(1, wrap.clientWidth / COLLAGE_WIDTH);
+      inner.style.transform = `scale(${scale})`;
+      wrap.style.height = `${COLLAGE_HEIGHT * scale}px`;
+    };
+    new ResizeObserver(fit).observe(wrap);
+    fit();
+  }
+
+  const chips = document.querySelectorAll('[data-chip]');
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      chips.forEach((c) => c.classList.remove('is-active'));
+      chip.classList.add('is-active');
+    });
+  });
+})();
+</script>
+</body>
+</html>
