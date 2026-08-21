@@ -182,7 +182,7 @@ Klidně a konkrétně. Zákazník je nervózní z toho, kolik to bude stát; ře
 
 | Kde | Text |
 |---|---|
-| Spodní navigace | `Today` · `Work` · `Invoices` · `Profile` |
+| Spodní navigace | `Today` · `Opportunities` · `Invoices` · `Profile` |
 | Plocha, řádky | `3 new jobs, one already has a bid drafted` · `2 bids waiting on a reply` · `1 invoice overdue, 9 days` |
 | Štítek u příležitosti | `Bid ready` |
 | Balíček — nadpis | `Electrical installation` |
