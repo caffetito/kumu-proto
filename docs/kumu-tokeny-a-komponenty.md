@@ -1,8 +1,10 @@
 # Kumu — tokeny a komponenty
 
-**Datum:** 2026-08-21
+**Datum:** 2026-08-21 · verze 2
 **Vstup:** hotová vstupní obrazovka, varianta 3a
 **K čemu to je:** aby se na hotové obrazovky dalo naroubovat libovolné barevné schéma
+
+> **Změna proti verzi 1.** Legenda v §2 používala vlastní názvosloví `plane/ink`. Sjednoceno na `surface/text/action` podle `styles/tokens.css` a `kumu-design.md` §4. Otázka akcentu z §3a je rozhodnutá — paleta dostala šestou barvu, viz `kumu-design.md` §4a.
 
 ---
 
@@ -14,80 +16,81 @@ To je past. Když se ve stejném duchu nakreslí F2, kolize se objeví až tam �
 
 Na téhle obrazovce dělá oranžová **šest různých prací**:
 
-| # | Kde | Jakou roli hraje |
-|---|---|---|
-| 1 | Hodnocení 4,9 | Metrika, na kterou se má koukat |
-| 2 | Vybraná pilulka „Zatím jen nápad" | Stav výběru |
-| 3 | Celkem 450 000 Kč · 398 000 Kč | Hlavní číslo |
-| 4 | Ukazatel 72 % | Průběh |
-| 5 | Obrys tlačítka „Vyměnit" | Navrhovaná volba |
-| 6 | Šipka k poli | Dekorace |
+| # | Kde | Jakou roli hraje | Nově |
+|---|---|---|---|
+| 1 | Hodnocení 4,9 | Metrika, na kterou se má koukat | `--color-accent` |
+| 2 | Vybraná pilulka „Zatím jen nápad" | Stav výběru | `--color-accent` |
+| 3 | Celkem 450 000 Kč · 398 000 Kč | Hlavní číslo | **`--text-primary`** |
+| 4 | Ukazatel 72 % | Průběh | `--color-accent` |
+| 5 | Obrys tlačítka „Vyměnit" | Navrhovaná volba | `--color-accent` |
+| 6 | Šipka k poli | Dekorace | Odstranit, nebo `--text-primary` |
 
-Šest rolí, jedna barva. Žádné schéma se na to nedá vyměnit, protože při výměně se musí vědět, **co která barva znamená**, ne kde je použitá. Dokud je to šest významů v jednom odstínu, je výměna schématu ruční překreslení.
+Šest rolí, jedna barva. Žádné schéma se na to nedá vyměnit, protože při výměně se musí vědět, **co která barva znamená**, ne kde je použitá.
 
-Rolí má být nejvýš **pět** a každá potřebuje vlastní token. To je celá odpověď na „aby se dalo naroubovat cokoli".
+Rolí má být nejvýš pět a každá má vlastní token. To je celá odpověď na „aby se dalo naroubovat cokoli".
 
 ---
 
 ## 2. Legenda tokenů
 
-Role, ne barvy. Hodnoty se dosadí až podle schématu; pravidla platí pro všechna.
+Role, ne barvy. Hodnoty jsou v `kumu-design.md` §4 a v `styles/tokens.css`; pravidla platí pro všechna schémata.
 
 ### Plochy
 
 | Token | Role | Na vstupní obrazovce |
 |---|---|---|
-| `plane` | Základní plocha, plnoplošně | Režná (Bone) |
-| `planeRaised` | Karty s obsahem a s čísly | Bílá |
-| `planeMuted` | Ustupující pásmo | Sekce ukázky výstupu |
-| `planeInverse` | Rám kolem produktu | Černý fázový pruh |
+| `--surface` | Základní plocha, plnoplošně | Cornsilk |
+| `--surface-raised` | Karty s obsahem a s čísly | Bílá |
+| `--surface-green` | Panely bez čísel | Hero, „Co by se změnilo" |
+| `--surface-cool` | Ustupující pásmo | Sekce ukázky výstupu, partnerský agregát |
+| `--surface-inverse` | Rám kolem produktu | Fázový pruh |
+| `--surface-over` | Podklad karty víceprací | — |
+| `--surface-accent` | Výplň vybraného stavu | Vybraná pilulka |
 
 ### Linky a text
 
 | Token | Role |
 |---|---|
-| `line` | Vlasové oddělovače |
-| `lineStrong` | Obrys karet, aktivní stav |
-| `ink` | Veškerý text a **všechna čísla** |
-| `inkMuted` | Popisky, poznámky, mikropopisky verzálkami |
-| `inkInverse` | Text na `planeInverse` |
+| `--border` | Vlasové oddělovače |
+| `--border-strong` | Obrys karet, aktivní stav |
+| `--text-primary` | Veškerý text a **všechna peněžní čísla** |
+| `--text-secondary` | Popisky, poznámky, mikropopisky verzálkami |
+| `--text-inverse` | Text na `--surface-inverse` |
+| `--text-disabled` | Nedostupné prvky |
 
 ### Akce a stavy
 
 | Token | Role | Na vstupní obrazovce |
 |---|---|---|
-| `action` | Hlavní akce | Černá pilulka „Začít" |
-| `actionQuiet` | Vedlejší akce | Obrys „Zachovat" |
-| `accent` | **Výběr, aktivní stav, průběh, metriky** | Vybraná pilulka, hodnocení, ukazatel 72 % |
-| `focus` | Klávesová navigace | — |
+| `--action-primary` | Hlavní akce | Pilulka „Začít" |
+| `--action-secondary` | Vedlejší akce | Obrys „Zachovat" |
+| `--color-accent` | **Výběr, aktivní stav, průběh, metriky** | Vybraná pilulka, hodnocení, ukazatel 72 % |
+| `--color-accent-fg` | Text na akcentu | — |
+| `--focus` | Klávesová navigace | — |
 
 ### Semantika — vyhrazená
 
 | Token | Role | Kde se objeví |
 |---|---|---|
-| `over` | Nad rozpočtem | B3, B8, vyúčtování, vícepráce |
-| `under` | Úspora, pod rozpočtem | B3, B8, vyúčtování |
+| `--color-over` | Nad rozpočtem | B3, B8, vyúčtování, vícepráce |
+| `--color-under` | Úspora, pod rozpočtem | B3, B8, vyúčtování |
+| `--graphic-over` · `--graphic-under` · `--graphic-track` | Ukazatele a segmenty — grafika, nikdy text | B3, harmonogram |
 
-**Semantika je nedotknutelná.** Nikde jinde než na rozpočtovém čísle se `over` ani `under` neobjeví, a naopak žádný jiný token se nesmí objevit na rozpočtovém čísle.
+**Semantika je nedotknutelná.** Nikde jinde než na rozpočtovém čísle se `--color-over` ani `--color-under` neobjeví, a naopak žádný jiný token se nesmí objevit na rozpočtovém čísle.
 
 ---
 
 ## 3. Tři rozhodnutí, která to vynucuje
 
-### a) Hlavní číslo přestane být oranžové
+### a) Hlavní číslo přestane být barevné — VYŘEŠENO
 
-Na téhle obrazovce jsou 450 000 Kč a 398 000 Kč oranžové. V produktu je barevné číslo vyhrazené pro nad/pod rozpočtem — a karta ROZPOČET v ukázce výstupu je doslova náhled bloku B3. Kdyby náhled ukazoval oranžový součet a skutečné B3 černý, publikum to v dvanáctiminutové prezentaci uvidí.
+Na vstupní obrazovce jsou 450 000 Kč a 398 000 Kč oranžové. V produktu je barevné číslo vyhrazené pro nad a pod rozpočtem — a karta ROZPOČET v ukázce výstupu je doslova náhled bloku B3. Kdyby náhled ukazoval barevný součet a skutečné B3 černý, publikum to v dvanáctiminutové prezentaci uvidí.
 
-Dvě cesty:
-
-1. **Číslo je `ink`.** Součty zčernají, oranžová zůstane na hodnocení, výběru a průběhu. Marketingová obrazovka ztratí trochu důrazu, produkt zůstane soudržný.
-2. **Marketing a aplikace jsou dvě sady pravidel.** Legitimní — landing pages se běžně liší. Cena je, že náhled bloku vypadá jinak než blok.
-
-Rozhodnutí nedávám, ale cesta 2 je udržitelná jen tehdy, když v ukázce výstupu nebudou náhledy skutečných bloků.
+**Rozhodnuto: součty jdou na `--text-primary`.** Akcent zůstává na hodnocení, výběru a průběhu — a je to nově vlastní odstín, ne oranžová.
 
 ### b) Šipka je dekorace
 
-Konfliktní hned dvakrát: nese `accent` bez toho, aby něco znamenala, a porušuje pravidlo „žádná dekorace, ikony jen funkčně". Na vstupní obrazovce funguje. Ve zbytku produktu takový prvek nebude, takže je to jednorázová výjimka — a ta se má napsat, ne nechat, aby se rozšířila.
+Konfliktní hned dvakrát: nese barvu bez toho, aby něco znamenala, a porušuje pravidlo „žádná dekorace, ikony jen funkčně". Na vstupní obrazovce funguje. Ve zbytku produktu takový prvek nebude, takže je to jednorázová výjimka — a ta se má napsat, ne nechat, aby se rozšířila.
 
 ### c) Krok 03 patří do konceptu
 
@@ -105,7 +108,7 @@ Vstupní obrazovka už obsahuje většinu systému. Než vzniknou další obrazo
 |---|---|---|---|
 | 1 | Horní pruh | — | Všechny zákaznické a partnerské obrazovky |
 | 2 | Vlasový oddělovač | — | Všude |
-| 3 | Displejový nadpis | — | F1, F5 „Hotovo" |
+| 3 | Displejový nadpis | — | F1, F5 „Done" |
 | 4 | Dvojice metrik | — | Partnerský agregát |
 | 5 | Orámovaná karta se zápatím | — | Pole na vstupu, karty s akcí |
 | 6 | Pilulka | vybraná / nevybraná | Fáze zralosti, filtry, taby |
@@ -120,7 +123,7 @@ Vstupní obrazovka už obsahuje většinu systému. Než vzniknou další obrazo
 | 15 | Fázový pruh | — | Všechny obrazovky |
 | 16 | Patička | — | Všechny zákaznické obrazovky |
 
-Komponenty **10 a 11 jsou nejdůležitější v celém produktu.** Objevují se v B3, v panelu Váš tým, ve vyúčtování a v partnerské tabulce, a jsou to jediná místa, kde barva něco znamená. Vyplatí se je nakreslit dřív než jakoukoli další obrazovku, ve všech třech stavech součtu.
+Komponenty **10 a 11 jsou nejdůležitější v celém produktu.** Objevují se v B3, v panelu Váš tým, ve vyúčtování a v partnerské tabulce, a jsou to jediná místa, kde barva něco znamená. Vyplatí se je postavit dřív než jakoukoli další obrazovku, ve všech třech stavech součtu. Rozměry jsou v `tokens.css` §10.
 
 Chybí a vzniknou až dál: slot týmu, karta kandidáta s hodnocením, vodorovná časová osa, spodní navigace mobilu, konverzační bublina.
 
@@ -128,17 +131,21 @@ Chybí a vzniknou až dál: slot týmu, karta kandidáta s hodnocením, vodorovn
 
 ## 5. Co dál — pořadí
 
+Pořadí stavby řídí `kumu-kostra.md` §9. Tenhle seznam je jeho designová strana.
+
 | # | Krok | Proč teď |
 |---|---|---|
-| 1 | **Legenda tokenů z §2 zapsaná do souboru**, se kterým se kreslí | Bez ní je každá další obrazovka další ruční překreslení při změně schématu |
+| 1 | **Legenda z §2 v `tokens.css`** | Hotovo |
 | 2 | **Komponenty 10 a 11 ve všech stavech** | Nesou jediné významové použití barvy v produktu |
 | 3 | **F2 zákazník** — B3, páky, B8 varianty | Peak dema. Zároveň první obrazovka, kde se semantika objeví, takže potvrdí nebo vyvrátí legendu |
-| 4 | **F3 zákazník** — skládání týmu | Nejsložitější interakce. Do statické obrazovky se vejde jen výchozí a zaplněný stav |
-| 5 | **Řemeslník F3** — plocha a nabídka | Mobil, jiný layout, ověří komponenty na užší ploše |
-| 6 | **Partner F2** | Hustá tabulka, ověří `planeMuted` a agregát |
+| 4 | **Řemeslník F3** — plocha a nabídka | Mobil, jiný layout, ověří komponenty na užší ploše |
+| 5 | **Zákazník F3** — skládání týmu | Nejsložitější interakce |
+| 6 | **Partner F2** | Hustá tabulka, ověří `--surface-cool` a agregát |
 | 7 | Zbytek F4 a F5 | Kulisa, nejnižší detail |
 
-**F2 je ta obrazovka, která rozhodne.** Pokud se legenda tokenů udrží na obrazovce, kde současně existuje součet, strop, rozdíl nad rozpočtem, tři úspory a přepočet — udrží se všude. Pokud se rozsype, je lepší to zjistit na druhé obrazovce než na sedmé.
+> Pořadí kroků 4 a 5 je proti verzi 1 prohozené, aby sedělo s `kumu-kostra.md` §9. Kostra staví řemeslníka dřív, protože bez něj demo neukáže hlavní myšlenku.
+
+**F2 je ta obrazovka, která rozhodne.** Pokud se legenda udrží tam, kde současně existuje součet, strop, rozdíl nad rozpočtem, tři úspory a přepočet — udrží se všude. Pokud se rozsype, je lepší to zjistit na druhé obrazovce než na sedmé.
 
 ---
 
@@ -147,9 +154,12 @@ Chybí a vzniknou až dál: slot týmu, karta kandidáta s hodnocením, vodorovn
 Než obrazovka odejde jako hotová, projít:
 
 - [ ] Každá barevná plocha, text i linka odpovídá právě jednomu tokenu z §2
-- [ ] `accent` se neobjevuje na žádném peněžním čísle
-- [ ] `over` a `under` se neobjevují nikde mimo rozpočtové číslo
+- [ ] `--color-accent` se neobjevuje na žádném peněžním čísle
+- [ ] `--color-over` a `--color-under` se neobjevují nikde mimo rozpočtové číslo
+- [ ] Akcent nikde nenese význam sám — vždy s výplní, vahou nebo pozicí
+- [ ] Na `--surface-cool` není akcent jako drobný text, jen jako grafika
 - [ ] Žádná barva, která na obrazovce něco *neznamená* — kromě zapsané výjimky se šipkou
 - [ ] Prvek, který už v inventáři §4 je, se nekreslí znovu jinak
 - [ ] Typografie používá jen pět úrovní z `kumu-kostra.md` §7
-- [ ] Karta s peněžní částkou stojí na `planeRaised`, ne na `plane`
+- [ ] Karta s peněžní částkou stojí na `--surface-raised`, ne na `--surface`
+- [ ] Význam nikde nenese barva sama — kontrola černobílým tiskem
