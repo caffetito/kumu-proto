@@ -1129,6 +1129,33 @@
   .whatchanges { background: var(--surface-green); border-radius: var(--radius-card); padding: var(--space-2); margin-top: var(--space-2); }
   .whatchanges p { margin: 0 0 8px; font-size: var(--type-caption); }
   .whatchanges p:last-child { margin-bottom: 0; }
+
+  /* ============================================================
+     KROK 7 — F4 A F5 NAPŘÍČ ROLEMI
+     kumu-kostra.md §5, §9 krok 7. Realizace a dokončení pro
+     zákazníka, řemeslníka i partnera.
+     ============================================================ */
+
+  .photo-row { display: flex; gap: var(--space-1); margin-top: var(--space-2); }
+  .photo-placeholder {
+    flex: 1 1 0;
+    aspect-ratio: 4 / 3;
+    border: var(--border-width) solid var(--border-strong);
+    border-radius: var(--radius-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .photo-placeholder__label { font-size: var(--type-caption); color: var(--text-secondary); }
+
+  .f5-done-heading {
+    font-size: var(--type-display-xl);
+    font-weight: var(--weight-display);
+    letter-spacing: var(--tracking-display-xl);
+    line-height: var(--leading-display-xl);
+    color: var(--text-primary);
+    margin: 0 0 var(--space-1);
+  }
 </style>
 </head>
 <body data-role="zakaznik" data-faze="F1">
@@ -1197,6 +1224,10 @@
       plocha: 74,
       typ: "panelák 1978, původní stav",
       lokalita: "Brno-Královo Pole",
+      // [+] Vymyšlená — kostra (F4 partner) chce, aby se s objednávkou
+      // poprvé odkryla adresa dodání, ale žádná konkrétní ulice nikde
+      // v žádném zdroji není. Autorka výslovně odsouhlasila si ji vymyslet.
+      adresa: "Wurmova 1234/8, 612 00 Brno-Královo Pole",
       zakaznici: "Petra a Martin"
     },
 
@@ -1257,14 +1288,20 @@
     // podle kumu-copy-en.md F3. Kde už dorazila a byla vybrána nabídka,
     // je rovnou na balíčku (pole nabidka) — ne ve druhém, odděleném
     // seznamu, který by se musel párovat podle jména a mohl se rozejít.
+    // realizator — [+] Vymyšlené jméno a profese pro každý balíček,
+    // odsouhlaseno autorkou (kroky 7). Odděleně od "nabidka.dodavatel",
+    // který zůstává jako v kroku 6 — kdo skutečně dělá práci, se neváže
+    // na to, jestli ve F3 "day 6" snímku dorazila nabídka. "Instalace
+    // Kříž" není vymyšlené nově, je to doslovná citace z
+    // kumu-copy-en.md (Asistent, otázka "Who's doing the plumbing there?").
     balicky: [
-      { nazev: "Demolition and waste removal", odhad: 85000, od: "2026-02-16", do: "2026-02-20", stav: "3 bids", nabidka: { castka: 82000, odchylka: -3000 } },
-      { nazev: "Water and drainage", odhad: 95000, od: "2026-02-23", do: "2026-03-02", stav: "2 bids", nabidka: { castka: 98000, odchylka: 3000 } },
-      { nazev: "Electrical installation", odhad: 165000, od: "2026-03-02", do: "2026-03-13", stav: "3 bids", nabidka: { castka: 158000, odchylka: -7000, dodavatel: "Jiří Vaněk" } },
-      { nazev: "Plasterboard and surfaces", odhad: 174000, od: "2026-03-16", do: "2026-03-26", stav: "2 bids", nabidka: { castka: 181000, odchylka: 7000 } },
-      { nazev: "Tiling and flooring", odhad: 388000, od: "2026-03-30", do: "2026-04-14", stav: "Waiting on bids", nabidka: null },
-      { nazev: "Painting", odhad: 45000, od: "2026-04-15", do: "2026-04-20", stav: "3 bids", nabidka: { castka: 45000, odchylka: 0 } },
-      { nazev: "Kitchen and doors", odhad: 130000, od: "2026-04-21", do: "2026-04-27", stav: "Waiting on bids", nabidka: null }
+      { nazev: "Demolition and waste removal", odhad: 85000, od: "2026-02-16", do: "2026-02-20", stav: "3 bids", nabidka: { castka: 82000, odchylka: -3000 }, realizator: { jmeno: "Bourací práce Novák", profese: "Demolition contractor" } },
+      { nazev: "Water and drainage", odhad: 95000, od: "2026-02-23", do: "2026-03-02", stav: "2 bids", nabidka: { castka: 98000, odchylka: 3000 }, realizator: { jmeno: "Instalace Kříž", profese: "Plumber" } },
+      { nazev: "Electrical installation", odhad: 165000, od: "2026-03-02", do: "2026-03-13", stav: "3 bids", nabidka: { castka: 158000, odchylka: -7000, dodavatel: "Jiří Vaněk" }, realizator: { jmeno: "Jiří Vaněk", profese: "Electrician" } },
+      { nazev: "Plasterboard and surfaces", odhad: 174000, od: "2026-03-16", do: "2026-03-26", stav: "2 bids", nabidka: { castka: 181000, odchylka: 7000 }, realizator: { jmeno: "Sádrokartony Holý s.r.o.", profese: "Drylining contractor" } },
+      { nazev: "Tiling and flooring", odhad: 388000, od: "2026-03-30", do: "2026-04-14", stav: "Waiting on bids", nabidka: null, realizator: { jmeno: "Tomáš Procházka", profese: "Tiler and flooring fitter" } },
+      { nazev: "Painting", odhad: 45000, od: "2026-04-15", do: "2026-04-20", stav: "3 bids", nabidka: { castka: 45000, odchylka: 0 }, realizator: { jmeno: "Malby Svoboda", profese: "Painter and decorator" } },
+      { nazev: "Kitchen and doors", odhad: 130000, od: "2026-04-21", do: "2026-04-27", stav: "Waiting on bids", nabidka: null, realizator: { jmeno: "Kuchyně Bárta s.r.o.", profese: "Kitchen fitter" } }
     ],
     rezervaMimoBalicky: 99000,
     predani: "2026-04-27",
@@ -1389,6 +1426,7 @@
         view: "dnes",
         nabidkaCastka: null,
         nabidkaOdeslana: false,
+        fakturaOdeslana: false,
         asistentOtevren: false,
         asistentDotaz: null
       },
@@ -1406,13 +1444,24 @@
         cesta: "profese",
         vybrane: { 0: true, 1: true, 2: "vanek", 3: true, 5: true },
         vybranaFirma: null
-      }
+      },
+      // F4 × zákazník (krok 7). Jediná interakce, která mění číslo:
+      // schválení víceprací posune celkovou částku 1 181 000 → 1 199 000.
+      f4: { vicepraceSchvalena: false, probratKliknuto: false }
     }
   };
 
   var listeners = [];
 
   function setState(patch) {
+    // Přepnutí fáze demo přepínačem vrátí řemeslnickou plochu na "Dnes" —
+    // jinak by po přepnutí F3 → F4 zůstal viditelný podřazený pohled
+    // (balíček/nabídka) z jiné fáze, který tam nedává smysl.
+    if ("faze" in patch && patch.faze !== state.faze) {
+      state.ui.remeslnik.view = "dnes";
+      state.ui.remeslnik.nabidkaOdeslana = false;
+      state.ui.remeslnik.fakturaOdeslana = false;
+    }
     Object.assign(state, patch);
     listeners.forEach(function (fn) { fn(state); });
   }
@@ -2311,7 +2360,7 @@
 
   function renderRemeslnikNav() {
     var ui = state.ui.remeslnik;
-    var active = (ui.view === "balicek" || ui.view === "nabidka") ? "prilezitosti" : ui.view;
+    var active = (ui.view === "balicek" || ui.view === "nabidka") ? "prilezitosti" : (ui.view === "faktura-detail" ? "faktury" : ui.view);
     var tabs = [
       { id: "dnes", label: "Today" },
       { id: "prilezitosti", label: "Opportunities" },
@@ -2324,6 +2373,24 @@
   }
 
   function renderRemeslnikDnes() {
+    if (state.faze === "F4") {
+      return '<p class="remeslnik-date">Byt 3+1, Královo Pole — electrical installation, day 8 of 10</p>' +
+        '<div class="row-list"><div class="row"><span class="row__label">Today’s task</span><span class="row__amount--muted">Final circuit testing</span></div></div>' +
+        '<div class="block-card__cta" style="display:flex;gap:8px;margin-top:var(--space-2);">' +
+          '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="noop">Add photos</button>' +
+          '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="noop">Report a change</button>' +
+        '</div>' +
+        '<p class="block-card__note" style="margin-top:var(--space-2);">Your bid was accepted on 20 Feb.</p>';
+    }
+    if (state.faze === "F5") {
+      var f = projekt.remeslnik.faktury[0];
+      return '<p class="remeslnik-date">Friday, 1 May</p>' +
+        '<div class="opportunity-card" data-action="rem-open-faktura" style="cursor:pointer;">' +
+          '<span class="opportunity-card__badge">Ready to invoice</span>' +
+          '<div class="opportunity-card__title">' + f.projekt + '</div>' +
+          '<div class="opportunity-card__meta">' + czk(f.castka) + '</div>' +
+        '</div>';
+    }
     return '<p class="remeslnik-date">Friday, 27 February</p>' +
       '<div class="row-list">' +
         '<div class="row"><span class="row__label">3 new jobs, one already has a bid drafted</span></div>' +
@@ -2386,9 +2453,39 @@
   }
 
   function renderRemeslnikFaktury() {
+    if (state.faze === "F5") {
+      var f = projekt.remeslnik.faktury[0];
+      return '<div class="opportunity-card" data-action="rem-open-faktura" style="cursor:pointer;">' +
+          '<span class="opportunity-card__badge">Ready to invoice</span>' +
+          '<div class="opportunity-card__title">' + f.projekt + '</div>' +
+          '<div class="opportunity-card__meta">' + czk(f.castka) + '</div>' +
+        '</div>';
+    }
     return '<div class="row-list"><div class="row"><span class="row__label">1 invoice overdue, 9 days</span>' +
       '<span class="row__amount row__amount--over">9 days</span></div></div>' +
       '<p class="block-card__note">Nothing to invoice yet on Královo Pole — that comes once the job is handed over.</p>';
+  }
+
+  // Číslo faktury a splatnost (kumu-kostra.md §5 F5) jsou administrativní
+  // výplň formuláře, ne rozpočtové číslo ze zdroje pravdy — proto tu je
+  // jen "Due in 14 days" jako obvyklá konvence, ne konkrétní datum.
+  function renderRemeslnikFakturaDetail() {
+    var ui = state.ui.remeslnik;
+    var f = projekt.remeslnik.faktury[0];
+    var b = projekt.balicky[2];
+    if (ui.fakturaOdeslana) {
+      return '<p class="block-card__title" style="margin-top:var(--space-3);">Invoice sent</p>' +
+        '<p class="block-card__note">' + czk(f.castka) + ' for ' + f.projekt + '.</p>' +
+        '<p class="block-card__note">A copy is saved to the job.</p>';
+    }
+    return '<p class="microlabel" style="display:block;margin-bottom:var(--space-1);">Pre-filled from the job</p>' +
+      '<dl class="def-list">' +
+        '<dt>Customer</dt><dd>' + projekt.identita.zakaznici + '</dd>' +
+        '<dt>Item</dt><dd>' + b.nazev + '</dd>' +
+        '<dt>Amount</dt><dd>' + czk(f.castka) + '</dd>' +
+        '<dt>Due</dt><dd>14 days</dd>' +
+      '</dl>' +
+      '<div class="block-card__cta"><button type="button" class="pill-btn pill-btn--primary" data-action="rem-faktura-send">Send invoice</button></div>';
   }
 
   function renderRemeslnikAsistent() {
@@ -2415,6 +2512,7 @@
     else if (ui.view === "balicek") content = renderRemeslnikBalicek();
     else if (ui.view === "nabidka") content = renderRemeslnikNabidka();
     else if (ui.view === "profil") content = renderRemeslnikProfil();
+    else if (ui.view === "faktura-detail") content = renderRemeslnikFakturaDetail();
     else content = renderRemeslnikFaktury();
 
     return '<div class="screen remeslnik-page">' +
@@ -2652,23 +2750,151 @@
     '</div>';
   }
 
-  function renderPartnerScreen() {
+  // --- F4 × zákazník — realizace (krok 7) ------------------------------
+
+  function renderF4StageCard() {
+    var b = projekt.balicky[3]; // Plasterboard and surfaces — etapa 4, viz renderB6("status")
+    var photos = [1, 2, 3].map(function () {
+      return '<div class="photo-placeholder"><span class="photo-placeholder__label">Photo</span></div>';
+    }).join('');
+    return '<div class="block-card">' +
+      '<div class="block-card__kicker"><span class="microlabel">In progress</span></div>' +
+      '<h3 class="block-card__title">' + b.nazev + '</h3>' +
+      '<p class="block-card__note" style="margin-top:-6px;">' + b.realizator.jmeno + ' · ' + b.realizator.profese + ' · day 3 of 9</p>' +
+      '<div class="photo-row">' + photos + '</div>' +
+    '</div>';
+  }
+
+  function renderF4Budget() {
+    var zaklad = rozpocetPoPakach();
+    var schvaleno = state.ui.f4.vicepraceSchvalena;
+    var celkem = schvaleno ? zaklad + projekt.vicepráce[0].castka : zaklad;
+    var strop = projekt.zadani.strop;
+    return blockCard("B3", "Budget so far", null, totalRowHtml("Total", czk(celkem), celkem > strop ? "over" : "under"), {
+      subtitle: "Your budget " + czk(strop)
+    });
+  }
+
+  function renderF4Vicepráce() {
+    var v = projekt.vicepráce[0];
+    var f4 = state.ui.f4;
+    var body = '<p>' + v.popis + '</p><p class="block-card__note">' + v.dopadNaTermin + '</p>';
+    if (!f4.vicepraceSchvalena) body += totalRowHtml("Extra cost", formatKc(v.castka), "over");
+    var actions;
+    if (f4.vicepraceSchvalena) {
+      actions = '<p class="block-card__note">' + v.stav + '</p>';
+    } else if (f4.probratKliknuto) {
+      actions = '<p class="block-card__note">Noted — we’ll follow up before anything changes.</p>';
+    } else {
+      actions = '<div class="block-card__cta" style="display:flex;gap:8px;">' +
+        '<button type="button" class="pill-btn pill-btn--primary" data-action="f4-schvalit-vicepraci">Approve</button>' +
+        '<button type="button" class="pill-btn pill-btn--secondary" data-action="f4-probrat">I’d like to talk it through</button>' +
+      '</div>';
+    }
+    return '<div class="block-card"' + (f4.vicepraceSchvalena ? '' : ' style="background:var(--surface-over);border-color:transparent;"') + '>' +
+      '<div class="block-card__kicker"><span class="microlabel">Extra work proposed</span></div>' +
+      body + actions +
+    '</div>';
+  }
+
+  function renderF4Screen() {
     return '<div class="screen">' +
       renderKumuTopbar() +
-      '<div class="f2-screen" style="max-width:var(--container);">' +
-        '<div class="catalog__row">' + renderPartnerMaterialy() + renderPartnerAgregat() + '</div>' +
+      '<div class="f2-screen">' +
+        renderB6("status") +
+        '<div class="catalog__row">' + renderF4StageCard() + renderF4Budget() + '</div>' +
+        renderF4Vicepráce() +
       '</div>' +
+      renderPhaseBarReal() +
+    '</div>';
+  }
+
+  // --- F5 × zákazník — dokončení (krok 7) -------------------------------
+
+  function renderF5Dokumentace() {
+    var body = '<details class="disclosure"><summary>Project documents</summary><ul>' +
+      ["Electrical certificate", "Warranties", "Photo record", "Materials used"].map(function (d) {
+        return '<li><span>' + d + '</span></li>';
+      }).join('') +
+    '</ul></details>';
+    return '<div class="block-card">' + body + '</div>';
+  }
+
+  function renderF5Hodnoceni() {
+    var rows = projekt.balicky.map(function (b) {
+      return '<div class="row"><span class="row__label">' + b.realizator.jmeno + '<span class="row__tag">' + b.realizator.profese + '</span></span>' +
+        '<span class="row__amount--muted">★★★★★</span></div>';
+    }).join('');
+    return blockCard("", "Rate the trades", null, '<div class="row-list">' + rows + '</div>');
+  }
+
+  function renderF5Screen() {
+    return '<div class="screen">' +
+      renderKumuTopbar() +
+      '<div class="f2-screen">' +
+        '<h2 class="f5-done-heading">Done</h2>' +
+        '<p class="block-card__note" style="margin-top:0;">Handed over 30 April 2026</p>' +
+        renderB3Vyuctovani() +
+        '<div class="catalog__row">' + renderF5Dokumentace() + renderF5Hodnoceni() + '</div>' +
+      '</div>' +
+      renderPhaseBarReal() +
+    '</div>';
+  }
+
+  // --- F4/F5 × partner — objednávka a spotřeba (krok 7) -----------------
+
+  function renderPartnerObjednavka() {
+    var id = projekt.identita;
+    var items = [
+      { nazev: "Plasterboard", mnozstvi: "18 m²" },
+      { nazev: "Profiles and fixings", mnozstvi: "—" },
+      { nazev: "Skim coat", mnozstvi: "210 kg" },
+      { nazev: "Party wall insulation", mnozstvi: "22 m²" }
+    ];
+    var body = rowListHtml(items.map(function (m) { return { label: m.nazev, amount: m.mnozstvi }; })) +
+      '<div class="row"><span class="row__label" style="color:var(--text-secondary);">Bathroom tanking 14 m²</span><span class="row__amount--muted">ordered outside Kumu</span></div>';
+    return blockCard("ORDER #2419", "", null, body, {
+      subtitle: id.zakaznici + " — " + id.nazev + ", " + id.adresa,
+      note: "Dispatched 12 March · delivery 16 March"
+    });
+  }
+
+  function renderPartnerSpotreba() {
+    var s = projekt.partner.f5RealizovanaSpotreba;
+    var items = [
+      { label: "Proposed in the budget", amount: czk(s.navrzeno) },
+      { label: "Ordered through Kumu", amount: czk(s.objednanoPresKumu) },
+      { label: "Ordered elsewhere", amount: czk(s.objednanoJinde) }
+    ];
+    return blockCard("", "Actual material use", null, rowListHtml(items), {
+      note: "Unspecified lines in a budget are where the decision gets made without you."
+    });
+  }
+
+  function renderPartnerScreen() {
+    var content;
+    if (state.faze === "F4") {
+      content = '<div class="catalog__row">' + renderPartnerObjednavka() + '</div>';
+    } else if (state.faze === "F5") {
+      content = '<div class="catalog__row">' + renderPartnerSpotreba() + '</div>';
+    } else {
+      content = '<div class="catalog__row">' + renderPartnerMaterialy() + renderPartnerAgregat() + '</div>';
+    }
+    return '<div class="screen">' +
+      renderKumuTopbar() +
+      '<div class="f2-screen" style="max-width:var(--container);">' + content + '</div>' +
     '</div>';
   }
 
   function renderScreen() {
     var el = document.querySelector('[data-screen]');
     var scaffold = document.querySelector('[data-scaffold]');
-    var isZakaznikScreen = state.role === "zakaznik" && (state.faze === "F1" || state.faze === "F2" || state.faze === "F3");
-    var isRemeslnikScreen = state.role === "remeslnik" && state.faze === "F3";
-    var isPartnerScreen = state.role === "partner" && (state.faze === "F2" || state.faze === "F3");
+    var isZakaznikScreen = state.role === "zakaznik";
+    var isRemeslnikScreen = state.role === "remeslnik" && (state.faze === "F3" || state.faze === "F4" || state.faze === "F5");
+    var isPartnerScreen = state.role === "partner" && state.faze !== "F1";
     if (isZakaznikScreen) {
-      el.innerHTML = state.faze === "F1" ? renderF1Screen() : (state.faze === "F2" ? renderF2Screen() : renderF3Screen());
+      var zakaznikRenderers = { F1: renderF1Screen, F2: renderF2Screen, F3: renderF3Screen, F4: renderF4Screen, F5: renderF5Screen };
+      el.innerHTML = zakaznikRenderers[state.faze]();
       scaffold.style.display = "none";
     } else if (isRemeslnikScreen) {
       el.innerHTML = renderRemeslnikScreen();
@@ -2747,6 +2973,14 @@
     } else if (action === "f3-vyber-firmu") {
       var firmaIdx = Number(el.getAttribute("data-index"));
       updateUi(function (ui) { ui.f3.vybranaFirma = ui.f3.vybranaFirma === firmaIdx ? null : firmaIdx; });
+    } else if (action === "f4-schvalit-vicepraci") {
+      updateUi(function (ui) { ui.f4.vicepraceSchvalena = true; });
+    } else if (action === "f4-probrat") {
+      updateUi(function (ui) { ui.f4.probratKliknuto = true; });
+    } else if (action === "rem-open-faktura") {
+      updateUi(function (ui) { ui.remeslnik.view = "faktura-detail"; });
+    } else if (action === "rem-faktura-send") {
+      updateUi(function (ui) { ui.remeslnik.fakturaOdeslana = true; });
     }
   }
 
