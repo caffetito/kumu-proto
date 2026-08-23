@@ -1306,7 +1306,12 @@
         nabidkaOdeslana: false,
         asistentOtevren: false,
         asistentDotaz: null
-      }
+      },
+      // F2/F3 × partner (krok 5) — jedna obrazovka pro obě fáze, kostra
+      // §5 F3 partner je doslova "stejné jako F2". hodnoty[i] drží buď
+      // nabídnutou cenu (číslo), nebo doplněný produkt u neurčené
+      // položky (text) — podle toho, který řádek je index i.
+      partner: { otevrenaPolozka: null, hodnoty: {} }
     }
   };
 
@@ -2268,16 +2273,83 @@
     '</div>';
   }
 
+  // --- F2/F3 × partner — jedna obrazovka pro obě fáze (krok 5) --------
+
+  function renderPartnerMaterialy() {
+    var items = projekt.partner.polozkyMaterialu;
+    var ui = state.ui.partner;
+    var rows = items.map(function (m, i) {
+      var neurcena = !!m.neurceno;
+      var hodnota = ui.hodnoty[i];
+      var znacka = neurcena ? (hodnota || "Not specified") : (m.znacka || "—");
+      var actionCell;
+      if (ui.otevrenaPolozka === i) {
+        actionCell = '<span style="display:flex;gap:6px;align-items:center;">' +
+          '<input type="' + (neurcena ? "text" : "number") + '" data-bind="partner-input" data-index="' + i + '" placeholder="' + (neurcena ? "Product or brand" : "CZK") + '" ' +
+          'style="width:100px;border:1px solid var(--border-strong);border-radius:4px;padding:5px 7px;font-family:inherit;font-size:var(--type-caption);" />' +
+          '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="partner-confirm" data-index="' + i + '">' + (neurcena ? "Add" : "Quote") + '</button>' +
+        '</span>';
+      } else if (hodnota) {
+        actionCell = neurcena ? '<span class="microlabel">Added</span>' : '<span class="row__amount">' + czk(Number(hodnota)) + '</span>';
+      } else {
+        actionCell = '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="partner-open" data-index="' + i + '">' + (neurcena ? "Add a product" : "Quote a price") + '</button>';
+      }
+      return '<tr' + (neurcena && !hodnota ? ' data-neurceno' : '') + '>' +
+        '<td>' + m.nazev + '</td>' +
+        '<td>' + m.mnozstvi + '</td>' +
+        '<td>' + znacka + '</td>' +
+        '<td>' + actionCell + '</td>' +
+      '</tr>';
+    }).join('');
+    var body = '<table class="material-table"><thead><tr><th>Item</th><th>Quantity</th><th>Brand</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>';
+    return blockCard("B4", "Materials list", "partner", body, {
+      subtitle: "3-room flat, Brno north, 74 m²",
+      badge: "ESTIMATE"
+    });
+  }
+
+  // Design.md §7: agregát je jmenovitá výjimka na --surface-cool
+  // (Glacier) — čísla jsou metriky nad celým portfoliem, ne rozpočtové
+  // částky jednoho projektu, i když jedno z nich je v CZK. Proto zůstávají
+  // v --text-primary, ne v accentu — accent na peněžní číslo nesmí nikdy.
+  function renderPartnerAgregat() {
+    var a = projekt.partner.agregat;
+    var rows = [
+      { label: "Projects in preparation", value: String(a.projektuVPriprave) },
+      { label: "Contain your categories", value: Math.round(a.obsahujeVaseKategorie * 100) + "%" },
+      { label: "Average material value", value: czk(a.prumernaHodnotaMaterialu) },
+      { label: "Proposal to order", value: Math.round(a.konverzeNavrhNaObjednavku * 100) + "%" }
+    ];
+    var body = rowListHtml(rows.map(function (r) { return { label: r.label, amount: r.value }; }));
+    return '<div class="block-card" style="background:var(--surface-cool);border-color:transparent;">' +
+      '<div class="block-card__kicker"><span class="microlabel">Aggregate</span></div>' +
+      body +
+    '</div>';
+  }
+
+  function renderPartnerScreen() {
+    return '<div class="screen">' +
+      renderKumuTopbar() +
+      '<div class="f2-screen" style="max-width:var(--container);">' +
+        '<div class="catalog__row">' + renderPartnerMaterialy() + renderPartnerAgregat() + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
   function renderScreen() {
     var el = document.querySelector('[data-screen]');
     var scaffold = document.querySelector('[data-scaffold]');
     var isZakaznikScreen = state.role === "zakaznik" && (state.faze === "F1" || state.faze === "F2");
     var isRemeslnikScreen = state.role === "remeslnik" && state.faze === "F3";
+    var isPartnerScreen = state.role === "partner" && (state.faze === "F2" || state.faze === "F3");
     if (isZakaznikScreen) {
       el.innerHTML = state.faze === "F1" ? renderF1Screen() : renderF2Screen();
       scaffold.style.display = "none";
     } else if (isRemeslnikScreen) {
       el.innerHTML = renderRemeslnikScreen();
+      scaffold.style.display = "none";
+    } else if (isPartnerScreen) {
+      el.innerHTML = renderPartnerScreen();
       scaffold.style.display = "none";
     } else {
       el.innerHTML = "";
@@ -2327,6 +2399,16 @@
       });
     } else if (action === "rem-asistent-dotaz") {
       updateUi(function (ui) { ui.remeslnik.asistentDotaz = Number(el.getAttribute("data-index")); });
+    } else if (action === "partner-open") {
+      updateUi(function (ui) { ui.partner.otevrenaPolozka = Number(el.getAttribute("data-index")); });
+    } else if (action === "partner-confirm") {
+      var idx = Number(el.getAttribute("data-index"));
+      var input = el.parentElement.querySelector('[data-bind="partner-input"]');
+      var hodnota = input ? input.value.trim() : "";
+      updateUi(function (ui) {
+        if (hodnota) ui.partner.hodnoty[idx] = hodnota;
+        ui.partner.otevrenaPolozka = null;
+      });
     }
   }
 
