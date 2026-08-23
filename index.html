@@ -1042,7 +1042,58 @@
     padding: var(--space-1) 0;
     font-variant-numeric: tabular-nums lining-nums;
   }
-  .nabidka-field-wrap { border-bottom: var(--border-width) solid var(--border-strong); margin-bottom: var(--space-1); }
+  .nabidka-field-wrap {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    border-bottom: var(--border-width) solid var(--border-strong);
+    margin-bottom: var(--space-1);
+  }
+  .nabidka-field-wrap .amount-ccy { color: var(--text-secondary); }
+
+  /* Hlavička kontextu nabídky — profese a projekt, nad "Your bid" */
+  .nabidka-header__title { font-weight: var(--weight-heading); font-size: var(--type-heading); }
+  .nabidka-header__meta { font-size: var(--type-caption); color: var(--text-secondary); margin-top: 2px; }
+
+  /* Termín a poznámka — ohraničené boxy pod částkou */
+  .nabidka-box {
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--space-1) var(--space-2);
+    margin-top: var(--space-2);
+  }
+  .nabidka-box__label {
+    display: block;
+    font-size: var(--type-caption);
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+  }
+  .nabidka-box__value { font-size: var(--type-body); }
+  .nabidka-box__textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: vertical;
+    background: transparent;
+    font-family: inherit;
+    font-size: var(--type-body);
+    color: var(--text-primary);
+    padding: 0;
+  }
+
+  .nabidka-attach {
+    display: block;
+    margin-top: var(--space-2);
+    font-family: inherit;
+    font-size: var(--type-caption);
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+  }
 
   .assistant-sheet {
     position: absolute;
@@ -1469,6 +1520,7 @@
       remeslnik: {
         view: "dnes",
         nabidkaCastka: null,
+        nabidkaPoznamka: null,
         nabidkaOdeslana: false,
         fakturaOdeslana: false,
         asistentOtevren: false,
@@ -2196,9 +2248,9 @@
         { role: "zakaznik", faze: "F2", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" } }, popis: "B8 „Jak to chcete poptat“ — výchozí obojí, nic se nevybírá." },
         { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: {}, vybranaFirma: null } }, popis: "Skládání týmu — klikněte na tři nabídky naživo, panel se plní před očima." },
         { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: { 0: true, 1: true, 2: "vanek" }, vybranaFirma: null } }, popis: "Řádek „nebo jedna firma“ — zkuste přepnout na klíč a zpět." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Řemeslník — plocha, záložka Dnes." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "balicek", nabidkaCastka: null, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Balíček práce — elektroinstalace." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "nabidka", nabidkaCastka: 158000, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Nabídka — cena upravená 165 000 → 158 000 Kč." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Řemeslník — plocha, záložka Dnes." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "balicek", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Balíček práce — elektroinstalace." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "nabidka", nabidkaCastka: 158000, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Nabídka — cena upravená 165 000 → 158 000 Kč." },
         { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: { 0: true, 1: true, 2: "vanek", 3: true, 5: true }, vybranaFirma: null } }, popis: "Elektroinstalace — tři nabídky, Jiří Vaněk vybraný." },
         { role: "partner", faze: "F2", ui: { partner: { otevrenaPolozka: null, hodnoty: {} } }, popis: "Partner — materiálová skladba a agregát." },
         { role: "zakaznik", faze: "F5", ui: {}, popis: "Plán vs. skutečnost." }
@@ -2215,11 +2267,11 @@
     S3: {
       label: "Trade view",
       kroky: [
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Plocha Dnes." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "prilezitosti", nabidkaCastka: null, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Příležitosti." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "profil", nabidkaCastka: null, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Profil — doplňuje se z dokončených projektů." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: true, asistentDotaz: null } }, popis: "Asistent — čtyři předpřipravené dotazy." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "faktury", nabidkaCastka: null, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Faktury." }
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Plocha Dnes." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "prilezitosti", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Příležitosti." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "profil", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Profil — doplňuje se z dokončených projektů." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: true, asistentDotaz: null } }, popis: "Asistent — čtyři předpřipravené dotazy." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "faktury", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Faktury." }
       ]
     },
     S4: {
@@ -2560,6 +2612,11 @@
 
   // --- F3 × řemeslník — plocha a navigace (krok 4) --------------------
 
+  // [+] Předvyplněná poznámka u nabídky — kostra §5 F3 řemeslník žádá
+  // "Poznámka předvyplněná", ale žádný zdroj netextovou hodnotu neudává.
+  // Doplněno podle referenčního screenshotu, který autorka poslala.
+  var NABIDKA_POZNAMKA_VYCHOZI = "Price includes materials, labour and the standard inspection.";
+
   // Přesně podle kumu-copy-en.md, sekce "Asistent — čtyři dotazy a odpovědi".
   var ASISTENT = [
     { dotaz: "When do I start on Královo Pole?", odpoved: "2 March. Demolition runs before you and finishes on 27 February. I'll tell you if that moves." },
@@ -2633,17 +2690,34 @@
   function renderRemeslnikNabidka() {
     var ui = state.ui.remeslnik;
     var b = projekt.balicky[2];
+    var header = '<div class="nabidka-header">' +
+        '<div class="nabidka-header__title">' + b.nazev + '</div>' +
+        '<div class="nabidka-header__meta">3-room flat · Královo Pole</div>' +
+      '</div><hr class="hairline" />';
     if (ui.nabidkaOdeslana) {
-      return '<p class="block-card__title" style="margin-top:var(--space-3);">Bid sent</p>' +
-        '<p class="block-card__note">' + czk(b.nabidka.castka) + ' for ' + b.nazev + '.</p>';
+      return '<div class="block-card">' + header +
+        '<p class="block-card__title" style="margin-top:var(--space-3);">Bid sent</p>' +
+        '<p class="block-card__note">' + czk(b.nabidka.castka) + ' for ' + b.nazev + '.</p>' +
+      '</div>';
     }
     var castka = ui.nabidkaCastka !== null ? ui.nabidkaCastka : b.odhad;
-    return '<div class="nabidka-field-wrap">' +
+    var poznamka = ui.nabidkaPoznamka !== null ? ui.nabidkaPoznamka : NABIDKA_POZNAMKA_VYCHOZI;
+    return '<div class="block-card">' + header +
+      '<div class="block-card__kicker"><span class="microlabel">Your bid</span></div>' +
+      '<div class="nabidka-field-wrap">' +
         '<input class="nabidka-field" type="number" step="1000" data-bind="nabidka-castka" value="' + castka + '" />' +
+        '<span class="amount-ccy">CZK</span>' +
       '</div>' +
       '<p class="block-card__note">Based on your last 6 jobs in this category. Change it to suit.</p>' +
-      '<p class="row" style="margin-top:var(--space-2);"><span class="row__label">Dates</span><span class="row__amount">' + fmtRange(b.od, b.do) + '</span></p>' +
-      '<div class="block-card__cta"><button type="button" class="pill-btn pill-btn--primary" data-action="rem-nabidka-send">Send bid</button></div>';
+      '<div class="nabidka-box"><span class="nabidka-box__label">Date</span>' +
+        '<div class="nabidka-box__value">' + fmtRange(b.od, b.do) + '</div>' +
+      '</div>' +
+      '<div class="nabidka-box"><span class="nabidka-box__label">Note</span>' +
+        '<textarea class="nabidka-box__textarea" rows="3" data-bind="nabidka-poznamka">' + poznamka + '</textarea>' +
+      '</div>' +
+      '<button type="button" class="nabidka-attach" data-action="noop">+ Add attachment</button>' +
+      '<div class="block-card__cta"><button type="button" class="pill-btn pill-btn--primary" data-action="rem-nabidka-send">Send bid</button></div>' +
+    '</div>';
   }
 
   function renderRemeslnikProfil() {
@@ -3223,6 +3297,8 @@
       state.ui.f1.textZadany = e.target.value;
     } else if (bind === "f1-dialog-draft") {
       state.ui.f1.dialogDraft = e.target.value;
+    } else if (bind === "nabidka-poznamka") {
+      state.ui.remeslnik.nabidkaPoznamka = e.target.value;
     }
   });
 
