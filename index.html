@@ -1050,6 +1050,85 @@
     line-height: var(--leading-body);
   }
   .assistant-sheet__footnote { margin-top: auto; padding-top: var(--space-2); font-size: var(--type-caption); color: var(--text-secondary); }
+
+  /* ============================================================
+     KROK 6 — F3 × ZÁKAZNÍK
+     Skládání týmu: dva sloupce, pravý panel trvalý (sticky).
+     ============================================================ */
+
+  .f3-screen {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: clamp(var(--space-3), 5vw, var(--space-4)) var(--space-2) var(--space-5);
+  }
+
+  .f3-summary { max-width: var(--container-prose); margin-bottom: var(--space-3); }
+  .f3-summary p { margin: 0; font-size: var(--type-body); line-height: var(--leading-body); }
+  .f3-summary p + p { margin-top: 6px; color: var(--text-secondary); }
+
+  .f3-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+  .f3-layout__main { flex: 2 1 480px; min-width: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+  .f3-layout__side { flex: 1 1 300px; min-width: 280px; position: sticky; top: var(--space-2); }
+
+  .f3-section { border-bottom: var(--border-width) solid var(--border); padding-bottom: var(--space-2); margin-bottom: var(--space-2); }
+  .f3-section:last-child { border-bottom: none; }
+  .f3-section__head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-1); }
+  .f3-section__title { font-weight: var(--weight-heading); }
+  .f3-section__meta { font-size: var(--type-caption); color: var(--text-secondary); }
+  .f3-section--suppressed { color: var(--text-secondary); font-size: var(--type-caption); }
+
+  .candidate-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 10px 12px;
+    margin-top: 6px;
+    cursor: pointer;
+  }
+  .candidate-card--selected { border-color: var(--color-accent); background: var(--surface-accent); }
+  .candidate-card--dimmed { opacity: 0.55; }
+  .candidate-card__name { font-weight: var(--weight-heading); font-size: var(--type-caption); }
+  .candidate-card__meta { font-size: var(--type-caption); color: var(--text-secondary); }
+  .candidate-card__amount { font-weight: var(--weight-heading); white-space: nowrap; }
+
+  .team-panel {
+    background: var(--surface-raised);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--space-2);
+  }
+  .team-panel__label { font-size: var(--type-caption); text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--color-accent); margin-bottom: 4px; }
+  .team-panel__subhead { font-size: var(--type-caption); color: var(--text-secondary); margin-bottom: var(--space-2); }
+  .team-slot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: var(--row-line);
+    padding: 8px 0;
+    gap: 8px;
+  }
+  .team-slot:last-of-type { border-bottom: none; }
+  .team-slot__profese { font-size: var(--type-caption); text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--text-secondary); }
+  .team-slot__name { font-weight: var(--weight-heading); }
+  .team-slot__empty { color: var(--text-secondary); font-size: var(--type-caption); }
+  .team-panel__totals { margin-top: var(--space-2); padding-top: var(--space-2); border-top: var(--border-width) solid var(--border); }
+  .team-panel__cta { margin-top: var(--space-2); }
+  .team-panel__cta .pill-btn { width: 100%; text-align: center; }
+  .team-panel__cta .pill-btn:disabled { opacity: var(--disabled-opacity); cursor: not-allowed; }
+  .team-panel__alt { margin-top: var(--space-2); padding-top: var(--space-2); border-top: var(--border-width) solid var(--border); font-size: var(--type-caption); }
+  .team-panel__alt a, .team-panel__alt button.link { color: var(--text-primary); background: none; border: none; font: inherit; padding: 0; cursor: pointer; text-decoration: underline; }
+
+  .whatchanges { background: var(--surface-green); border-radius: var(--radius-card); padding: var(--space-2); margin-top: var(--space-2); }
+  .whatchanges p { margin: 0 0 8px; font-size: var(--type-caption); }
+  .whatchanges p:last-child { margin-bottom: 0; }
 </style>
 </head>
 <body data-role="zakaznik" data-faze="F1">
@@ -1199,7 +1278,13 @@
     // Kandidát na elektroinstalaci, jehož nabídka posouvá harmonogram —
     // viz F3 §5, „mechanika, která musí být funkční".
     nabidkyElektro: [
-      { jmeno: "Jiří Vaněk", castka: 158000, hodnoceni: "4.8 (31)", zakazek: 31, od: "2026-03-02", do: "2026-03-13", poznamka: "Based on your last 6 jobs in this category.", vybrana: true }
+      { id: "vanek", jmeno: "Jiří Vaněk", castka: 158000, hodnoceni: "4.8 (31)", zakazek: 31, od: "2026-03-02", do: "2026-03-13", poznamka: "Based on your last 6 jobs in this category.", vybrana: true },
+      // [+] Vymyšlený — jediný vymyšlený řemeslník v celém datovém modelu.
+      // Kostra (§5, F3) vyžaduje mechaniku "levnější nabídka s pozdějším
+      // termínem posune harmonogram" a k tomu je potřeba druhý kandidát
+      // s jinou cenou i termínem. Žádný takový v žádném zdroji není,
+      // autorka odsouhlasila vymyslet jednoho — přidáno se svolením.
+      { id: "novotny", jmeno: "Pavel Novotný", castka: 149000, hodnoceni: "4.6 (12)", zakazek: 12, od: "2026-03-09", do: "2026-03-20", poznamka: "Based on his current availability — starts a week later.", vybrana: false }
     ],
 
     // B2 — tři rozhodnutí a jejich cenový rozptyl. Texty a částky
@@ -1311,7 +1396,17 @@
       // §5 F3 partner je doslova "stejné jako F2". hodnoty[i] drží buď
       // nabídnutou cenu (číslo), nebo doplněný produkt u neurčené
       // položky (text) — podle toho, který řádek je index i.
-      partner: { otevrenaPolozka: null, hodnoty: {} }
+      partner: { otevrenaPolozka: null, hodnoty: {} },
+      // F3 × zákazník (krok 6). vybrane[i] je u většiny balíčků true/false
+      // (zapnuto/vypnuto — kliknutí na jedinou dostupnou nabídku), u
+      // balíčku 2 (elektro) místo toho drží "vanek" / "novotny" / false,
+      // protože tam jsou dva kandidáti na výběr. Výchozí = přesně těch
+      // pět balíčků, které mají nabídku (kostra §5: "Vybráno 5 ze 7").
+      f3: {
+        cesta: "profese",
+        vybrane: { 0: true, 1: true, 2: "vanek", 3: true, 5: true },
+        vybranaFirma: null
+      }
     }
   };
 
@@ -1423,6 +1518,68 @@
 
   function soucetVyuctovani() {
     return projekt.vyuctovani.reduce(function (sum, r) { return sum + r.castka; }, rozpocetPoPakach());
+  }
+
+  // --- F3 — skládání týmu (krok 6) -------------------------------------
+
+  function elektroKandidat(id) {
+    return projekt.nabidkyElektro.filter(function (k) { return k.id === id; })[0];
+  }
+
+  function f3PosunDatum(iso, dny) {
+    var d = new Date(iso + "T00:00:00");
+    d.setDate(d.getDate() + dny);
+    return d.toISOString().slice(0, 10);
+  }
+
+  // Balíčky s daty přepočítanými podle toho, kterého elektrikáře má
+  // zákazník právě vybraného. projekt.balicky se nemění — tohle je jen
+  // odvozený pohled pro harmonogram a levý sloupec F3. Základ (0 dní
+  // posunu) je Vaněk, protože na jeho termínu jsou postavené všechny
+  // ostatní datumy v §2.
+  function f3EfektivniBalicky() {
+    var vybranyId = state.ui.f3.vybrane[2];
+    var kandidat = elektroKandidat(vybranyId === "novotny" ? "novotny" : "vanek");
+    var zaklad = elektroKandidat("vanek");
+    var posun = Math.round((new Date(kandidat.do + "T00:00:00") - new Date(zaklad.do + "T00:00:00")) / 86400000);
+    return projekt.balicky.map(function (b, i) {
+      if (i === 2) {
+        return Object.assign({}, b, { od: kandidat.od, do: kandidat.do });
+      }
+      if (i > 2 && posun !== 0) {
+        return Object.assign({}, b, { od: f3PosunDatum(b.od, posun), do: f3PosunDatum(b.do, posun) });
+      }
+      return b;
+    });
+  }
+
+  function f3EfektivniPredani() {
+    var balicky = f3EfektivniBalicky();
+    return balicky[balicky.length - 1].do;
+  }
+
+  function f3CenaBalicku(i) {
+    var b = projekt.balicky[i];
+    var sel = state.ui.f3.vybrane[i];
+    if (i === 2) {
+      return sel ? elektroKandidat(sel).castka : b.odhad;
+    }
+    return (sel && b.nabidka) ? b.nabidka.castka : b.odhad;
+  }
+
+  function f3Soucet() {
+    var celkem = 0;
+    for (var i = 0; i < projekt.balicky.length; i++) celkem += f3CenaBalicku(i);
+    return celkem + projekt.rezervaMimoBalicky;
+  }
+
+  function f3PocetVybranych() {
+    var vybrane = state.ui.f3.vybrane;
+    return Object.keys(vybrane).filter(function (k) { return vybrane[k]; }).length;
+  }
+
+  function f3PocetSNabidkou() {
+    return projekt.balicky.filter(function (b) { return b.nabidka; }).length;
   }
 
   function czk(castka) {
@@ -2327,6 +2484,174 @@
     '</div>';
   }
 
+  // --- F3 × zákazník — skládání týmu (krok 6) --------------------------
+
+  function f3SegStyle(od, doo, rangeStart, rangeEnd) {
+    var total = dayNum(rangeEnd) - dayNum(rangeStart);
+    var left = (dayNum(od) - dayNum(rangeStart)) / total * 100;
+    var width = Math.max((dayNum(doo) - dayNum(od)) / total * 100, 2);
+    return "left:" + left.toFixed(2) + "%; width:" + width.toFixed(2) + "%;";
+  }
+
+  function renderF3Summary() {
+    return '<div class="f3-summary">' +
+      '<p>Day 6 after the requests went out. You\'re choosing across ' + f3PocetSNabidkou() + ' of 7 trades; two are still waiting. One firm for the whole job: 3 complete bids.</p>' +
+      '<p>One firm gives you a complete price now. Trade by trade, you\'ll have one when the last two bids land.</p>' +
+    '</div>';
+  }
+
+  function renderF3Harmonogram() {
+    var balicky = f3EfektivniBalicky();
+    var vybrane = state.ui.f3.vybrane;
+    var rangeStart = balicky[0].od;
+    var rangeEnd = balicky[balicky.length - 1].do;
+    var segs = balicky.map(function (b, i) {
+      var filled = i === 2 ? !!vybrane[2] : !!(vybrane[i] && b.nabidka);
+      var cls = "timeline__segment" + (filled ? " timeline__segment--filled" : "");
+      return '<div class="' + cls + '" style="' + f3SegStyle(b.od, b.do, rangeStart, rangeEnd) + '" title="' + b.nazev + '"></div>';
+    }).join('');
+    return '<div class="block-card">' +
+      '<div class="block-card__kicker"><span class="microlabel">B6 · schedule</span></div>' +
+      '<div class="timeline"><div class="timeline__track"></div>' + segs +
+        '<div class="timeline__marker" style="left:100%;"></div></div>' +
+      '<div class="timeline__caption"><span>' + fmtDate(rangeStart) + '</span><span>Handover ' + fmtDate(rangeEnd) + '</span></div>' +
+    '</div>';
+  }
+
+  function renderF3Sekce(i) {
+    var b = projekt.balicky[i];
+    var sel = state.ui.f3.vybrane[i];
+    if (!b.nabidka) {
+      return '<div class="f3-section f3-section--suppressed">' +
+        '<div class="f3-section__title" style="color:var(--text-primary);">' + b.nazev + '</div>' +
+        '<p>Request sent 20 Feb. Bids usually arrive within 10 days.</p>' +
+      '</div>';
+    }
+    var kandidatiHtml;
+    if (i === 2) {
+      kandidatiHtml = projekt.nabidkyElektro.map(function (k) {
+        var isSel = sel === k.id;
+        var cls = "candidate-card" + (isSel ? " candidate-card--selected" : (sel ? " candidate-card--dimmed" : ""));
+        return '<div class="' + cls + '" data-action="f3-toggle-elektro" data-candidate="' + k.id + '">' +
+          '<span><span class="candidate-card__name">' + k.jmeno + '</span><br/>' +
+          '<span class="candidate-card__meta">' + k.hodnoceni + ' · ' + k.zakazek + ' jobs · ' + fmtRange(k.od, k.do) + '</span></span>' +
+          '<span class="candidate-card__amount">' + czk(k.castka) + '</span>' +
+        '</div>';
+      }).join('');
+    } else {
+      var cls2 = "candidate-card" + (sel ? " candidate-card--selected" : "");
+      kandidatiHtml = '<div class="' + cls2 + '" data-action="f3-toggle" data-index="' + i + '">' +
+        '<span><span class="candidate-card__name">Selected bid</span><br/>' +
+        '<span class="candidate-card__meta">' + fmtRange(b.od, b.do) + (b.nabidka.dodavatel ? ' · ' + b.nabidka.dodavatel : '') + '</span></span>' +
+        '<span class="candidate-card__amount">' + czk(b.nabidka.castka) + '</span>' +
+      '</div>';
+    }
+    return '<div class="f3-section">' +
+      '<div class="f3-section__head"><span class="f3-section__title">' + b.nazev + '</span><span class="f3-section__meta">' + b.stav + '</span></div>' +
+      kandidatiHtml +
+    '</div>';
+  }
+
+  function renderF3TeamPanel() {
+    var f3 = state.ui.f3;
+
+    if (f3.cesta === "naklic") {
+      var firma = f3.vybranaFirma !== null ? projekt.nabidkyFirem[f3.vybranaFirma] : null;
+      return '<div class="team-panel">' +
+        '<div class="team-panel__label">Draft</div>' +
+        '<div class="team-panel__subhead">One firm, whole job</div>' +
+        '<div class="team-slot"><span class="team-slot__profese">Whole job</span>' +
+          (firma ? '<span class="team-slot__name">' + firma.nazev + '</span>' : '<span class="team-slot__empty">Choose a firm</span>') +
+        '</div>' +
+        (firma ? totalRowHtml("Total", czk(firma.castka), "neutral") : "") +
+        '<div class="team-panel__alt"><button type="button" class="link" data-action="f3-goto-profese">Back to choosing trades</button></div>' +
+      '</div>';
+    }
+
+    var vybrane = f3.vybrane;
+    var slots = projekt.balicky.map(function (b, i) {
+      var sel = vybrane[i];
+      var content;
+      if (i === 2 && sel) {
+        var k = elektroKandidat(sel);
+        content = '<span class="team-slot__name">' + k.jmeno + '</span><span class="row__amount">' + czk(k.castka) + '</span>';
+      } else if (sel && b.nabidka) {
+        content = '<span class="team-slot__name">Selected</span><span class="row__amount">' + czk(b.nabidka.castka) + '</span>';
+      } else if (b.nabidka) {
+        content = '<span class="team-slot__empty">Choose someone</span>';
+      } else {
+        content = '<span class="team-slot__empty">Waiting on bids</span>';
+      }
+      return '<div class="team-slot"><span class="team-slot__profese">' + b.nazev + '</span>' + content + '</div>';
+    }).join('');
+
+    var vybraniIdx = [], nevybraniIdx = [];
+    for (var i = 0; i < projekt.balicky.length; i++) { (vybrane[i] ? vybraniIdx : nevybraniIdx).push(i); }
+    var souctVybranych = vybraniIdx.reduce(function (s, i) { return s + f3CenaBalicku(i); }, 0);
+    var souctNevybranych = nevybraniIdx.reduce(function (s, i) { return s + f3CenaBalicku(i); }, 0);
+    var celkem = f3Soucet();
+    var strop = projekt.zadani.strop;
+    var rozdil = celkem - strop;
+    var nejlevnejsiFirma = Math.min.apply(null, projekt.nabidkyFirem.map(function (f) { return f.castka; }));
+    var kompletni = vybraniIdx.length === projekt.balicky.length;
+
+    return '<div class="team-panel">' +
+      '<div class="team-panel__label">Draft</div>' +
+      '<div class="team-panel__subhead">You pick the people. We keep the sequence straight.</div>' +
+      slots +
+      '<div class="team-panel__totals">' +
+        '<div class="row"><span class="row__label">' + vybraniIdx.length + ' of 7 chosen</span><span class="row__amount">' + czk(souctVybranych) + '</span></div>' +
+        '<div class="row"><span class="row__label">Estimate for the rest</span><span class="row__amount row__amount--muted">' + czk(souctNevybranych) + '</span></div>' +
+        '<div class="row"><span class="row__label">Contingency</span><span class="row__amount">' + czk(projekt.rezervaMimoBalicky) + '</span></div>' +
+        totalRowHtml("Total so far", czk(celkem), rozdil > 0 ? "over" : "under") +
+      '</div>' +
+      '<div class="team-panel__cta"><button type="button" class="pill-btn pill-btn--primary"' + (kompletni ? "" : " disabled") + '>Confirm your team</button></div>' +
+      '<div class="team-panel__alt"><button type="button" class="link" data-action="f3-goto-naklic">Or hand the whole job to one firm — from ' + czk(nejlevnejsiFirma) + '</button></div>' +
+    '</div>';
+  }
+
+  function renderF3NaKlic() {
+    var vybranaFirma = state.ui.f3.vybranaFirma;
+    var cards = projekt.nabidkyFirem.map(function (f, i) {
+      var isSel = vybranaFirma === i;
+      var rozdilText = f.rozdilOdStropu < 0 ? czk(Math.abs(f.rozdilOdStropu)) + " under ceiling" : czk(f.rozdilOdStropu) + " over ceiling";
+      return '<div class="offer-card' + (isSel ? ' candidate-card--selected' : '') + '" data-action="f3-vyber-firmu" data-index="' + i + '" style="cursor:pointer;">' +
+        '<div class="offer-card__name">' + f.nazev + '</div>' +
+        '<div class="offer-card__amount">' + bigAmountHtml(czk(f.castka)) + '</div>' +
+        '<div class="offer-card__meta">' + f.hodnoceni + ' · handover ' + fmtDate(f.predani) + '</div>' +
+        '<div class="offer-card__meta">1 contract, one warranty on the whole job</div>' +
+        '<div class="offer-card__meta">' + rozdilText + '</div>' +
+      '</div>';
+    }).join('');
+    var whatChanges = vybranaFirma !== null
+      ? '<div class="whatchanges"><p><b>What would change</b></p>' +
+          '<p>The remaining six requests are cancelled.</p>' +
+          '<p>The trades become the firm\'s subcontractors, not yours.</p>' +
+          '<p>The budget firms up after a site visit.</p>' +
+        '</div>'
+      : "";
+    return '<p class="block-card__note" style="margin-bottom:var(--space-2);">The gap between the cheapest firm and the dearest is 234,000 CZK — more than all three budget savings put together.</p>' +
+      '<div class="offer-row">' + cards + '</div>' +
+      whatChanges;
+  }
+
+  function renderF3Screen() {
+    var f3 = state.ui.f3;
+    var mainContent = f3.cesta === "naklic"
+      ? renderF3NaKlic()
+      : renderF3Harmonogram() + [0, 1, 2, 3, 4, 5, 6].map(renderF3Sekce).join('');
+    return '<div class="screen">' +
+      renderKumuTopbar() +
+      '<div class="f3-screen">' +
+        renderF3Summary() +
+        '<div class="f3-layout">' +
+          '<div class="f3-layout__main">' + mainContent + '</div>' +
+          '<div class="f3-layout__side">' + renderF3TeamPanel() + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
   function renderPartnerScreen() {
     return '<div class="screen">' +
       renderKumuTopbar() +
@@ -2339,11 +2664,11 @@
   function renderScreen() {
     var el = document.querySelector('[data-screen]');
     var scaffold = document.querySelector('[data-scaffold]');
-    var isZakaznikScreen = state.role === "zakaznik" && (state.faze === "F1" || state.faze === "F2");
+    var isZakaznikScreen = state.role === "zakaznik" && (state.faze === "F1" || state.faze === "F2" || state.faze === "F3");
     var isRemeslnikScreen = state.role === "remeslnik" && state.faze === "F3";
     var isPartnerScreen = state.role === "partner" && (state.faze === "F2" || state.faze === "F3");
     if (isZakaznikScreen) {
-      el.innerHTML = state.faze === "F1" ? renderF1Screen() : renderF2Screen();
+      el.innerHTML = state.faze === "F1" ? renderF1Screen() : (state.faze === "F2" ? renderF2Screen() : renderF3Screen());
       scaffold.style.display = "none";
     } else if (isRemeslnikScreen) {
       el.innerHTML = renderRemeslnikScreen();
@@ -2409,6 +2734,19 @@
         if (hodnota) ui.partner.hodnoty[idx] = hodnota;
         ui.partner.otevrenaPolozka = null;
       });
+    } else if (action === "f3-toggle") {
+      var fi = Number(el.getAttribute("data-index"));
+      updateUi(function (ui) { ui.f3.vybrane[fi] = !ui.f3.vybrane[fi]; });
+    } else if (action === "f3-toggle-elektro") {
+      var cand = el.getAttribute("data-candidate");
+      updateUi(function (ui) { ui.f3.vybrane[2] = ui.f3.vybrane[2] === cand ? false : cand; });
+    } else if (action === "f3-goto-naklic") {
+      updateUi(function (ui) { ui.f3.cesta = "naklic"; });
+    } else if (action === "f3-goto-profese") {
+      updateUi(function (ui) { ui.f3.cesta = "profese"; });
+    } else if (action === "f3-vyber-firmu") {
+      var firmaIdx = Number(el.getAttribute("data-index"));
+      updateUi(function (ui) { ui.f3.vybranaFirma = ui.f3.vybranaFirma === firmaIdx ? null : firmaIdx; });
     }
   }
 
