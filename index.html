@@ -86,6 +86,10 @@
     outline-offset: var(--focus-offset);
   }
 
+  .demo-chrome button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .scenar-bar__popis { flex: 1 1 300px; opacity: 0.9; }
+
   /* ============================================================
      PLOCHA KROKU 1
      „Nic ukazatelného, ale drží to" — kumu-kostra.md §9. Tohle
@@ -1161,14 +1165,21 @@
 <body data-role="zakaznik" data-faze="F1">
 
   <header class="demo-chrome" aria-label="Demo chrome">
-    <div class="demo-chrome__group">
-      <span class="demo-chrome__label">Role</span>
-      <div class="demo-chrome__pills" data-pills="role"></div>
+    <div data-chrome-picker style="display:contents;">
+      <div class="demo-chrome__group">
+        <span class="demo-chrome__label">Role</span>
+        <div class="demo-chrome__pills" data-pills="role"></div>
+      </div>
+      <div class="demo-chrome__group">
+        <span class="demo-chrome__label">Fáze</span>
+        <div class="demo-chrome__pills" data-pills="faze"></div>
+      </div>
+      <div class="demo-chrome__group">
+        <span class="demo-chrome__label">Scénář</span>
+        <div class="demo-chrome__pills" data-pills="scenar"></div>
+      </div>
     </div>
-    <div class="demo-chrome__group">
-      <span class="demo-chrome__label">Fáze</span>
-      <div class="demo-chrome__pills" data-pills="faze"></div>
-    </div>
+    <div data-chrome-playback style="display:none;"></div>
   </header>
 
   <main id="app">
@@ -1415,7 +1426,7 @@
     // (ten drží faze/role/projekt/scenar/krok). Dialog a výběr pák
     // jsou interakce uvnitř jedné obrazovky, ne osy matice.
     ui: {
-      f1: { pilulka: "napad", odeslano: false, krokDialogu: 0, odpovedi: [] },
+      f1: { pilulka: "napad", textZadany: "", odeslano: false, krokDialogu: 0, odpovedi: [] },
       f2: { vybranePaky: [], poptavka: "oboji" },
       // F3 × řemeslník (krok 4). "view" drží i podřazené obrazovky
       // balicek/nabidka, které nejsou samostatnou položkou spodní
@@ -1686,8 +1697,22 @@
   function render() {
     document.body.setAttribute("data-role", state.role);
     document.body.setAttribute("data-faze", state.faze);
-    renderPills(document.querySelector('[data-pills="role"]'), ROLE, state.role, function (id) { setState({ role: id }); });
-    renderPills(document.querySelector('[data-pills="faze"]'), FAZE, state.faze, function (id) { setState({ faze: id }); });
+    var picker = document.querySelector('[data-chrome-picker]');
+    var playback = document.querySelector('[data-chrome-playback]');
+    // Při běhu scénáře chrome skrývá výběr role/fáze a nahradí ho
+    // přehrávacím pruhem — CLAUDE.md „Stav": scénář se hraje, ne klikají
+    // se pod ním pořád viditelné přepínače.
+    if (state.scenar) {
+      picker.style.display = "none";
+      playback.style.display = "flex";
+      playback.innerHTML = renderScenarBar();
+    } else {
+      picker.style.display = "contents";
+      playback.style.display = "none";
+      renderPills(document.querySelector('[data-pills="role"]'), ROLE, state.role, function (id) { setState({ role: id }); });
+      renderPills(document.querySelector('[data-pills="faze"]'), FAZE, state.faze, function (id) { setState({ faze: id }); });
+      renderPills(document.querySelector('[data-pills="scenar"]'), SCENAR_LIST, null, function (id) { scenarStart(id); });
+    }
     renderCell();
     renderScreen();
   }
@@ -2101,6 +2126,128 @@
     { otazka: "How firm is the end-of-September deadline?", moznosti: ["Fixed", "We have a month's slack"] }
   ];
 
+  // Doslovná citace z kumu-copy-en.md, "Ukázkový text pro demo".
+  var F1_DEMO_TEXT = "We've bought a three-room flat in a 1970s block. It's completely original and needs doing from top to bottom. We have around 1.2 million and we'd like to move in by the end of September.";
+
+  // Odpovědi, které přesně odpovídají projekt.zadani (viz renderB1) —
+  // aby B1 na konci dialogu ukázalo totéž, co scénář naklikal.
+  var F1_DEMO_ODPOVEDI = ["No, we're renting elsewhere", "Strip it out", "Off-the-shelf", "Painting", "We have a month's slack"];
+
+  /* ==========================================================
+     KROK 8 — SCÉNÁŘE S1—S5
+     kumu-kostra.md §6. Pojmenovaná cesta maticí, přehratelná
+     krok za krokem. Každý krok je úplný snímek role/fáze/ui —
+     replay je tak vždycky deterministický bez ohledu na to, co
+     kdo předtím naklikal živě.
+     ========================================================== */
+
+  var SCENAR_LIST = [
+    { id: "S1", label: "Full walkthrough" },
+    { id: "S2", label: "One firm" },
+    { id: "S3", label: "Trade view" },
+    { id: "S4", label: "Partner view" },
+    { id: "S5", label: "Extra work" }
+  ];
+
+  var VSECHNY_PAKY = projekt.paky.map(function (p) { return p.id; });
+
+  var SCENARIOS = {
+    S1: {
+      label: "Full walkthrough",
+      kroky: [
+        { role: "zakaznik", faze: "F1", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: false, krokDialogu: 0, odpovedi: [] } }, popis: "Vstupní obrazovka, pilulka „I have a rough idea“." },
+        { role: "zakaznik", faze: "F1", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: true, krokDialogu: 0, odpovedi: [] } }, popis: "Ukázkový text vložen, dialog rozjetý." },
+        { role: "zakaznik", faze: "F1", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: true, krokDialogu: 5, odpovedi: F1_DEMO_ODPOVEDI } }, popis: "B1 — shrnutí zadání." },
+        { role: "zakaznik", faze: "F2", ui: { f2: { vybranePaky: [], poptavka: "oboji" } }, popis: "B3 odhad, 1 388 000 Kč — přes strop." },
+        { role: "zakaznik", faze: "F2", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" } }, popis: "Páky zaškrtnuté — 1 181 000 Kč. Peak dema." },
+        { role: "zakaznik", faze: "F2", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" } }, popis: "B8 „Jak to chcete poptat“ — výchozí obojí, nic se nevybírá." },
+        { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: {}, vybranaFirma: null } }, popis: "Skládání týmu — klikněte na tři nabídky naživo, panel se plní před očima." },
+        { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: { 0: true, 1: true, 2: "vanek" }, vybranaFirma: null } }, popis: "Řádek „nebo jedna firma“ — zkuste přepnout na klíč a zpět." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Řemeslník — plocha, záložka Dnes." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "balicek", nabidkaCastka: null, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Balíček práce — elektroinstalace." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "nabidka", nabidkaCastka: 158000, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Nabídka — cena upravená 165 000 → 158 000 Kč." },
+        { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: { 0: true, 1: true, 2: "vanek", 3: true, 5: true }, vybranaFirma: null } }, popis: "Elektroinstalace — tři nabídky, Jiří Vaněk vybraný." },
+        { role: "partner", faze: "F2", ui: { partner: { otevrenaPolozka: null, hodnoty: {} } }, popis: "Partner — materiálová skladba a agregát." },
+        { role: "zakaznik", faze: "F5", ui: {}, popis: "Plán vs. skutečnost." }
+      ]
+    },
+    S2: {
+      label: "One firm",
+      kroky: [
+        { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: { 0: true, 1: true, 2: "vanek", 3: true, 5: true }, vybranaFirma: null } }, popis: "Řádek „nebo jedna firma — od 1 124 000 Kč“." },
+        { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "naklic", vybrane: { 0: true, 1: true, 2: "vanek", 3: true, 5: true }, vybranaFirma: 0 } }, popis: "Výběr Stavby Konečný — panel „Co by se změnilo“." },
+        { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: { 0: true, 1: true, 2: "vanek", 3: true, 5: true }, vybranaFirma: 0 } }, popis: "Návrat — výběry v týmu zůstaly zachované." }
+      ]
+    },
+    S3: {
+      label: "Trade view",
+      kroky: [
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Plocha Dnes." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "prilezitosti", nabidkaCastka: null, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Příležitosti." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "profil", nabidkaCastka: null, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Profil — doplňuje se z dokončených projektů." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: true, asistentDotaz: null } }, popis: "Asistent — čtyři předpřipravené dotazy." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "faktury", nabidkaCastka: null, nabidkaOdeslana: false, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Faktury." }
+      ]
+    },
+    S4: {
+      label: "Partner view",
+      kroky: [
+        { role: "partner", faze: "F2", ui: { partner: { otevrenaPolozka: null, hodnoty: {} } }, popis: "Anonymní materiálová poptávka — „Byt 3+1, Brno-sever, 74 m²“." },
+        { role: "partner", faze: "F2", ui: { partner: { otevrenaPolozka: 4, hodnoty: {} } }, popis: "Prázdný řádek hydroizolace — „Add a product“." },
+        { role: "partner", faze: "F4", ui: {}, popis: "Objednávka — adresa dodání se poprvé odkrývá." },
+        { role: "partner", faze: "F5", ui: {}, popis: "Realizovaná spotřeba — hydroizolace objednána mimo Kumu." }
+      ]
+    },
+    S5: {
+      label: "Extra work",
+      kroky: [
+        { role: "zakaznik", faze: "F4", ui: { f4: { vicepraceSchvalena: false, probratKliknuto: false } }, popis: "Karta víceprací — nález vlhkosti, +18 000 Kč." },
+        { role: "zakaznik", faze: "F4", ui: { f4: { vicepraceSchvalena: true, probratKliknuto: false } }, popis: "Schváleno — částka se překlopila do celkové sumy." },
+        { role: "zakaznik", faze: "F4", ui: { f4: { vicepraceSchvalena: true, probratKliknuto: false } }, popis: "Celkem 1 199 000 Kč — pořád pod stropem 1 200 000 Kč." }
+      ]
+    }
+  };
+
+  function applyScenarKrok(krok) {
+    state.role = krok.role;
+    state.faze = krok.faze;
+    Object.assign(state.ui, krok.ui);
+  }
+
+  function scenarStart(id) {
+    state.scenar = id;
+    state.krok = 0;
+    applyScenarKrok(SCENARIOS[id].kroky[0]);
+    listeners.forEach(function (fn) { fn(state); });
+  }
+
+  function scenarGoto(i) {
+    var kroky = SCENARIOS[state.scenar].kroky;
+    if (i < 0 || i >= kroky.length) return;
+    state.krok = i;
+    applyScenarKrok(kroky[i]);
+    listeners.forEach(function (fn) { fn(state); });
+  }
+
+  function scenarExit() {
+    state.scenar = null;
+    state.krok = 0;
+    listeners.forEach(function (fn) { fn(state); });
+  }
+
+  function renderScenarBar() {
+    var sc = SCENARIOS[state.scenar];
+    var krok = sc.kroky[state.krok];
+    return '<div class="demo-chrome__group"><strong>' + sc.label + '</strong>' +
+        '<span>Step ' + (state.krok + 1) + ' of ' + sc.kroky.length + '</span></div>' +
+      '<div class="demo-chrome__group scenar-bar__popis">' + krok.popis + '</div>' +
+      '<div class="demo-chrome__group">' +
+        '<button type="button" data-action="scenar-prev"' + (state.krok === 0 ? ' disabled' : '') + '>Prev</button>' +
+        '<button type="button" data-action="scenar-next"' + (state.krok === sc.kroky.length - 1 ? ' disabled' : '') + '>Next</button>' +
+        '<button type="button" data-action="scenar-exit">Exit scenario</button>' +
+      '</div>';
+  }
+
   function renderKumuTopbar() {
     return '<header class="kumu-topbar">' +
       '<span class="kumu-wordmark">Kumu</span>' +
@@ -2124,7 +2271,7 @@
       return '<button type="button" class="chip" aria-pressed="' + (ui.pilulka === p.id) + '" data-action="f1-pilulka" data-pilulka-id="' + p.id + '">' + p.label + '</button>';
     }).join('');
     return '<div class="field-card">' +
-      '<textarea rows="4" placeholder="' + F1_COPY.priklad.replace(/"/g, '&quot;') + '"></textarea>' +
+      '<textarea rows="4" data-bind="f1-text" placeholder="' + F1_COPY.priklad.replace(/"/g, '&quot;') + '">' + ui.textZadany + '</textarea>' +
       '<div class="field-card__meta">' +
         '<div class="chip-row">' + chips + '</div>' +
         '<p class="reassurance">' + F1_COPY.ujisteni + '</p>' +
@@ -2981,6 +3128,12 @@
       updateUi(function (ui) { ui.remeslnik.view = "faktura-detail"; });
     } else if (action === "rem-faktura-send") {
       updateUi(function (ui) { ui.remeslnik.fakturaOdeslana = true; });
+    } else if (action === "scenar-prev") {
+      scenarGoto(state.krok - 1);
+    } else if (action === "scenar-next") {
+      scenarGoto(state.krok + 1);
+    } else if (action === "scenar-exit") {
+      scenarExit();
     }
   }
 
@@ -2994,11 +3147,14 @@
   // Cena nabídky se edituje přímo v čísle — samostatný "input" listener,
   // protože klikací delegace výše neposlouchá psaní do pole.
   document.addEventListener("input", function (e) {
-    if (e.target.getAttribute && e.target.getAttribute("data-bind") === "nabidka-castka") {
+    var bind = e.target.getAttribute && e.target.getAttribute("data-bind");
+    if (bind === "nabidka-castka") {
       var val = Number(e.target.value);
       if (!isNaN(val)) {
         state.ui.remeslnik.nabidkaCastka = val;
       }
+    } else if (bind === "f1-text") {
+      state.ui.f1.textZadany = e.target.value;
     }
   });
 
