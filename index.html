@@ -731,6 +731,36 @@
   }
   .dialog__choice:hover { border-color: var(--color-accent); }
 
+  /* krok 9 — volný text vedle rychlých odpovědí, plus "přemýšlím…" */
+  .dialog__input-row { display: flex; gap: 8px; }
+  .dialog__input {
+    flex: 1;
+    font-family: inherit;
+    font-size: var(--type-body);
+    padding: 10px 14px;
+    border-radius: var(--radius-pill);
+    border: var(--border-width) solid var(--border-strong);
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    min-height: var(--hit-min);
+  }
+  .dialog__input:focus-visible { outline: var(--focus-width) solid var(--focus); outline-offset: var(--focus-offset); }
+  .dialog__bubble--thinking { display: flex; gap: 4px; align-items: center; padding: 14px; }
+  .dialog__bubble--thinking span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text-secondary);
+    animation: dialog-thinking 1s infinite ease-in-out;
+  }
+  .dialog__bubble--thinking span:nth-child(2) { animation-delay: 0.15s; }
+  .dialog__bubble--thinking span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes dialog-thinking {
+    0%, 80%, 100% { opacity: 0.25; }
+    40% { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dialog__bubble--thinking span { animation: none; opacity: 0.6; }
+  }
+
   /* Ukázka výstupu — obrys telefonu s přesahujícími kartami */
   .collage-section {
     padding: clamp(var(--space-4), 6vw, var(--space-4)) clamp(20px, 5vw, 80px);
@@ -1426,7 +1456,10 @@
     // (ten drží faze/role/projekt/scenar/krok). Dialog a výběr pák
     // jsou interakce uvnitř jedné obrazovky, ne osy matice.
     ui: {
-      f1: { pilulka: "napad", textZadany: "", odeslano: false, krokDialogu: 0, odpovedi: [] },
+      // krok 9 — simulovaná živost: volný text místo pevných tlačítek.
+      // dialogDraft je rozepsaná odpověď, pendingOdpoved/mysli drží
+      // krátkou "přemýšlím…" prodlevu mezi odesláním a další otázkou.
+      f1: { pilulka: "napad", textZadany: "", odeslano: false, krokDialogu: 0, odpovedi: [], dialogDraft: "", pendingOdpoved: null, mysli: false },
       f2: { vybranePaky: [], poptavka: "oboji" },
       // F3 × řemeslník (krok 4). "view" drží i podřazené obrazovky
       // balicek/nabidka, které nejsou samostatnou položkou spodní
@@ -2155,9 +2188,9 @@
     S1: {
       label: "Full walkthrough",
       kroky: [
-        { role: "zakaznik", faze: "F1", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: false, krokDialogu: 0, odpovedi: [] } }, popis: "Vstupní obrazovka, pilulka „I have a rough idea“." },
-        { role: "zakaznik", faze: "F1", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: true, krokDialogu: 0, odpovedi: [] } }, popis: "Ukázkový text vložen, dialog rozjetý." },
-        { role: "zakaznik", faze: "F1", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: true, krokDialogu: 5, odpovedi: F1_DEMO_ODPOVEDI } }, popis: "B1 — shrnutí zadání." },
+        { role: "zakaznik", faze: "F1", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: false, krokDialogu: 0, odpovedi: [], dialogDraft: "", pendingOdpoved: null, mysli: false } }, popis: "Vstupní obrazovka, pilulka „I have a rough idea“." },
+        { role: "zakaznik", faze: "F1", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: true, krokDialogu: 0, odpovedi: [], dialogDraft: "", pendingOdpoved: null, mysli: false } }, popis: "Ukázkový text vložen, dialog rozjetý — teď se dá odpovídat volným textem." },
+        { role: "zakaznik", faze: "F1", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: true, krokDialogu: 5, odpovedi: F1_DEMO_ODPOVEDI, dialogDraft: "", pendingOdpoved: null, mysli: false } }, popis: "B1 — shrnutí zadání." },
         { role: "zakaznik", faze: "F2", ui: { f2: { vybranePaky: [], poptavka: "oboji" } }, popis: "B3 odhad, 1 388 000 Kč — přes strop." },
         { role: "zakaznik", faze: "F2", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" } }, popis: "Páky zaškrtnuté — 1 181 000 Kč. Peak dema." },
         { role: "zakaznik", faze: "F2", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" } }, popis: "B8 „Jak to chcete poptat“ — výchozí obojí, nic se nevybírá." },
@@ -2295,13 +2328,43 @@
     var body = messages;
     if (ui.krokDialogu < DIALOG.length) {
       var q = DIALOG[ui.krokDialogu];
-      var choices = q.moznosti.map(function (m) {
-        return '<button type="button" class="dialog__choice" data-action="f1-dialog-choice" data-answer="' + m.replace(/"/g, '&quot;') + '">' + m + '</button>';
-      }).join('');
-      body += '<div class="dialog__msg dialog__msg--assistant"><span class="dialog__bubble">' + q.otazka + '</span></div>' +
-        '<div class="dialog__choices">' + choices + '</div>';
+      body += '<div class="dialog__msg dialog__msg--assistant"><span class="dialog__bubble">' + q.otazka + '</span></div>';
+      if (ui.mysli) {
+        // Odpověď se ukáže hned, další otázka až po krátké prodlevě —
+        // viz submitDialogAnswer(). Simulovaná živost, kostra §9 krok 9.
+        body += '<div class="dialog__msg dialog__msg--user"><span class="dialog__bubble">' + ui.pendingOdpoved + '</span></div>' +
+          '<div class="dialog__msg dialog__msg--assistant"><span class="dialog__bubble dialog__bubble--thinking"><span></span><span></span><span></span></span></div>';
+      } else {
+        var chips = q.moznosti.map(function (m) {
+          return '<button type="button" class="dialog__choice" data-action="f1-dialog-quick" data-answer="' + m.replace(/"/g, '&quot;') + '">' + m + '</button>';
+        }).join('');
+        body += '<div class="dialog__choices">' + chips + '</div>' +
+          '<div class="dialog__input-row">' +
+            '<input type="text" class="dialog__input" data-bind="f1-dialog-draft" value="' + (ui.dialogDraft || "").replace(/"/g, '&quot;') + '" placeholder="Type your own answer…" />' +
+            '<button type="button" class="pill-btn pill-btn--primary pill-btn--small" data-action="f1-dialog-send">Send</button>' +
+          '</div>';
+      }
     }
     return '<div class="field-card"><div class="dialog">' + body + '</div></div>';
+  }
+
+  // Volný text i klik na rychlou odpověď vedou sem — obojí je jen jiný
+  // způsob, jak dodat text odpovědi. Prodleva je předstíraná (setTimeout),
+  // ne skutečné volání AI — viz CLAUDE.md „Architektura", soubor zůstává
+  // offline a bez API klíče.
+  function submitDialogAnswer(text) {
+    var ui = state.ui.f1;
+    ui.pendingOdpoved = text;
+    ui.dialogDraft = "";
+    ui.mysli = true;
+    listeners.forEach(function (fn) { fn(state); });
+    setTimeout(function () {
+      ui.odpovedi.push(ui.pendingOdpoved);
+      ui.krokDialogu++;
+      ui.pendingOdpoved = null;
+      ui.mysli = false;
+      listeners.forEach(function (fn) { fn(state); });
+    }, 650);
   }
 
   function renderHero() {
@@ -3063,11 +3126,14 @@
       updateUi(function (ui) { ui.f1.pilulka = el.getAttribute("data-pilulka-id"); });
     } else if (action === "f1-submit") {
       updateUi(function (ui) { ui.f1.odeslano = true; });
-    } else if (action === "f1-dialog-choice") {
-      updateUi(function (ui) {
-        ui.f1.odpovedi.push(el.getAttribute("data-answer"));
-        ui.f1.krokDialogu++;
-      });
+    } else if (action === "f1-dialog-quick") {
+      if (state.ui.f1.mysli) return;
+      submitDialogAnswer(el.getAttribute("data-answer"));
+    } else if (action === "f1-dialog-send") {
+      var ui1 = state.ui.f1;
+      if (ui1.mysli) return;
+      var draft = (ui1.dialogDraft || "").trim();
+      submitDialogAnswer(draft || DIALOG[ui1.krokDialogu].moznosti[0]);
     } else if (action === "f2-toggle-lever") {
       var id = el.getAttribute("data-lever-id");
       updateUi(function (ui) {
@@ -3155,6 +3221,16 @@
       }
     } else if (bind === "f1-text") {
       state.ui.f1.textZadany = e.target.value;
+    } else if (bind === "f1-dialog-draft") {
+      state.ui.f1.dialogDraft = e.target.value;
+    }
+  });
+
+  // Enter v poli odpovědi odešle stejně jako tlačítko Send.
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.target.getAttribute && e.target.getAttribute("data-bind") === "f1-dialog-draft") {
+      e.preventDefault();
+      handleAction("f1-dialog-send", e.target);
     }
   });
 
