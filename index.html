@@ -1521,6 +1521,7 @@
         view: "dnes",
         nabidkaCastka: null,
         nabidkaPoznamka: null,
+        nabidkaSablona: null,
         nabidkaOdeslana: false,
         fakturaOdeslana: false,
         asistentOtevren: false,
@@ -2248,9 +2249,9 @@
         { role: "zakaznik", faze: "F2", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" } }, popis: "B8 „Jak to chcete poptat“ — výchozí obojí, nic se nevybírá." },
         { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: {}, vybranaFirma: null } }, popis: "Skládání týmu — klikněte na tři nabídky naživo, panel se plní před očima." },
         { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: { 0: true, 1: true, 2: "vanek" }, vybranaFirma: null } }, popis: "Řádek „nebo jedna firma“ — zkuste přepnout na klíč a zpět." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Řemeslník — plocha, záložka Dnes." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "balicek", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Balíček práce — elektroinstalace." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "nabidka", nabidkaCastka: 158000, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Nabídka — cena upravená 165 000 → 158 000 Kč." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Řemeslník — plocha, záložka Dnes." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "balicek", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Balíček práce — elektroinstalace." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "nabidka", nabidkaCastka: 158000, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Nabídka — cena upravená 165 000 → 158 000 Kč." },
         { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: { 0: true, 1: true, 2: "vanek", 3: true, 5: true }, vybranaFirma: null } }, popis: "Elektroinstalace — tři nabídky, Jiří Vaněk vybraný." },
         { role: "partner", faze: "F2", ui: { partner: { otevrenaPolozka: null, hodnoty: {} } }, popis: "Partner — materiálová skladba a agregát." },
         { role: "zakaznik", faze: "F5", ui: {}, popis: "Plán vs. skutečnost." }
@@ -2267,11 +2268,11 @@
     S3: {
       label: "Trade view",
       kroky: [
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Plocha Dnes." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "prilezitosti", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Příležitosti." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "profil", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Profil — doplňuje se z dokončených projektů." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: true, asistentDotaz: null } }, popis: "Asistent — čtyři předpřipravené dotazy." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "faktury", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Faktury." }
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Plocha Dnes." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "prilezitosti", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Příležitosti." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "profil", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Profil — doplňuje se z dokončených projektů." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: true, asistentDotaz: null } }, popis: "Asistent — čtyři předpřipravené dotazy." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "faktury", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Faktury." }
       ]
     },
     S4: {
@@ -2617,6 +2618,15 @@
   // Doplněno podle referenčního screenshotu, který autorka poslala.
   var NABIDKA_POZNAMKA_VYCHOZI = "Price includes materials, labour and the standard inspection.";
 
+  // [+] Šablony poznámky — autorka požádala o výběr z předpřipravených
+  // šablon u nabídky, žádný zdroj konkrétní texty neudává. Tři krátké,
+  // věcné varianty pro elektroinstalaci.
+  var NABIDKA_SABLONY = [
+    { label: "Materials & labour", text: "Price includes materials, labour and the standard inspection." },
+    { label: "Labour only", text: "Labour only — materials to be supplied by the customer." },
+    { label: "Includes call-out", text: "Price includes the initial call-out and a written inspection report." }
+  ];
+
   // Přesně podle kumu-copy-en.md, sekce "Asistent — čtyři dotazy a odpovědi".
   var ASISTENT = [
     { dotaz: "When do I start on Královo Pole?", odpoved: "2 March. Demolition runs before you and finishes on 27 February. I'll tell you if that moves." },
@@ -2713,6 +2723,9 @@
         '<div class="nabidka-box__value">' + fmtRange(b.od, b.do) + '</div>' +
       '</div>' +
       '<div class="nabidka-box"><span class="nabidka-box__label">Note</span>' +
+        '<div class="chip-row" style="margin-bottom:8px;">' + NABIDKA_SABLONY.map(function (s, i) {
+          return '<button type="button" class="chip" aria-pressed="' + (ui.nabidkaSablona === i) + '" data-action="rem-nabidka-sablona" data-index="' + i + '">' + s.label + '</button>';
+        }).join('') + '</div>' +
         '<textarea class="nabidka-box__textarea" rows="3" data-bind="nabidka-poznamka">' + poznamka + '</textarea>' +
       '</div>' +
       '<button type="button" class="nabidka-attach" data-action="noop">+ Add attachment</button>' +
@@ -3229,6 +3242,12 @@
         var castka = ui.remeslnik.nabidkaCastka !== null ? ui.remeslnik.nabidkaCastka : projekt.balicky[2].odhad;
         projekt.balicky[2].nabidka.castka = castka;
         ui.remeslnik.nabidkaOdeslana = true;
+      });
+    } else if (action === "rem-nabidka-sablona") {
+      var sablonaIdx = Number(el.getAttribute("data-index"));
+      updateUi(function (ui) {
+        ui.remeslnik.nabidkaSablona = sablonaIdx;
+        ui.remeslnik.nabidkaPoznamka = NABIDKA_SABLONY[sablonaIdx].text;
       });
     } else if (action === "rem-asistent-toggle") {
       updateUi(function (ui) {
