@@ -1030,6 +1030,23 @@
   .opportunity-card__title { font-weight: var(--weight-heading); margin-bottom: 2px; }
   .opportunity-card__meta { font-size: var(--type-caption); color: var(--text-secondary); }
 
+  /* Reminders — read-only, žádné akce */
+  .reminder-card {
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--space-2);
+    margin-bottom: var(--space-1);
+  }
+  .reminder-card__time { font-weight: var(--weight-heading); margin-bottom: 2px; }
+  .reminder-card__text { font-size: var(--type-body); color: var(--text-primary); }
+
+  /* Messages — karta stojí na .opportunity-card, vnitřek má vlastní řádky */
+  .message-card__meta { font-size: var(--type-caption); color: var(--text-secondary); margin-bottom: 2px; }
+  .message-card__from { font-weight: var(--weight-heading); margin-bottom: 6px; }
+  .message-card__quote { font-size: var(--type-body); margin: 0 0 4px; }
+  .message-card__reply { font-size: var(--type-caption); color: var(--text-secondary); margin: 0; }
+  .message-card__actions { display: flex; gap: 8px; margin-top: var(--space-1); }
+
   .nabidka-field {
     width: 100%;
     border: none;
@@ -2635,6 +2652,86 @@
     { dotaz: "How much am I owed?", odpoved: "116,000 across two invoices. One is 9 days overdue — I can send a reminder." }
   ];
 
+  // [+] Reminders a Messages na záložce Dnes — samostatné scriptované
+  // sekce mimo datový model projektu, stejná povaha jako ASISTENT výše.
+  // Statické natvrdo, žádné napojení na projekt.balicky ani kalendář.
+  var REMINDERS_DEMO = [
+    { cas: "Tomorrow, 8:00", text: "Start on Královo Pole — electrical rough-in" },
+    { cas: "Friday", text: "Revision in Bystrc, moved to 6 March" },
+    { cas: "Next week", text: "Lesná job — final photos due for the profile" }
+  ];
+
+  // radky drží přesné znění pro každou kartu zvlášť — tři karty mají
+  // navzájem jinou strukturu textu (citace / příchozí SMS / odpověď
+  // asistenta), žádná společná šablona by je neopsala všechny správně.
+  var MESSAGES_DEMO = [
+    {
+      meta: "Missed call · Today, 10:42",
+      od: "+420 776 XXX XXX",
+      tag: "New enquiry",
+      radky: [
+        { typ: "quote", text: "Bathroom retile, about 15 m². Wants a quote by end of month." },
+        { typ: "plain", text: "Captured: name and number on file" }
+      ],
+      akce: true
+    },
+    {
+      meta: "SMS · Today, 9:15",
+      od: "Petra Nováková",
+      tag: "Confirmed",
+      radky: [
+        { typ: "quote", text: "Incoming: “Are you still free for Tuesday?”" },
+        { typ: "plain", text: "Assistant replied: “Yes, 9:00 is confirmed. I’ll remind you the day before.”" }
+      ],
+      akce: false
+    },
+    {
+      meta: "Missed call · Yesterday, 16:20",
+      od: "Jan Kříž",
+      tag: "Existing project",
+      radky: [
+        { typ: "quote", text: "Asked about the Bystrc revision date." },
+        { typ: "plain", text: "Assistant replied by SMS: revision moved to 6 March." }
+      ],
+      akce: false
+    }
+  ];
+
+  function renderRemeslnikReminders() {
+    return '<span class="microlabel">Reminders</span>' +
+      '<div style="margin-top:var(--space-1);">' + REMINDERS_DEMO.map(function (r) {
+        return '<div class="reminder-card">' +
+          '<div class="reminder-card__time">' + r.cas + '</div>' +
+          '<div class="reminder-card__text">' + r.text + '</div>' +
+        '</div>';
+      }).join('') + '</div>';
+  }
+
+  function renderRemeslnikMessages() {
+    var cards = MESSAGES_DEMO.map(function (m) {
+      var telo = m.radky.map(function (r) {
+        var cls = r.typ === "quote" ? "message-card__quote" : "message-card__reply";
+        return '<p class="' + cls + '">' + r.text + '</p>';
+      }).join('');
+      var akce = m.akce
+        ? '<div class="message-card__actions">' +
+            '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="noop">Call back</button>' +
+            '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="noop">Add to jobs</button>' +
+          '</div>'
+        : "";
+      return '<div class="opportunity-card">' +
+        '<div class="message-card__meta">' + m.meta + '</div>' +
+        '<div class="message-card__from">' + m.od + '</div>' +
+        '<span class="opportunity-card__badge">' + m.tag + '</span>' +
+        telo + akce +
+      '</div>';
+    }).join('');
+    return '<h3 class="block-card__title" style="margin-top:var(--space-3);">Messages</h3>' +
+      '<p class="block-card__note" style="margin-top:-6px;">Handled while you were on site</p>' +
+      cards +
+      '<p class="block-card__note">Captured automatically from calls and texts while you were unavailable.</p>';
+  }
+
   function renderRemeslnikNav() {
     var ui = state.ui.remeslnik;
     var active = (ui.view === "balicek" || ui.view === "nabidka") ? "prilezitosti" : (ui.view === "faktura-detail" ? "faktury" : ui.view);
@@ -2650,6 +2747,12 @@
   }
 
   function renderRemeslnikDnes() {
+    // Reminders a Messages jsou na záložce Dnes napříč všemi fázemi —
+    // jsou to sekce vázané na řemeslníka, ne na konkrétní projekt, proto
+    // se přidávají pod stávající obsah ve všech třech větvích stejně.
+    var extra = '<hr class="hairline" style="margin:var(--space-3) 0;" />' +
+      renderRemeslnikReminders() +
+      renderRemeslnikMessages();
     if (state.faze === "F4") {
       return '<p class="remeslnik-date">Byt 3+1, Královo Pole — electrical installation, day 8 of 10</p>' +
         '<div class="row-list"><div class="row"><span class="row__label">Today’s task</span><span class="row__amount--muted">Final circuit testing</span></div></div>' +
@@ -2657,7 +2760,8 @@
           '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="noop">Add photos</button>' +
           '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="noop">Report a change</button>' +
         '</div>' +
-        '<p class="block-card__note" style="margin-top:var(--space-2);">Your bid was accepted on 20 Feb.</p>';
+        '<p class="block-card__note" style="margin-top:var(--space-2);">Your bid was accepted on 20 Feb.</p>' +
+        extra;
     }
     if (state.faze === "F5") {
       var f = projekt.remeslnik.faktury[0];
@@ -2666,7 +2770,8 @@
           '<span class="opportunity-card__badge">Ready to invoice</span>' +
           '<div class="opportunity-card__title">' + f.projekt + '</div>' +
           '<div class="opportunity-card__meta">' + czk(f.castka) + '</div>' +
-        '</div>';
+        '</div>' +
+        extra;
     }
     return '<p class="remeslnik-date">Friday, 27 February</p>' +
       '<div class="row-list">' +
@@ -2674,7 +2779,8 @@
         '<div class="row"><span class="row__label">2 bids waiting on a reply</span></div>' +
         '<div class="row"><span class="row__label">1 invoice overdue, 9 days</span><span class="row__amount row__amount--over">9 days</span></div>' +
       '</div>' +
-      '<p class="block-card__note" style="margin-top:var(--space-2);">Today: a different job. Tomorrow: free. Friday: an inspection.</p>';
+      '<p class="block-card__note" style="margin-top:var(--space-2);">Today: a different job. Tomorrow: free. Friday: an inspection.</p>' +
+      extra;
   }
 
   function renderRemeslnikPrilezitosti() {
