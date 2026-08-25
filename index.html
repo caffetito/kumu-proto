@@ -452,10 +452,43 @@
   }
 
   /* Partner — poptávky, rozbalitelné */
-  .enquiry-head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); }
-  .enquiry-head__title { font-weight: var(--weight-heading); }
+  .enquiry-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-2); }
+  .enquiry-head__main { display: block; min-width: 0; }
+  .enquiry-head__title { font-weight: var(--weight-heading); display: block; }
+  .enquiry-head__meta {
+    display: block;
+    font-size: var(--type-caption);
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
   .enquiry-head__right { display: flex; align-items: center; gap: var(--space-2); }
   .enquiry-chevron { font-size: var(--type-heading); color: var(--text-secondary); line-height: 1; }
+
+  /* Partner — patička poptávky: souhrn nabídky + odeslání */
+  .enquiry-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+  }
+  .enquiry-foot__summary { font-size: var(--type-caption); color: var(--text-secondary); }
+  .enquiry-foot__total { color: var(--text-primary); font-variant-numeric: tabular-nums lining-nums; }
+  .enquiry-foot__sent { font-size: var(--type-caption); color: var(--text-secondary); }
+
+  /* Řádková reference materiálu — drobný kód pod názvem položky */
+  .material-table__ref {
+    display: block;
+    font-size: var(--type-caption);
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  /* Tlačítka jsou v prototypu klikací — .pill-btn má cursor: default,
+     protože slouží i jako statická ukázka v katalogu bloků. */
+  button.pill-btn { cursor: pointer; }
+  button.pill-btn:disabled { opacity: var(--disabled-opacity); cursor: not-allowed; }
 
   /* Balíčky — B5 přehled */
   .package-list { display: flex; flex-direction: column; }
@@ -1510,48 +1543,79 @@
       // house repair) jsou vymyšlené, včetně jejich položek materiálu —
       // v žádném zdroji nejsou. Anonymizace (čtvrť + m², bez jména)
       // drží stejné pravidlo jako u prvního projektu.
+      // [+] Rozšířeno o hlavičková data poptávky (reference, datumy,
+      // odhad hodnoty materiálu, fáze projektu) a o stabilní id položek.
+      // Vše kromě první poptávky je vymyšlené, v žádném zdroji to není.
+      //
+      // stav je STROJOVÝ KLÍČ, ne text do rozhraní — popisky drží
+      // ENQUIRY_STAV níž. Dřív tu stálo přímo "New" / "Send calculation",
+      // což míchalo stav se štítkem i s akcí.
+      //
+      // mnozstvi je číslo a jednotka zvlášť — jen tak jde později
+      // spočítat jednotkovou cenu nebo řádek přepočítat. Kde množství
+      // není zadané (kotvení, spojovací materiál), je null.
       poptavky: [
         {
           id: "byt-3-1",
+          ref: "KU-2604-118",
           nazev: "3-room flat, Brno north, 74 m²",
-          stav: "New",
+          stav: "nova",
+          faze: "F2",
+          prijato: "2026-04-06",
+          odpovedetDo: "2026-04-13",
+          odhadHodnotyMaterialu: 46000,
           polozky: [
-            { nazev: "Plasterboard", mnozstvi: "18 m²", znacka: "Rigips" },
-            { nazev: "Profiles and fixings", mnozstvi: "—", znacka: null },
-            { nazev: "Skim coat", mnozstvi: "210 kg", znacka: "Weber" },
-            { nazev: "Party wall insulation", mnozstvi: "22 m²", znacka: "Isover" },
-            { nazev: "Bathroom tanking", mnozstvi: "14 m²", znacka: null, neurceno: true }
+            { id: "sdk", nazev: "Plasterboard", mnozstvi: 18, jednotka: "m²", znacka: "Rigips" },
+            { id: "profily", nazev: "Profiles and fixings", mnozstvi: null, jednotka: null, znacka: null },
+            { id: "sterka", nazev: "Skim coat", mnozstvi: 210, jednotka: "kg", znacka: "Weber" },
+            { id: "izolace-pricka", nazev: "Party wall insulation", mnozstvi: 22, jednotka: "m²", znacka: "Isover" },
+            { id: "hydroizolace", nazev: "Bathroom tanking", mnozstvi: 14, jednotka: "m²", znacka: null, neurceno: true }
           ]
         },
         {
           id: "house-renovation",
+          ref: "KU-2604-092",
           nazev: "House renovation, Brno-Žabovřesky, 120 m²",
-          stav: "Send calculation",
+          stav: "rozpracovana",
+          faze: "F2",
+          prijato: "2026-04-02",
+          odpovedetDo: "2026-04-09",
+          odhadHodnotyMaterialu: 168000,
           polozky: [
-            { nazev: "Floor tiles", mnozstvi: "45 m²", znacka: "Rako" },
-            { nazev: "Interior doors", mnozstvi: "6 sets", znacka: "Sapeli" },
-            { nazev: "Paint", mnozstvi: "40 L", znacka: null, neurceno: true },
-            { nazev: "Skirting boards", mnozstvi: "60 m", znacka: null, neurceno: true }
+            { id: "dlazba", nazev: "Floor tiles", mnozstvi: 45, jednotka: "m²", znacka: "Rako" },
+            { id: "dvere", nazev: "Interior doors", mnozstvi: 6, jednotka: "sets", znacka: "Sapeli" },
+            { id: "barva", nazev: "Paint", mnozstvi: 40, jednotka: "L", znacka: null, neurceno: true },
+            { id: "listy", nazev: "Skirting boards", mnozstvi: 60, jednotka: "m", znacka: null, neurceno: true }
           ]
         },
         {
           id: "loft-insulation",
+          ref: "KU-2603-274",
           nazev: "Loft insulation, Brno-Líšeň, 95 m²",
-          stav: "Waiting response",
+          stav: "odeslana",
+          faze: "F3",
+          prijato: "2026-03-24",
+          odpovedetDo: "2026-03-31",
+          odhadHodnotyMaterialu: 94000,
           polozky: [
-            { nazev: "EPS insulation boards", mnozstvi: "95 m²", znacka: "Isover" },
-            { nazev: "Render system", mnozstvi: "95 m²", znacka: "Weber" },
-            { nazev: "Fixings and profiles", mnozstvi: "1 set", znacka: null, neurceno: true }
+            { id: "eps", nazev: "EPS insulation boards", mnozstvi: 95, jednotka: "m²", znacka: "Isover" },
+            { id: "omitka", nazev: "Render system", mnozstvi: 95, jednotka: "m²", znacka: "Weber" },
+            { id: "kotveni", nazev: "Fixings and profiles", mnozstvi: null, jednotka: null, znacka: null, neurceno: true }
           ]
         },
         {
           id: "family-house-repair",
+          ref: "KU-2602-051",
           nazev: "Family house repair, Brno-Bystrc, 140 m²",
-          stav: "Done",
+          stav: "hotova",
+          faze: "F5",
+          prijato: "2026-02-17",
+          odpovedetDo: "2026-02-24",
+          odhadHodnotyMaterialu: 212000,
           polozky: [
-            { nazev: "Roof tiles", mnozstvi: "180 m²", znacka: "Tondach" },
-            { nazev: "Guttering", mnozstvi: "40 m", znacka: "Lindab" },
-            { nazev: "Timber battens", mnozstvi: "1 set", znacka: "Stora Enso" }
+            { id: "tasky", nazev: "Roof tiles", mnozstvi: 180, jednotka: "m²", znacka: "Tondach" },
+            { id: "okapy", nazev: "Guttering", mnozstvi: 40, jednotka: "m", znacka: "Lindab" },
+            { id: "latovani", nazev: "Timber battens", mnozstvi: null, jednotka: null, znacka: "Stora Enso" }
           ]
         }
       ],
@@ -1576,16 +1640,16 @@
      nesmí zůstat bez obsahu.
      ========================================================== */
 
-  var state = {
-    faze: "F1",
-    role: "zakaznik",
-    projekt: projekt,
-    scenar: null,
-    krok: 0,
-    // Stav samotných obrazovek — mimo stavový model z kostry §1
-    // (ten drží faze/role/projekt/scenar/krok). Dialog a výběr pák
-    // jsou interakce uvnitř jedné obrazovky, ne osy matice.
-    ui: {
+  // Stav samotných obrazovek — mimo stavový model z kostry §1
+  // (ten drží faze/role/projekt/scenar/krok). Dialog a výběr pák
+  // jsou interakce uvnitř jedné obrazovky, ne osy matice.
+  //
+  // [+] Dřív to byl literál přímo ve `state`. Teď je to továrna, protože
+  // z ní bere výchozí hodnoty i applyScenarKrok — když se do některého
+  // řezu přidá pole, scénáře ho dostanou automaticky a nespadnou na
+  // undefined jen proto, že o něm jejich krok neví.
+  function vychoziUi() {
+    return {
       // krok 9 — simulovaná živost: volný text místo pevných tlačítek.
       // dialogDraft je rozepsaná odpověď, pendingOdpoved/mysli drží
       // krátkou "přemýšlím…" prodlevu mezi odesláním a další otázkou.
@@ -1607,11 +1671,27 @@
         asistentDotaz: null
       },
       // F2/F3 × partner (krok 5) — jedna obrazovka pro obě fáze, kostra
-      // §5 F3 partner je doslova "stejné jako F2". hodnoty[klíč] drží buď
-      // nabídnutou cenu (číslo), nebo doplněný produkt u neurčené
-      // položky (text) — klíč je "index poptávky_index položky".
-      // otevrenaPoptavka drží, která poptávka je rozbalená (krok navíc).
-      partner: { otevrenaPoptavka: null, otevrenaPolozka: null, hodnoty: {} },
+      // §5 F3 partner je doslova "stejné jako F2".
+      //
+      // [+] Dřív tu byla jediná mapa `hodnoty`, kde se pod indexovým
+      // klíčem "0_4" mísila nabídnutá cena (číslo) s doplněným produktem
+      // (text). Rozdělené na dvě mapy s jasným typem a klíčem
+      // "idPoptávky:idPolozky" — přeskládání pole položek už uložené
+      // hodnoty nepřehází na jiné řádky.
+      //   ceny[klíč]     = číslo, nabídnutá cena za řádek v Kč
+      //   produkty[klíč] = text, doplněný produkt u neurčené položky
+      //   odeslane[idPoptávky] = { castka, polozek } po odeslání nabídky
+      partner: {
+        otevrenaPoptavka: null,
+        otevrenaPolozka: null,
+        ceny: {
+          // Předvyplněno, aby druhá poptávka věrohodně stála v „In progress“.
+          "house-renovation:dlazba": 38700,
+          "house-renovation:dvere": 54000
+        },
+        produkty: {},
+        odeslane: {}
+      },
       // F3 × zákazník (krok 6). vybrane[i] je u většiny balíčků true/false
       // (zapnuto/vypnuto — kliknutí na jedinou dostupnou nabídku), u
       // balíčku 2 (elektro) místo toho drží "vanek" / "novotny" / false,
@@ -1625,7 +1705,16 @@
       // F4 × zákazník (krok 7). Jediná interakce, která mění číslo:
       // schválení víceprací posune celkovou částku 1 181 000 → 1 199 000.
       f4: { vicepraceSchvalena: false, probratKliknuto: false }
-    }
+    };
+  }
+
+  var state = {
+    faze: "F1",
+    role: "zakaznik",
+    projekt: projekt,
+    scenar: null,
+    krok: 0,
+    ui: vychoziUi()
   };
 
   var listeners = [];
@@ -2071,7 +2160,7 @@
     var items = projekt.partner.poptavky[0].polozky;
     var body = '<details class="disclosure" open><summary>Materials list</summary><ul>' +
       items.map(function (m) {
-        return '<li><span>' + m.nazev + '</span><span>' + m.mnozstvi + '</span></li>';
+        return '<li><span>' + m.nazev + '</span><span>' + partnerMnozstvi(m) + '</span></li>';
       }).join('') +
     '</ul></details>';
     return blockCard("B4", "", "customer", body);
@@ -2084,7 +2173,7 @@
       var akce = m.neurceno ? "Add a product" : "Quote a price";
       return '<tr' + (m.neurceno ? ' data-neurceno' : '') + '>' +
         '<td>' + m.nazev + '</td>' +
-        '<td>' + m.mnozstvi + '</td>' +
+        '<td>' + partnerMnozstvi(m) + '</td>' +
         '<td>' + znacka + '</td>' +
         '<td><span class="pill-btn pill-btn--secondary pill-btn--small">' + akce + '</span></td>' +
       '</tr>';
@@ -2333,7 +2422,7 @@
         { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "balicek", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Balíček práce — elektroinstalace." },
         { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "nabidka", nabidkaCastka: 158000, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Nabídka — cena upravená 165 000 → 158 000 Kč." },
         { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: { 0: true, 1: true, 2: "vanek", 3: true, 5: true }, vybranaFirma: null } }, popis: "Elektroinstalace — tři nabídky, Jiří Vaněk vybraný." },
-        { role: "partner", faze: "F2", ui: { partner: { otevrenaPoptavka: 0, otevrenaPolozka: null, hodnoty: {} } }, popis: "Partner — přehled a poptávky, „Byt 3+1“ rozbalená." },
+        { role: "partner", faze: "F2", ui: { partner: { otevrenaPoptavka: 0 } }, popis: "Partner — přehled a poptávky, „Byt 3+1“ rozbalená." },
         { role: "zakaznik", faze: "F5", ui: {}, popis: "Plán vs. skutečnost." }
       ]
     },
@@ -2358,8 +2447,8 @@
     S4: {
       label: "Partner view",
       kroky: [
-        { role: "partner", faze: "F2", ui: { partner: { otevrenaPoptavka: 0, otevrenaPolozka: null, hodnoty: {} } }, popis: "Anonymní materiálová poptávka — „Byt 3+1, Brno-sever, 74 m²“." },
-        { role: "partner", faze: "F2", ui: { partner: { otevrenaPoptavka: 0, otevrenaPolozka: "0_4", hodnoty: {} } }, popis: "Prázdný řádek hydroizolace — „Add a product“." },
+        { role: "partner", faze: "F2", ui: { partner: { otevrenaPoptavka: 0 } }, popis: "Anonymní materiálová poptávka — „Byt 3+1, Brno-sever, 74 m²“." },
+        { role: "partner", faze: "F2", ui: { partner: { otevrenaPoptavka: 0, otevrenaPolozka: "byt-3-1:hydroizolace" } }, popis: "Prázdný řádek hydroizolace — „Add a product“." },
         { role: "partner", faze: "F4", ui: {}, popis: "Objednávka — adresa dodání se poprvé odkrývá." },
         { role: "partner", faze: "F5", ui: {}, popis: "Realizovaná spotřeba — hydroizolace objednána mimo Kumu." }
       ]
@@ -2374,10 +2463,17 @@
     }
   };
 
+  // Každý řez, o kterém krok mluví, se nejdřív vrátí na výchozí hodnoty
+  // z vychoziUi() a teprve pak se přepíše tím, co krok říká. Krok tedy
+  // nemusí vyjmenovat všechna pole řezu — nová pole dostanou default,
+  // a zároveň se scénář nepustí se zbytky z předchozího klikání.
   function applyScenarKrok(krok) {
     state.role = krok.role;
     state.faze = krok.faze;
-    Object.assign(state.ui, krok.ui);
+    var vychozi = vychoziUi();
+    Object.keys(krok.ui || {}).forEach(function (klic) {
+      state.ui[klic] = Object.assign({}, vychozi[klic], krok.ui[klic]);
+    });
   }
 
   function scenarStart(id) {
@@ -3000,48 +3096,142 @@
   // se konkrétní poptávka rozbalí (autorčina žádost). Klíč řádku je
   // "index poptávky_index položky", aby se ceny/produkty jedné poptávky
   // nepletly se stavem jiné.
+  // Stav poptávky — strojový klíč → štítek do rozhraní + jestli se dá
+  // ještě nabízet. Dřív byl v datech přímo anglický text; rozhraní se pak
+  // nedalo přeložit ani odvodit, co se s poptávkou smí dělat.
+  var ENQUIRY_STAV = {
+    nova:          { label: "New",              editovatelna: true },
+    rozpracovana:  { label: "In progress",      editovatelna: true },
+    odeslana:      { label: "Waiting response", editovatelna: false },
+    hotova:        { label: "Done",             editovatelna: false }
+  };
+
+  function partnerKlic(p, m) {
+    return p.id + ":" + m.id;
+  }
+
+  function partnerMnozstvi(m) {
+    if (m.mnozstvi === null || m.mnozstvi === undefined) return "—";
+    return m.mnozstvi.toLocaleString("en-US") + (m.jednotka ? " " + m.jednotka : "");
+  }
+
+  // Souhrn jedné poptávky: kolik řádků má cenu, z kolika oceňovatelných,
+  // a jaký je součet. Oceňovatelné = všechny řádky; u neurčené položky
+  // se nejdřív doplňuje produkt, cena může přijít až po něm.
+  function partnerSouhrn(p) {
+    var ui = state.ui.partner;
+    var ceneno = 0, soucet = 0;
+    p.polozky.forEach(function (m) {
+      var cena = ui.ceny[partnerKlic(p, m)];
+      if (cena !== undefined && cena !== null && cena !== "") {
+        ceneno += 1;
+        soucet += Number(cena);
+      }
+    });
+    return { ceneno: ceneno, celkem: p.polozky.length, soucet: soucet };
+  }
+
   function renderPartnerMaterialy() {
     var ui = state.ui.partner;
     var cards = projekt.partner.poptavky.map(function (p, pi) {
       var open = ui.otevrenaPoptavka === pi;
+      var odeslana = ui.odeslane[p.id];
+      var stav = ENQUIRY_STAV[p.stav] || { label: p.stav, editovatelna: false };
+      var stavLabel = odeslana ? ENQUIRY_STAV.odeslana.label : stav.label;
+      var editovatelna = !odeslana && stav.editovatelna;
+      var souhrn = partnerSouhrn(p);
+
+      // Hlavička nese i to, co partner potřebuje k rozhodnutí, jestli
+      // poptávku vůbec otevřít: reference, kdy přišla, dokdy odpovědět,
+      // kolik položek a jaký je odhad hodnoty materiálu.
+      var meta = [
+        p.ref,
+        "Received " + fmtDate(p.prijato),
+        "Reply by " + fmtDate(p.odpovedetDo),
+        p.polozky.length + " items",
+        "Est. " + czk(p.odhadHodnotyMaterialu)
+      ].join(" · ");
+
       var head = '<div class="enquiry-head" data-action="partner-toggle-poptavka" data-index="' + pi + '" style="cursor:pointer;">' +
-          '<span class="enquiry-head__title">' + p.nazev + '</span>' +
+          '<span class="enquiry-head__main">' +
+            '<span class="enquiry-head__title">' + p.nazev + '</span>' +
+            '<span class="enquiry-head__meta">' + meta + '</span>' +
+          '</span>' +
           '<span class="enquiry-head__right">' +
-            '<span class="opportunity-card__badge" style="margin-bottom:0;">' + p.stav + '</span>' +
+            '<span class="opportunity-card__badge" style="margin-bottom:0;">' + stavLabel + '</span>' +
             '<span class="enquiry-chevron">' + (open ? "−" : "+") + '</span>' +
           '</span>' +
         '</div>';
-      var table = "";
+
+      var body = "";
       if (open) {
-        var rows = p.polozky.map(function (m, i) {
-          var key = pi + "_" + i;
+        var rows = p.polozky.map(function (m) {
+          var key = partnerKlic(p, m);
           var neurcena = !!m.neurceno;
-          var hodnota = ui.hodnoty[key];
-          var znacka = neurcena ? (hodnota || "Not specified") : (m.znacka || "—");
+          var cena = ui.ceny[key];
+          var produkt = ui.produkty[key];
+          var maCenu = cena !== undefined && cena !== null && cena !== "";
+          var znacka = neurcena ? (produkt || m.znacka || "Not specified") : (m.znacka || "—");
           var actionCell;
-          if (ui.otevrenaPolozka === key) {
+
+          if (!editovatelna) {
+            // Odeslaná nebo uzavřená poptávka se jen čte.
+            actionCell = maCenu ? '<span class="row__amount">' + czk(Number(cena)) + '</span>' : '<span class="microlabel">Not quoted</span>';
+          } else if (ui.otevrenaPolozka === key) {
+            var doplnujeProdukt = neurcena && !produkt;
             actionCell = '<span style="display:flex;gap:6px;align-items:center;">' +
-              '<input type="' + (neurcena ? "text" : "number") + '" data-bind="partner-input" data-key="' + key + '" placeholder="' + (neurcena ? "Product or brand" : "CZK") + '" ' +
-              'style="width:100px;border:1px solid var(--border-strong);border-radius:4px;padding:5px 7px;font-family:inherit;font-size:var(--type-caption);" />' +
-              '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="partner-confirm" data-key="' + key + '">' + (neurcena ? "Add" : "Quote") + '</button>' +
+              '<input type="' + (doplnujeProdukt ? "text" : "number") + '" data-bind="partner-input" data-key="' + key + '" placeholder="' + (doplnujeProdukt ? "Product or brand" : "CZK") + '" ' +
+              'style="width:110px;border:1px solid var(--border-strong);border-radius:4px;padding:5px 7px;font-family:inherit;font-size:var(--type-caption);" />' +
+              '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="partner-confirm" data-key="' + key + '">' + (doplnujeProdukt ? "Add" : "Save") + '</button>' +
             '</span>';
-          } else if (hodnota) {
-            actionCell = neurcena ? '<span class="microlabel">Added</span>' : '<span class="row__amount">' + czk(Number(hodnota)) + '</span>';
+          } else if (maCenu) {
+            // Cena už je zadaná — jde přepsat, dokud se nabídka neodešle.
+            actionCell = '<span style="display:flex;gap:8px;align-items:center;justify-content:flex-end;">' +
+              '<span class="row__amount">' + czk(Number(cena)) + '</span>' +
+              '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="partner-open" data-key="' + key + '">Edit</button>' +
+            '</span>';
           } else {
-            actionCell = '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="partner-open" data-key="' + key + '">' + (neurcena ? "Add a product" : "Quote a price") + '</button>';
+            actionCell = '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="partner-open" data-key="' + key + '">' + (neurcena && !produkt ? "Add a product" : "Quote a price") + '</button>';
           }
-          return '<tr' + (neurcena && !hodnota ? ' data-neurceno' : '') + '>' +
-            '<td>' + m.nazev + '</td>' +
-            '<td>' + m.mnozstvi + '</td>' +
+
+          return '<tr' + (neurcena && !produkt && !maCenu ? ' data-neurceno' : '') + '>' +
+            '<td>' + m.nazev + '<span class="material-table__ref">' + p.ref + '-' + m.id + '</span></td>' +
+            '<td>' + partnerMnozstvi(m) + '</td>' +
             '<td>' + znacka + '</td>' +
-            '<td>' + actionCell + '</td>' +
+            '<td style="text-align:right;">' + actionCell + '</td>' +
           '</tr>';
         }).join('');
-        table = '<hr class="hairline" style="margin:var(--space-2) 0;" />' +
-          '<table class="material-table"><thead><tr><th>Item</th><th>Quantity</th><th>Brand</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>';
+
+        var table = '<table class="material-table"><thead><tr>' +
+          '<th>Item</th><th>Quantity</th><th>Brand</th><th style="text-align:right;">Your price</th>' +
+          '</tr></thead><tbody>' + rows + '</tbody></table>';
+
+        // Patička: souhrn + jediné odeslání celé nabídky. Dokud není
+        // oceněný aspoň jeden řádek, není co odeslat.
+        var foot;
+        if (odeslana) {
+          foot = '<div class="enquiry-foot">' +
+            '<span class="enquiry-foot__sent">Quote sent — ' + odeslana.polozek + ' of ' + p.polozky.length + ' items, ' + czk(odeslana.castka) + '</span>' +
+          '</div>';
+        } else if (!editovatelna) {
+          foot = '<div class="enquiry-foot">' +
+            '<span class="enquiry-foot__sent">Closed — no further quotes accepted</span>' +
+          '</div>';
+        } else {
+          foot = '<div class="enquiry-foot">' +
+            '<span class="enquiry-foot__summary">' + souhrn.ceneno + ' of ' + souhrn.celkem + ' items priced · Quote total ' +
+              '<span class="enquiry-foot__total">' + czk(souhrn.soucet) + '</span></span>' +
+            '<button type="button" class="pill-btn pill-btn--primary" data-action="partner-send-quote" data-index="' + pi + '"' +
+              (souhrn.ceneno === 0 ? ' disabled' : '') + '>Send quote</button>' +
+          '</div>';
+        }
+
+        body = '<hr class="hairline" style="margin:var(--space-2) 0;" />' + table + foot;
       }
-      return '<div class="opportunity-card">' + head + table + '</div>';
+
+      return '<div class="opportunity-card">' + head + body + '</div>';
     }).join('');
+
     return '<div>' +
       '<span class="microlabel">Enquiries</span>' +
       '<div style="margin-top:var(--space-1);">' + cards + '</div>' +
@@ -3457,8 +3647,26 @@
       var key = el.getAttribute("data-key");
       var input = el.parentElement.querySelector('[data-bind="partner-input"]');
       var hodnota = input ? input.value.trim() : "";
+      var jeText = input && input.type === "text";
       updateUi(function (ui) {
-        if (hodnota) ui.partner.hodnoty[key] = hodnota;
+        // Textové pole plní produkt u neurčené položky, číselné cenu.
+        // Po doplnění produktu se řádek nechá otevřený, aby na něj šlo
+        // rovnou navázat cenou — to je celá pointa neurčené položky.
+        if (hodnota && jeText) {
+          ui.partner.produkty[key] = hodnota;
+          ui.partner.otevrenaPolozka = key;
+        } else {
+          if (hodnota) ui.partner.ceny[key] = Number(hodnota);
+          ui.partner.otevrenaPolozka = null;
+        }
+      });
+    } else if (action === "partner-send-quote") {
+      var qIdx = Number(el.getAttribute("data-index"));
+      var poptavka = projekt.partner.poptavky[qIdx];
+      var souhrn = partnerSouhrn(poptavka);
+      if (souhrn.ceneno === 0) return;
+      updateUi(function (ui) {
+        ui.partner.odeslane[poptavka.id] = { castka: souhrn.soucet, polozek: souhrn.ceneno };
         ui.partner.otevrenaPolozka = null;
       });
     } else if (action === "partner-toggle-poptavka") {
