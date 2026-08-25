@@ -524,53 +524,39 @@
     border-color: var(--graphic-under);
   }
 
-  /* Harmonogram — B6, komponenty s grafikou (nikdy text) */
-  .timeline { position: relative; height: 40px; margin: var(--space-2) 0 var(--space-1); }
-  .timeline__track {
-    position: absolute;
-    left: 0; right: 0; top: 50%;
-    height: 1px;
-    background: var(--graphic-track);
-    opacity: 0.3;
-  }
-  .timeline__segment {
-    position: absolute;
-    top: 6px;
-    height: 28px;
-    border-radius: var(--meter-radius);
-    border: 1.5px solid var(--graphic-track);
-    background: transparent;
-  }
-  .timeline__segment--done    { background: var(--graphic-under); border-color: var(--graphic-under); }
-  .timeline__segment--active  { background: var(--color-accent);  border-color: var(--color-accent); }
-  .timeline__segment--filled  { background: var(--graphic-under); border-color: var(--graphic-under); }
-  .timeline__marker {
-    position: absolute;
-    top: -2px;
-    width: 2px;
-    height: 44px;
-    background: var(--border-strong);
-  }
-  .timeline__caption {
+  /* Harmonogram — B6, komponenty s grafikou (nikdy text). Přepracováno
+     podle autorčina screenshotu: popisek nad každým balíčkem, pruh pod
+     ním v samostatném sloupci (ne přes sebe na jedné ose) — šířka
+     sloupce úměrná délce balíčku přes flex-grow (b6Dny()). Nahradilo
+     dřívější .timeline* na absolutním pozicování. */
+  .b6-range {
     display: flex;
     justify-content: space-between;
     font-size: var(--type-caption);
     color: var(--text-secondary);
+    margin-bottom: var(--space-1);
   }
-  .timeline__legend {
-    display: flex;
-    gap: var(--space-2);
+  .b6-grid { display: flex; gap: 8px; }
+  .b6-col { min-width: 0; }
+  .b6-col__label {
     font-size: var(--type-caption);
     color: var(--text-secondary);
-    margin-top: var(--space-1);
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  .timeline__legend-swatch {
-    display: inline-block;
-    width: 10px; height: 10px;
-    border-radius: 3px;
-    margin-right: 4px;
-    vertical-align: middle;
+  .b6-col__bar {
+    height: 10px;
+    border-radius: var(--meter-radius);
+    border: 1.5px solid var(--graphic-track);
+    background: transparent;
   }
+  .b6-col__bar--done,
+  .b6-col__bar--filled { background: var(--graphic-under); border-color: var(--graphic-under); }
+  .b6-col__bar--active { background: var(--color-accent); border-color: var(--color-accent); }
+  .b6-footer__title { margin: 0; font-weight: var(--weight-heading); }
+  .b6-footer__note { margin: 2px 0 0; font-size: var(--type-caption); color: var(--text-secondary); }
 
   /* B8 výběr — zaškrtávací páka */
   .lever-row {
@@ -2136,15 +2122,6 @@
     return fmtDate(od) + " – " + fmtDate(doo);
   }
 
-  function segStyle(od, doo) {
-    var start = projekt.balicky[0].od;
-    var end = projekt.predani;
-    var total = dayNum(end) - dayNum(start);
-    var left = (dayNum(od) - dayNum(start)) / total * 100;
-    var width = Math.max((dayNum(doo) - dayNum(od)) / total * 100, 2);
-    return "left:" + left.toFixed(2) + "%; width:" + width.toFixed(2) + "%;";
-  }
-
   // --- Komponenty 8/10/11 -----------------------------------------
 
   function blockCard(kicker, title, mode, bodyHtml, opts) {
@@ -2350,31 +2327,51 @@
 
   // --- B6 — dva režimy -------------------------------------------------
 
-  function renderB6(mode) {
-    var segs = projekt.balicky.map(function (b, i) {
-      var cls = "timeline__segment";
-      if (mode === "plan") {
-        if (b.nabidka) cls += " timeline__segment--filled";
-      } else {
-        if (i < 3) cls += " timeline__segment--done";
-        else if (i === 3) cls += " timeline__segment--active";
-      }
-      return '<div class="' + cls + '" style="' + segStyle(b.od, b.do) + '" title="' + b.nazev + '"></div>';
+  // [+] Zkrácené popisky nad pruhy — autorčin obrázek je zkracuje
+  // ("Water & drainage" místo "Water and drainage" atd.), aby se
+  // vešly nad úzký sloupec. Jen zobrazovaný text nad grafem, nikde
+  // jinde v appce se balíček pod tímhle jménem neobjevuje.
+  var B6_KRATKE_LABELY = [
+    "Demolition", "Water & drainage", "Electrical", "Plasterboard",
+    "Tiling & flooring", "Painting", "Kitchen & doors"
+  ];
+
+  function b6Dny(od, doo) {
+    return Math.max(dayNum(doo) - dayNum(od), 1);
+  }
+
+  // Sdílené tělo B6 — rozsah dat nahoře, pak sloupce (popisek nad
+  // pruhem, šířka pruhu úměrná délce balíčku přes flex-grow). stavTrida
+  // dostane index a balíček, vrátí modifikátor pruhu (nebo "" pro
+  // výchozí obrysový stav) — stejná sémantika jako dřívější
+  // .timeline__segment--done/--active/--filled, jen v novém tvaru.
+  function renderB6Grid(balicky, rangeStart, rangeEnd, stavTrida) {
+    var cols = balicky.map(function (b, i) {
+      var mod = stavTrida ? stavTrida(i, b) : "";
+      return '<div class="b6-col" style="flex:' + b6Dny(b.od, b.do) + ' 1 0;">' +
+        '<div class="b6-col__label">' + (B6_KRATKE_LABELY[i] || b.nazev) + '</div>' +
+        '<div class="b6-col__bar' + (mod ? " b6-col__bar--" + mod : "") + '" title="' + b.nazev + '"></div>' +
+      '</div>';
     }).join('');
-    var legend = mode === "plan"
-      ? '<div class="timeline__legend">' +
-          '<span><span class="timeline__legend-swatch" style="background:var(--graphic-under)"></span>Bid chosen</span>' +
-          '<span><span class="timeline__legend-swatch" style="border:1.5px solid var(--graphic-track)"></span>Waiting on bids</span>' +
-        '</div>'
-      : '<div class="timeline__legend">' +
-          '<span><span class="timeline__legend-swatch" style="background:var(--graphic-under)"></span>Done</span>' +
-          '<span><span class="timeline__legend-swatch" style="background:var(--color-accent)"></span>In progress</span>' +
-          '<span><span class="timeline__legend-swatch" style="border:1.5px solid var(--graphic-track)"></span>Waiting</span>' +
-        '</div>';
-    var body = '<div class="timeline"><div class="timeline__track"></div>' + segs +
-        '<div class="timeline__marker" style="left:100%;"></div></div>' +
-      '<div class="timeline__caption"><span>' + fmtDate(projekt.balicky[0].od) + '</span><span>Handover ' + fmtDate(projekt.predani) + '</span></div>' +
-      legend;
+    return '<div class="b6-range"><span>' + fmtDate(rangeStart) + '</span><span>' + fmtDate(rangeEnd) + '</span></div>' +
+      '<div class="b6-grid">' + cols + '</div>';
+  }
+
+  // [+] Věta o rezervě do stěhování — poslala ji autorka ve screenshotu,
+  // v žádném zdrojovém dokumentu není. Porovnává předání s
+  // projekt.zadani.terminDo (30. 9. 2026), ne s vymyšleným datem.
+  function renderB6Footer(predani) {
+    return '<hr class="hairline" style="margin:var(--space-2) 0;" />' +
+      '<p class="b6-footer__title">Handover ' + fmtDate(predani) + '</p>' +
+      '<p class="b6-footer__note">You\'re planning to move in by end of September — plenty of buffer.</p>';
+  }
+
+  function renderB6(mode) {
+    var stavTrida = mode === "plan"
+      ? function (i, b) { return b.nabidka ? "filled" : ""; }
+      : function (i, b) { return i < 3 ? "done" : (i === 3 ? "active" : ""); };
+    var body = renderB6Grid(projekt.balicky, projekt.balicky[0].od, projekt.predani, stavTrida) +
+      renderB6Footer(projekt.predani);
     return blockCard("B6", "Schedule", mode === "plan" ? "plan" : "with status", body);
   }
 
@@ -3467,13 +3464,6 @@
 
   // --- F3 × zákazník — skládání týmu (krok 6) --------------------------
 
-  function f3SegStyle(od, doo, rangeStart, rangeEnd) {
-    var total = dayNum(rangeEnd) - dayNum(rangeStart);
-    var left = (dayNum(od) - dayNum(rangeStart)) / total * 100;
-    var width = Math.max((dayNum(doo) - dayNum(od)) / total * 100, 2);
-    return "left:" + left.toFixed(2) + "%; width:" + width.toFixed(2) + "%;";
-  }
-
   function renderF3Summary() {
     return '<div class="f3-summary">' +
       '<p>Day 6 after the requests went out. You\'re choosing across ' + f3PocetSNabidkou() + ' of 7 trades; two are still waiting. One firm for the whole job: 3 complete bids.</p>' +
@@ -3486,16 +3476,14 @@
     var vybrane = state.ui.f3.vybrane;
     var rangeStart = balicky[0].od;
     var rangeEnd = balicky[balicky.length - 1].do;
-    var segs = balicky.map(function (b, i) {
+    var stavTrida = function (i, b) {
       var filled = i === 2 ? !!vybrane[2] : !!(vybrane[i] && b.nabidka);
-      var cls = "timeline__segment" + (filled ? " timeline__segment--filled" : "");
-      return '<div class="' + cls + '" style="' + f3SegStyle(b.od, b.do, rangeStart, rangeEnd) + '" title="' + b.nazev + '"></div>';
-    }).join('');
+      return filled ? "filled" : "";
+    };
     return '<div class="block-card">' +
       '<div class="block-card__kicker"><span class="microlabel">B6 · schedule</span></div>' +
-      '<div class="timeline"><div class="timeline__track"></div>' + segs +
-        '<div class="timeline__marker" style="left:100%;"></div></div>' +
-      '<div class="timeline__caption"><span>' + fmtDate(rangeStart) + '</span><span>Handover ' + fmtDate(rangeEnd) + '</span></div>' +
+      renderB6Grid(balicky, rangeStart, rangeEnd, stavTrida) +
+      renderB6Footer(rangeEnd) +
     '</div>';
   }
 
