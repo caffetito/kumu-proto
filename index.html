@@ -434,6 +434,29 @@
   .material-table tr:last-child td { border-bottom: none; }
   .material-table tr[data-neurceno] td { color: var(--text-secondary); }
 
+  /* Partner — přehled (čtyři metriky + regionální box) */
+  .partner-stats { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .partner-stat { flex: 1 1 180px; }
+  .partner-stat__label { font-size: var(--type-caption); color: var(--text-secondary); margin-bottom: 4px; }
+  .partner-stat__value { font-size: var(--type-display); font-weight: var(--weight-display); color: var(--text-primary); }
+  .partner-region__empty {
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-card);
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: var(--type-body);
+    margin-top: var(--space-1);
+  }
+
+  /* Partner — poptávky, rozbalitelné */
+  .enquiry-head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); }
+  .enquiry-head__title { font-weight: var(--weight-heading); }
+  .enquiry-head__right { display: flex; align-items: center; gap: var(--space-2); }
+  .enquiry-chevron { font-size: var(--type-heading); color: var(--text-secondary); line-height: 1; }
+
   /* Balíčky — B5 přehled */
   .package-list { display: flex; flex-direction: column; }
   .package-list .row { flex-wrap: wrap; }
@@ -1480,18 +1503,57 @@
     },
 
     partner: {
-      // kumu-kostra.md §5 (F2 partner) mluví o čtyřech sloupcích:
-      // položka, množství, navrženo, značka. Pro "navrženo" ale
-      // nikde není konkrétní hodnota — ani copy-en decku, ani
-      // v kostře. Tabulka v B4 proto má tři sloupce (položka,
-      // množství, značka), sloupec "navrženo" jsem nedomýšlel.
-      // Nahlas to prosím, až uvidíš B4 partnerský režim.
-      polozkyMaterialu: [
-        { nazev: "Plasterboard", mnozstvi: "18 m²", znacka: "Rigips" },
-        { nazev: "Profiles and fixings", mnozstvi: "—", znacka: null },
-        { nazev: "Skim coat", mnozstvi: "210 kg", znacka: "Weber" },
-        { nazev: "Party wall insulation", mnozstvi: "22 m²", znacka: "Isover" },
-        { nazev: "Bathroom tanking", mnozstvi: "14 m²", znacka: null, neurceno: true }
+      // [+] Seznam poptávek na partnerské obrazovce — na žádost autorky
+      // rozšířeno z jednoho projektu (Byt 3+1) na čtyři, každou v jiné
+      // fázi rozpracování. První poptávka je ta původní, beze změny
+      // položek. Zbylé tři (House renovation / Loft insulation / Family
+      // house repair) jsou vymyšlené, včetně jejich položek materiálu —
+      // v žádném zdroji nejsou. Anonymizace (čtvrť + m², bez jména)
+      // drží stejné pravidlo jako u prvního projektu.
+      poptavky: [
+        {
+          id: "byt-3-1",
+          nazev: "3-room flat, Brno north, 74 m²",
+          stav: "New",
+          polozky: [
+            { nazev: "Plasterboard", mnozstvi: "18 m²", znacka: "Rigips" },
+            { nazev: "Profiles and fixings", mnozstvi: "—", znacka: null },
+            { nazev: "Skim coat", mnozstvi: "210 kg", znacka: "Weber" },
+            { nazev: "Party wall insulation", mnozstvi: "22 m²", znacka: "Isover" },
+            { nazev: "Bathroom tanking", mnozstvi: "14 m²", znacka: null, neurceno: true }
+          ]
+        },
+        {
+          id: "house-renovation",
+          nazev: "House renovation, Brno-Žabovřesky, 120 m²",
+          stav: "Send calculation",
+          polozky: [
+            { nazev: "Floor tiles", mnozstvi: "45 m²", znacka: "Rako" },
+            { nazev: "Interior doors", mnozstvi: "6 sets", znacka: "Sapeli" },
+            { nazev: "Paint", mnozstvi: "40 L", znacka: null, neurceno: true },
+            { nazev: "Skirting boards", mnozstvi: "60 m", znacka: null, neurceno: true }
+          ]
+        },
+        {
+          id: "loft-insulation",
+          nazev: "Loft insulation, Brno-Líšeň, 95 m²",
+          stav: "Waiting response",
+          polozky: [
+            { nazev: "EPS insulation boards", mnozstvi: "95 m²", znacka: "Isover" },
+            { nazev: "Render system", mnozstvi: "95 m²", znacka: "Weber" },
+            { nazev: "Fixings and profiles", mnozstvi: "1 set", znacka: null, neurceno: true }
+          ]
+        },
+        {
+          id: "family-house-repair",
+          nazev: "Family house repair, Brno-Bystrc, 140 m²",
+          stav: "Done",
+          polozky: [
+            { nazev: "Roof tiles", mnozstvi: "180 m²", znacka: "Tondach" },
+            { nazev: "Guttering", mnozstvi: "40 m", znacka: "Lindab" },
+            { nazev: "Timber battens", mnozstvi: "1 set", znacka: "Stora Enso" }
+          ]
+        }
       ],
       agregat: {
         projektuVPriprave: 340,
@@ -1545,10 +1607,11 @@
         asistentDotaz: null
       },
       // F2/F3 × partner (krok 5) — jedna obrazovka pro obě fáze, kostra
-      // §5 F3 partner je doslova "stejné jako F2". hodnoty[i] drží buď
+      // §5 F3 partner je doslova "stejné jako F2". hodnoty[klíč] drží buď
       // nabídnutou cenu (číslo), nebo doplněný produkt u neurčené
-      // položky (text) — podle toho, který řádek je index i.
-      partner: { otevrenaPolozka: null, hodnoty: {} },
+      // položky (text) — klíč je "index poptávky_index položky".
+      // otevrenaPoptavka drží, která poptávka je rozbalená (krok navíc).
+      partner: { otevrenaPoptavka: null, otevrenaPolozka: null, hodnoty: {} },
       // F3 × zákazník (krok 6). vybrane[i] je u většiny balíčků true/false
       // (zapnuto/vypnuto — kliknutí na jedinou dostupnou nabídku), u
       // balíčku 2 (elektro) místo toho drží "vanek" / "novotny" / false,
@@ -2005,7 +2068,7 @@
   // --- B4 — dva režimy -------------------------------------------------
 
   function renderB4Zakaznicky() {
-    var items = projekt.partner.polozkyMaterialu;
+    var items = projekt.partner.poptavky[0].polozky;
     var body = '<details class="disclosure" open><summary>Materials list</summary><ul>' +
       items.map(function (m) {
         return '<li><span>' + m.nazev + '</span><span>' + m.mnozstvi + '</span></li>';
@@ -2015,7 +2078,7 @@
   }
 
   function renderB4Partnersky() {
-    var items = projekt.partner.polozkyMaterialu;
+    var items = projekt.partner.poptavky[0].polozky;
     var rows = items.map(function (m) {
       var znacka = m.neurceno ? "Not specified" : (m.znacka || "—");
       var akce = m.neurceno ? "Add a product" : "Quote a price";
@@ -2270,7 +2333,7 @@
         { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "balicek", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Balíček práce — elektroinstalace." },
         { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "nabidka", nabidkaCastka: 158000, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Nabídka — cena upravená 165 000 → 158 000 Kč." },
         { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: { 0: true, 1: true, 2: "vanek", 3: true, 5: true }, vybranaFirma: null } }, popis: "Elektroinstalace — tři nabídky, Jiří Vaněk vybraný." },
-        { role: "partner", faze: "F2", ui: { partner: { otevrenaPolozka: null, hodnoty: {} } }, popis: "Partner — materiálová skladba a agregát." },
+        { role: "partner", faze: "F2", ui: { partner: { otevrenaPoptavka: 0, otevrenaPolozka: null, hodnoty: {} } }, popis: "Partner — přehled a poptávky, „Byt 3+1“ rozbalená." },
         { role: "zakaznik", faze: "F5", ui: {}, popis: "Plán vs. skutečnost." }
       ]
     },
@@ -2295,8 +2358,8 @@
     S4: {
       label: "Partner view",
       kroky: [
-        { role: "partner", faze: "F2", ui: { partner: { otevrenaPolozka: null, hodnoty: {} } }, popis: "Anonymní materiálová poptávka — „Byt 3+1, Brno-sever, 74 m²“." },
-        { role: "partner", faze: "F2", ui: { partner: { otevrenaPolozka: 4, hodnoty: {} } }, popis: "Prázdný řádek hydroizolace — „Add a product“." },
+        { role: "partner", faze: "F2", ui: { partner: { otevrenaPoptavka: 0, otevrenaPolozka: null, hodnoty: {} } }, popis: "Anonymní materiálová poptávka — „Byt 3+1, Brno-sever, 74 m²“." },
+        { role: "partner", faze: "F2", ui: { partner: { otevrenaPoptavka: 0, otevrenaPolozka: "0_4", hodnoty: {} } }, popis: "Prázdný řádek hydroizolace — „Add a product“." },
         { role: "partner", faze: "F4", ui: {}, popis: "Objednávka — adresa dodání se poprvé odkrývá." },
         { role: "partner", faze: "F5", ui: {}, popis: "Realizovaná spotřeba — hydroizolace objednána mimo Kumu." }
       ]
@@ -2933,56 +2996,78 @@
 
   // --- F2/F3 × partner — jedna obrazovka pro obě fáze (krok 5) --------
 
+  // Poptávky jdou rozkliknout — seznam položek materiálu se ukáže, až
+  // se konkrétní poptávka rozbalí (autorčina žádost). Klíč řádku je
+  // "index poptávky_index položky", aby se ceny/produkty jedné poptávky
+  // nepletly se stavem jiné.
   function renderPartnerMaterialy() {
-    var items = projekt.partner.polozkyMaterialu;
     var ui = state.ui.partner;
-    var rows = items.map(function (m, i) {
-      var neurcena = !!m.neurceno;
-      var hodnota = ui.hodnoty[i];
-      var znacka = neurcena ? (hodnota || "Not specified") : (m.znacka || "—");
-      var actionCell;
-      if (ui.otevrenaPolozka === i) {
-        actionCell = '<span style="display:flex;gap:6px;align-items:center;">' +
-          '<input type="' + (neurcena ? "text" : "number") + '" data-bind="partner-input" data-index="' + i + '" placeholder="' + (neurcena ? "Product or brand" : "CZK") + '" ' +
-          'style="width:100px;border:1px solid var(--border-strong);border-radius:4px;padding:5px 7px;font-family:inherit;font-size:var(--type-caption);" />' +
-          '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="partner-confirm" data-index="' + i + '">' + (neurcena ? "Add" : "Quote") + '</button>' +
-        '</span>';
-      } else if (hodnota) {
-        actionCell = neurcena ? '<span class="microlabel">Added</span>' : '<span class="row__amount">' + czk(Number(hodnota)) + '</span>';
-      } else {
-        actionCell = '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="partner-open" data-index="' + i + '">' + (neurcena ? "Add a product" : "Quote a price") + '</button>';
+    var cards = projekt.partner.poptavky.map(function (p, pi) {
+      var open = ui.otevrenaPoptavka === pi;
+      var head = '<div class="enquiry-head" data-action="partner-toggle-poptavka" data-index="' + pi + '" style="cursor:pointer;">' +
+          '<span class="enquiry-head__title">' + p.nazev + '</span>' +
+          '<span class="enquiry-head__right">' +
+            '<span class="opportunity-card__badge" style="margin-bottom:0;">' + p.stav + '</span>' +
+            '<span class="enquiry-chevron">' + (open ? "−" : "+") + '</span>' +
+          '</span>' +
+        '</div>';
+      var table = "";
+      if (open) {
+        var rows = p.polozky.map(function (m, i) {
+          var key = pi + "_" + i;
+          var neurcena = !!m.neurceno;
+          var hodnota = ui.hodnoty[key];
+          var znacka = neurcena ? (hodnota || "Not specified") : (m.znacka || "—");
+          var actionCell;
+          if (ui.otevrenaPolozka === key) {
+            actionCell = '<span style="display:flex;gap:6px;align-items:center;">' +
+              '<input type="' + (neurcena ? "text" : "number") + '" data-bind="partner-input" data-key="' + key + '" placeholder="' + (neurcena ? "Product or brand" : "CZK") + '" ' +
+              'style="width:100px;border:1px solid var(--border-strong);border-radius:4px;padding:5px 7px;font-family:inherit;font-size:var(--type-caption);" />' +
+              '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="partner-confirm" data-key="' + key + '">' + (neurcena ? "Add" : "Quote") + '</button>' +
+            '</span>';
+          } else if (hodnota) {
+            actionCell = neurcena ? '<span class="microlabel">Added</span>' : '<span class="row__amount">' + czk(Number(hodnota)) + '</span>';
+          } else {
+            actionCell = '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="partner-open" data-key="' + key + '">' + (neurcena ? "Add a product" : "Quote a price") + '</button>';
+          }
+          return '<tr' + (neurcena && !hodnota ? ' data-neurceno' : '') + '>' +
+            '<td>' + m.nazev + '</td>' +
+            '<td>' + m.mnozstvi + '</td>' +
+            '<td>' + znacka + '</td>' +
+            '<td>' + actionCell + '</td>' +
+          '</tr>';
+        }).join('');
+        table = '<hr class="hairline" style="margin:var(--space-2) 0;" />' +
+          '<table class="material-table"><thead><tr><th>Item</th><th>Quantity</th><th>Brand</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>';
       }
-      return '<tr' + (neurcena && !hodnota ? ' data-neurceno' : '') + '>' +
-        '<td>' + m.nazev + '</td>' +
-        '<td>' + m.mnozstvi + '</td>' +
-        '<td>' + znacka + '</td>' +
-        '<td>' + actionCell + '</td>' +
-      '</tr>';
+      return '<div class="opportunity-card">' + head + table + '</div>';
     }).join('');
-    var body = '<table class="material-table"><thead><tr><th>Item</th><th>Quantity</th><th>Brand</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>';
-    return blockCard("B4", "Materials list", "partner", body, {
-      subtitle: "3-room flat, Brno north, 74 m²",
-      badge: "ESTIMATE"
-    });
+    return '<div>' +
+      '<span class="microlabel">Enquiries</span>' +
+      '<div style="margin-top:var(--space-1);">' + cards + '</div>' +
+    '</div>';
   }
 
-  // Design.md §7: agregát je jmenovitá výjimka na --surface-cool
-  // (Glacier) — čísla jsou metriky nad celým portfoliem, ne rozpočtové
-  // částky jednoho projektu, i když jedno z nich je v CZK. Proto zůstávají
-  // v --text-primary, ne v accentu — accent na peněžní číslo nesmí nikdy.
+  // Layout přehledu podle referenčního screenshotu: čtyři metriky
+  // vodorovně, pod tím ohraničený box "Regional distribution". Data pro
+  // rozložení po krajích nikde nejsou — box to přiznává, nepředstírá graf.
   function renderPartnerAgregat() {
     var a = projekt.partner.agregat;
-    var rows = [
-      { label: "Projects in preparation", value: String(a.projektuVPriprave) },
+    var stats = [
+      { label: "Projects in preparation this month", value: String(a.projektuVPriprave) },
       { label: "Contain your categories", value: Math.round(a.obsahujeVaseKategorie * 100) + "%" },
-      { label: "Average material value", value: czk(a.prumernaHodnotaMaterialu) },
-      { label: "Proposal to order", value: Math.round(a.konverzeNavrhNaObjednavku * 100) + "%" }
+      { label: "Average material value per project", value: czk(a.prumernaHodnotaMaterialu) },
+      { label: "Proposal → order conversion", value: Math.round(a.konverzeNavrhNaObjednavku * 100) + "%" }
     ];
-    var body = rowListHtml(rows.map(function (r) { return { label: r.label, amount: r.value }; }));
-    return '<div class="block-card" style="background:var(--surface-cool);border-color:transparent;">' +
-      '<div class="block-card__kicker"><span class="microlabel">Aggregate</span></div>' +
-      body +
+    var statsHtml = '<div class="partner-stats">' + stats.map(function (s) {
+      return '<div class="partner-stat"><div class="partner-stat__label">' + s.label + '</div>' +
+        '<div class="partner-stat__value">' + s.value + '</div></div>';
+    }).join('') + '</div>';
+    var region = '<div class="block-card partner-region">' +
+      '<div class="block-card__kicker"><span class="microlabel">Regional distribution</span></div>' +
+      '<div class="partner-region__empty">Missing data for regional breakdown</div>' +
     '</div>';
+    return statsHtml + region;
   }
 
   // --- F3 × zákazník — skládání týmu (krok 6) --------------------------
@@ -3281,7 +3366,11 @@
     } else if (state.faze === "F5") {
       content = '<div class="catalog__row">' + renderPartnerSpotreba() + '</div>';
     } else {
-      content = '<div class="catalog__row">' + renderPartnerMaterialy() + renderPartnerAgregat() + '</div>';
+      // Layout podle referenčního screenshotu: přehled nahoře na celou
+      // šířku, poptávky pod ním — ne vedle sebe jako dřív ve dvou sloupcích.
+      content = '<div style="display:flex;flex-direction:column;gap:var(--space-3);">' +
+        renderPartnerAgregat() + renderPartnerMaterialy() +
+      '</div>';
     }
     return '<div class="screen">' +
       renderKumuTopbar() +
@@ -3363,13 +3452,19 @@
     } else if (action === "rem-asistent-dotaz") {
       updateUi(function (ui) { ui.remeslnik.asistentDotaz = Number(el.getAttribute("data-index")); });
     } else if (action === "partner-open") {
-      updateUi(function (ui) { ui.partner.otevrenaPolozka = Number(el.getAttribute("data-index")); });
+      updateUi(function (ui) { ui.partner.otevrenaPolozka = el.getAttribute("data-key"); });
     } else if (action === "partner-confirm") {
-      var idx = Number(el.getAttribute("data-index"));
+      var key = el.getAttribute("data-key");
       var input = el.parentElement.querySelector('[data-bind="partner-input"]');
       var hodnota = input ? input.value.trim() : "";
       updateUi(function (ui) {
-        if (hodnota) ui.partner.hodnoty[idx] = hodnota;
+        if (hodnota) ui.partner.hodnoty[key] = hodnota;
+        ui.partner.otevrenaPolozka = null;
+      });
+    } else if (action === "partner-toggle-poptavka") {
+      var pIdx = Number(el.getAttribute("data-index"));
+      updateUi(function (ui) {
+        ui.partner.otevrenaPoptavka = ui.partner.otevrenaPoptavka === pIdx ? null : pIdx;
         ui.partner.otevrenaPolozka = null;
       });
     } else if (action === "f3-toggle") {
