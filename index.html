@@ -677,16 +677,18 @@
   .hero__headline { flex: 1 1 380px; min-width: 0; max-width: 640px; }
   .hero__field { flex: 1 1 420px; min-width: 0; max-width: 560px; }
 
-  /* Přesná čísla z autorčina Claude Design panelu vlastností pro h1:
-     DM Serif Display 400, 38px, line-height 43, tracking 0%, max-width
-     384 (Tailwind max-w-sm). Nepoužívá --type-display-xl/--weight-display
-     — ty zůstávají sdílené s jinými Display XL použitími (F5 "Done"),
+  /* Čísla z autorčina Claude Design panelu vlastností pro h1: DM Serif
+     Display, 38px, line-height 43, tracking 0%, max-width 384
+     (Tailwind max-w-sm). Váha upravena na semi-bold (600) na autorčinu
+     žádost — DM Serif Display má jen jeden nativní řez (400), 600 tedy
+     dorýsuje prohlížeč syntetickým ztučněním. Nepoužívá sdílené
+     --type-display-xl/--weight-display (ty zůstávají pro F5 "Done"),
      tenhle nadpis má vlastní hodnoty přímo podle zdroje. */
   .hero__headline h1 {
     margin: 0;
     max-width: 384px;
     font-size: 38px;
-    font-weight: 400;
+    font-weight: 600;
     line-height: 43px;
     letter-spacing: 0;
     color: var(--text-primary);
@@ -768,10 +770,12 @@
   }
   .reassurance { margin: 0; font-size: var(--type-caption); line-height: var(--leading-caption); color: var(--text-secondary); }
   .field-card__actions {
-    display: flex;
-    justify-content: flex-end;
     padding: var(--space-1) 10px;
     border-top: var(--border-width) solid var(--border);
+  }
+  .field-card__actions .pill-btn {
+    width: 100%;
+    text-align: center;
   }
 
   /* Dialog — po odeslání pole zmizí, nastoupí konverzace */
