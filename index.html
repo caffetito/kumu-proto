@@ -590,14 +590,6 @@
   .choice-card--selected { border-color: var(--choice-border-on); background: var(--choice-bg-on); }
   .choice-card__title { font-weight: var(--weight-heading); margin-bottom: 4px; }
   .choice-card__meta { color: var(--text-secondary); font-size: var(--type-caption); }
-  .choice-card__note { color: var(--text-secondary); font-size: var(--type-caption); margin-top: var(--space-1); }
-  .choice-default {
-    margin-top: var(--space-2);
-    padding: var(--space-1) var(--space-2);
-    background: var(--surface-accent);
-    border-radius: var(--radius-card);
-    font-size: var(--type-caption);
-  }
 
   /* B8 nabídky — karty firem */
   .offer-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
@@ -2399,11 +2391,10 @@
       '<div class="choice-card"><div class="choice-card__title">Trade by trade</div>' +
         '<div class="choice-card__meta">7 requests · 7 contracts · 7 separate warranties · you coordinate</div></div>' +
       '<div class="choice-card"><div class="choice-card__title">One firm, whole job</div>' +
-        '<div class="choice-card__meta">1 request · 1 contract · one warranty on the works · the firm coordinates</div>' +
-        '<div class="choice-card__note">Firms bidding for a whole job typically come in between 8% below and 18% above the sum of individual trades. The range is drawn from 340 completed renovations of comparable size. You\'ll know the actual figure once they bid.</div>' +
-      '</div>' +
-    '</div>' +
-    '<div class="choice-default">Ask both and decide when the bids land — it costs you nothing. Bids arrive within days and you decide once there are numbers on the table.</div>';
+        '<div class="choice-card__meta">1 request · 1 contract · one warranty on the works · the firm coordinates</div></div>' +
+      '<div class="choice-card"><div class="choice-card__title">Ask both</div>' +
+        '<div class="choice-card__meta">Decide when the bids land — it costs you nothing. Bids arrive within days.</div></div>' +
+    '</div>';
     return blockCard("B8", "How do you want to source this?", "paths", body, {
       note: "The whole-job range overshoots your budget in both directions. An estimate can't tell you which route is cheaper. Bids can."
     });
@@ -2892,13 +2883,11 @@
         '<div class="choice-card__meta">7 requests · 7 contracts · 7 separate warranties · you coordinate</div></div>' +
       '<div class="' + cardClass("naklic") + '" data-action="f2-set-poptavka" data-value="naklic" style="cursor:pointer;">' +
         '<div class="choice-card__title">One firm, whole job</div>' +
-        '<div class="choice-card__meta">1 request · 1 contract · one warranty on the works · the firm coordinates</div>' +
-        '<div class="choice-card__note">Firms bidding for a whole job typically come in between 8% below and 18% above the sum of individual trades. The range is drawn from 340 completed renovations of comparable size. You\'ll know the actual figure once they bid.</div>' +
-      '</div>' +
-    '</div>' +
-    '<div class="choice-default" data-action="f2-set-poptavka" data-value="oboji" style="cursor:pointer; ' +
-      (current === "oboji" ? "border:1.5px solid var(--color-accent);" : "border:1.5px solid transparent;") + '">' +
-      (current === "oboji" ? "✓ " : "") + 'Ask both and decide when the bids land — it costs you nothing. Bids arrive within days and you decide once there are numbers on the table.</div>';
+        '<div class="choice-card__meta">1 request · 1 contract · one warranty on the works · the firm coordinates</div></div>' +
+      '<div class="' + cardClass("oboji") + '" data-action="f2-set-poptavka" data-value="oboji" style="cursor:pointer;">' +
+        '<div class="choice-card__title">Ask both</div>' +
+        '<div class="choice-card__meta">Decide when the bids land — it costs you nothing. Bids arrive within days.</div></div>' +
+    '</div>';
     return blockCard("B8", "How do you want to source this?", "paths", body, {
       note: "The whole-job range overshoots your budget in both directions. An estimate can't tell you which route is cheaper. Bids can."
     });
