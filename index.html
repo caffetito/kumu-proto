@@ -663,6 +663,7 @@
   .hero {
     display: flex;
     flex-wrap: wrap;
+    justify-content: space-between; /* [oprava] bez tohohle zůstávala karta na širokém plátně odtažená od pravého okraje — nadpis i karta mají max-width, takže flex-start nechal volný pruh vpravo a pravá hrana karty nelícovala s kartami "Jak to funguje" pod ní, které se roztahují na celou šířku */
     gap: clamp(var(--space-3), 4vw, var(--space-4));
     align-items: flex-start;
     padding: clamp(var(--space-4), 6vw, var(--space-5)) clamp(20px, 5vw, 80px);
@@ -675,7 +676,11 @@
     font-size: var(--type-display-xl);
     font-weight: var(--weight-display);
     line-height: var(--leading-display-xl);
-    letter-spacing: var(--tracking-display-xl);
+    /* [oprava] --tracking-display-xl (-0.03em) je vyladěný na těsný
+       sans-serif display řez. Na serifu ve stejné síle písmena sráží
+       k sobě a nadpis vypadá staženě/jinak velký, než v referenci.
+       Serif dostává vlastní, mnohem mírnější proklad. */
+    letter-spacing: -0.005em;
   }
 
   .proof {
