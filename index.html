@@ -1013,7 +1013,10 @@
     color: var(--text-secondary);
   }
 
-  /* F2 — rozpočet a rozhodnutí, jednosloupcová sekvence bloků */
+  /* F2 — rozpočet a rozhodnutí, jednosloupcová sekvence bloků. Šířku
+     přepisuje inline style jen na obrazovkách, které chtějí širší
+     dvousloupcové rozvržení (partner, F2 zákazník) — beze změny tady,
+     aby se nerozhodilo F1 dialog/B1/B2, které tenhle wrapper taky sdílí. */
   .f2-screen {
     max-width: var(--container-prose);
     margin: 0 auto;
@@ -1022,6 +1025,18 @@
     flex-direction: column;
     gap: var(--space-3);
   }
+
+  /* B3 + B4 vedle sebe na F2 — stejný poměr jako .f3-layout, ale bez
+     position:sticky (na F2 pod tím nejsou další sekce, ke kterým by
+     se dalo "dojíždět" scrollem, sticky by tu jen zůstalo viset). */
+  .f2-row { display: flex; align-items: flex-start; gap: var(--space-3); }
+  .f2-row__main { flex: 2 1 480px; min-width: 0; }
+  .f2-row__side { flex: 1 1 300px; min-width: 280px; }
+  @media (max-width: 640px) {
+    .f2-row { flex-direction: column; }
+  }
+
+  .f2-cta-bids { display: block; width: 100%; text-align: center; }
 
   /* ============================================================
      KROK 4 — F3 × ŘEMESLNÍK
@@ -2724,7 +2739,7 @@
     // nevykresluje vůbec. Proto tu žádné odeslano rozhodování není.
     return '<div class="hero"><div class="page-container hero__inner">' +
       '<div class="hero__headline">' +
-        '<h1>Describe your project. We\'ll handle the budget, the materials and the trades.</h1>' +
+        '<h1>Describe your project.<br>We\'ll handle the<br>budget, the materials<br>and the trades.</h1>' +
         renderProof() +
       '</div>' +
       '<div class="hero__field">' + renderFieldCard() + '</div>' +
@@ -2895,11 +2910,14 @@
   function renderF2Screen() {
     return '<div class="screen">' +
       renderKumuTopbar() +
-      '<div class="f2-screen">' +
-        renderF2Rozpocet() +
-        renderB4Zakaznicky() +
+      '<div class="f2-screen" style="max-width:var(--container);">' +
+        '<div class="f2-row">' +
+          '<div class="f2-row__main">' + renderF2Rozpocet() + '</div>' +
+          '<div class="f2-row__side">' + renderB4Zakaznicky() + '</div>' +
+        '</div>' +
         renderB8VyberInteractive() +
         renderB8VariantyInteractive() +
+        '<button type="button" class="pill-btn pill-btn--primary f2-cta-bids" data-action="goto-f3">Request bids →</button>' +
       '</div>' +
       renderPhaseBarReal() +
     '</div>';
@@ -3803,6 +3821,8 @@
       updateUi(function (ui) { ui.f2.poptavka = el.getAttribute("data-value"); });
     } else if (action === "goto-f2") {
       setState({ faze: "F2" });
+    } else if (action === "goto-f3") {
+      setState({ faze: "F3" });
     } else if (action === "rem-nav") {
       updateUi(function (ui) { ui.remeslnik.view = el.getAttribute("data-view"); });
     } else if (action === "rem-open-balicek") {
