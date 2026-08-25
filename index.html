@@ -659,28 +659,37 @@
     padding-bottom: 3px;
   }
 
+  /* Sdílený kontejner — autorka chce obsah omezený na max-width 1024,
+     zarovnaný na střed, ať plocha zůstává od kraje ke kraji (barva),
+     ale karty napříč sekcemi (hero, "Jak to funguje") mají stejné
+     levé i pravé hrany bez ohledu na šířku okna. */
+  .page-container { max-width: 1024px; margin: 0 auto; }
+
   /* Hero — dva sloupce, asymetrické (~55/45), ne na střed */
-  .hero {
+  .hero { padding: clamp(var(--space-4), 6vw, var(--space-5)) clamp(20px, 5vw, 80px); }
+  .hero__inner {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between; /* [oprava] bez tohohle zůstávala karta na širokém plátně odtažená od pravého okraje — nadpis i karta mají max-width, takže flex-start nechal volný pruh vpravo a pravá hrana karty nelícovala s kartami "Jak to funguje" pod ní, které se roztahují na celou šířku */
+    justify-content: space-between;
     gap: clamp(var(--space-3), 4vw, var(--space-4));
     align-items: flex-start;
-    padding: clamp(var(--space-4), 6vw, var(--space-5)) clamp(20px, 5vw, 80px);
   }
   .hero__headline { flex: 1 1 380px; min-width: 0; max-width: 640px; }
   .hero__field { flex: 1 1 420px; min-width: 0; max-width: 560px; }
 
+  /* Přesná čísla z autorčina Claude Design panelu vlastností pro h1:
+     DM Serif Display 400, 38px, line-height 43, tracking 0%, max-width
+     384 (Tailwind max-w-sm). Nepoužívá --type-display-xl/--weight-display
+     — ty zůstávají sdílené s jinými Display XL použitími (F5 "Done"),
+     tenhle nadpis má vlastní hodnoty přímo podle zdroje. */
   .hero__headline h1 {
     margin: 0;
-    font-size: var(--type-display-xl);
-    font-weight: var(--weight-display);
-    line-height: var(--leading-display-xl);
-    /* [oprava] --tracking-display-xl (-0.03em) je vyladěný na těsný
-       sans-serif display řez. Na serifu ve stejné síle písmena sráží
-       k sobě a nadpis vypadá staženě/jinak velký, než v referenci.
-       Serif dostává vlastní, mnohem mírnější proklad. */
-    letter-spacing: -0.005em;
+    max-width: 384px;
+    font-size: 38px;
+    font-weight: 400;
+    line-height: 43px;
+    letter-spacing: 0;
+    color: var(--text-primary);
   }
 
   .proof {
@@ -2709,13 +2718,13 @@
     // Volá se jen dokud se neodešle pole (viz renderF1Screen) — jakmile
     // se odešle, celá marketingová stránka mizí, tenhle blok se
     // nevykresluje vůbec. Proto tu žádné odeslano rozhodování není.
-    return '<div class="hero">' +
+    return '<div class="hero"><div class="page-container hero__inner">' +
       '<div class="hero__headline">' +
         '<h1>Describe your project. We\'ll handle the budget, the materials and the trades.</h1>' +
         renderProof() +
       '</div>' +
       '<div class="hero__field">' + renderFieldCard() + '</div>' +
-    '</div>';
+    '</div></div>';
   }
 
   function renderCollage() {
@@ -2765,10 +2774,10 @@
     var cols = F1_COPY.jakToFunguje.map(function (s) {
       return '<div class="how-col"><div class="how-num">' + s.cislo + '</div><h3>' + s.nadpis + '</h3><p>' + s.text + '</p></div>';
     }).join('');
-    return '<section class="how-it-works">' +
+    return '<section class="how-it-works"><div class="page-container">' +
       '<div class="how-grid">' + cols + '</div>' +
       '<div class="how-closing"><p>' + F1_COPY.jakToFungujeZaver + '</p></div>' +
-    '</section>';
+    '</div></section>';
   }
 
   function renderPhaseBarReal() {
