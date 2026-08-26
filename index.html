@@ -1399,9 +1399,24 @@
     gap: 8px;
   }
   .team-slot:last-of-type { border-bottom: none; }
+  .team-slot__who { display: flex; align-items: center; gap: var(--space-2); flex: 1 1 auto; min-width: 0; }
+  .team-slot__icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface-muted);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .team-slot__icon svg { width: 16px; height: 16px; }
+  .team-slot__info { display: flex; flex-direction: column; min-width: 0; }
   .team-slot__profese { font-size: var(--type-caption); text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--text-secondary); }
-  .team-slot__name { font-weight: var(--weight-heading); }
+  .team-slot__name { font-weight: var(--weight-heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .team-slot__empty { color: var(--text-secondary); font-size: var(--type-caption); }
+  .team-slot__amount { flex-shrink: 0; font-weight: var(--weight-heading); white-space: nowrap; }
   .team-panel__totals { margin-top: var(--space-2); padding-top: var(--space-2); border-top: var(--border-width) solid var(--border); }
   .team-panel__cta { margin-top: var(--space-2); }
   .team-panel__cta .pill-btn { width: 100%; text-align: center; }
@@ -2400,11 +2415,25 @@
 
   // [+] Zkrácené popisky nad pruhy — autorčin obrázek je zkracuje
   // ("Water & drainage" místo "Water and drainage" atd.), aby se
-  // vešly nad úzký sloupec. Jen zobrazovaný text nad grafem, nikde
-  // jinde v appce se balíček pod tímhle jménem neobjevuje.
+  // vešly nad úzký sloupec. Používá i panel „Your team“ (stejný
+  // balíček = stejná zkrácená nálepka všude, nekreslí se podruhé jinak).
   var B6_KRATKE_LABELY = [
     "Demolition", "Water & drainage", "Electrical", "Plasterboard",
     "Tiling & flooring", "Painting", "Kitchen & doors"
+  ];
+
+  // Ikony kategorií pro panel „Your team“ — [+] tahové, jednobarevné
+  // (currentColor), bez dekorativních barev podle kandidáta/profese.
+  // Konkrétní ikonový set kostra nechává „doladit později" (§7); tohle
+  // je funkční zástupný set ve stejném pořadí jako projekt.balicky.
+  var TEAM_SLOT_IKONY = [
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 4l12 12M16 4L4 16"/></svg>',
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3c3 4 5 6.8 5 9.2a5 5 0 0 1-10 0C5 9.8 7 7 10 3z"/></svg>',
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2 4 12h5l-1 6 8-11h-5l1-5z"/></svg>',
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="4" width="12" height="12" rx="1"/></svg>',
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="6" height="6"/><rect x="11" y="3" width="6" height="6"/><rect x="3" y="11" width="6" height="6"/><rect x="11" y="11" width="6" height="6"/></svg>',
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="9" height="5" rx="1"/><line x1="7.5" y1="9" x2="7.5" y2="12"/><line x1="7.5" y1="12" x2="15" y2="12"/><line x1="15" y1="12" x2="15" y2="17"/></svg>',
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="5" y="2" width="10" height="16" rx="1"/><circle cx="12" cy="10" r="0.8" fill="currentColor" stroke="none"/></svg>'
   ];
 
   function b6Dny(od, doo) {
@@ -3605,15 +3634,17 @@
     var slots = projekt.balicky.map(function (b, i) {
       var sel = vybrane[i];
       var k = sel && b.kandidati && balKandidat(i, sel);
-      var content;
-      if (k) {
-        content = '<span class="team-slot__name">' + k.jmeno + '</span><span class="row__amount">' + czk(k.castka) + '</span>';
-      } else if (b.kandidati) {
-        content = '<span class="team-slot__empty">Choose someone</span>';
-      } else {
-        content = '<span class="team-slot__empty">Waiting on bids</span>';
-      }
-      return '<div class="team-slot"><span class="team-slot__profese">' + b.nazev + '</span>' + content + '</div>';
+      var nameHtml = k
+        ? '<span class="team-slot__name">' + k.jmeno + '</span>'
+        : '<span class="team-slot__empty">' + (b.kandidati ? "Choose someone" : "Waiting on bids") + '</span>';
+      var amountHtml = k ? '<span class="team-slot__amount">' + czk(k.castka) + '</span>' : '';
+      return '<div class="team-slot">' +
+        '<span class="team-slot__who">' +
+          '<span class="team-slot__icon">' + (TEAM_SLOT_IKONY[i] || '') + '</span>' +
+          '<span class="team-slot__info"><span class="team-slot__profese">' + (B6_KRATKE_LABELY[i] || b.nazev) + '</span>' + nameHtml + '</span>' +
+        '</span>' +
+        amountHtml +
+      '</div>';
     }).join('');
 
     var vybraniIdx = [], nevybraniIdx = [];
@@ -3624,7 +3655,11 @@
     var strop = projekt.zadani.strop;
     var rozdil = celkem - strop;
     var nejlevnejsiFirma = Math.min.apply(null, projekt.nabidkyFirem.map(function (f) { return f.castka; }));
-    var kompletni = vybraniIdx.length === projekt.balicky.length;
+    // "Kompletní" = vybraný kandidát u všech pěti balíčků, které vůbec
+    // mají nabídku — ne u všech sedmi. Dva balíčky (obklady a podlahy,
+    // kuchyň a dveře) nemají kandidáty vůbec, takže "7 z 7" by nikdy
+    // nenastalo a tlačítko by zůstalo navždy neaktivní.
+    var kompletni = projekt.balicky.every(function (b, i) { return !b.kandidati || !!vybrane[i]; });
 
     return '<div class="team-panel">' +
       '<div class="team-panel__label">Draft</div>' +
@@ -3636,7 +3671,7 @@
         '<div class="row"><span class="row__label">Contingency</span><span class="row__amount">' + czk(projekt.rezervaMimoBalicky) + '</span></div>' +
         totalRowHtml("Total so far", czk(celkem), rozdil > 0 ? "over" : "under") +
       '</div>' +
-      '<div class="team-panel__cta"><button type="button" class="pill-btn pill-btn--primary"' + (kompletni ? "" : " disabled") + '>Confirm your team</button></div>' +
+      '<div class="team-panel__cta"><button type="button" class="pill-btn pill-btn--primary" data-action="f3-confirm-team"' + (kompletni ? "" : " disabled") + '>Confirm your team</button></div>' +
       '<div class="team-panel__alt"><button type="button" class="link" data-action="f3-goto-naklic">Or hand the whole job to one firm — from ' + czk(nejlevnejsiFirma) + '</button></div>' +
     '</div>';
   }
@@ -3966,6 +4001,8 @@
       var fi = Number(el.getAttribute("data-index"));
       var cand = el.getAttribute("data-candidate");
       updateUi(function (ui) { ui.f3.vybrane[fi] = cand; });
+    } else if (action === "f3-confirm-team") {
+      setState({ faze: "F4" });
     } else if (action === "f3-goto-naklic") {
       updateUi(function (ui) { ui.f3.cesta = "naklic"; });
     } else if (action === "f3-goto-profese") {
