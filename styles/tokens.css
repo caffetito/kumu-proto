@@ -87,6 +87,10 @@
   /* Podklady stavů */
   --surface-over:    color-mix(in srgb, var(--raw-persimmon) 12%, transparent);
   --surface-accent:  var(--raw-violet-tint); /* [+] výplň vybrané pilulky */
+
+  /* [+] Neutrální výplň bez významu — placeholder avatar u kandidátní
+     karty (F3). Nenese sémantiku, proto není odvozená z accent/over/under. */
+  --surface-muted: color-mix(in srgb, var(--raw-atlantic) 8%, transparent);
 }
 
 /* Partner má bílou základní plochu, Cornsilk jen v chrome.
