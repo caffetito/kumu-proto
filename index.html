@@ -1328,27 +1328,35 @@
   .f3-section__meta { font-size: var(--type-caption); color: var(--text-secondary); }
   .f3-section--suppressed { color: var(--text-secondary); font-size: var(--type-caption); }
 
-  .candidate-card {
+  /* Kandidáti jednoho balíčku stojí vedle sebe v řadě, ne pod sebou —
+     tři karty se stejnou šířkou, každá samostatně klikatelná. */
+  .candidate-row {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-wrap: wrap;
     gap: var(--space-2);
+    margin-top: 6px;
+  }
+  .candidate-card {
+    flex: 1 1 200px;
+    max-width: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
     border: var(--border-width) solid var(--border);
     border-radius: var(--radius-card);
-    padding: 10px 12px;
-    margin-top: 6px;
+    padding: 12px;
     cursor: pointer;
+    position: relative;
   }
   .candidate-card--selected { border-color: var(--color-accent); background: var(--surface-accent); }
   .candidate-card--dimmed { opacity: 0.55; }
-  .candidate-card__who { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
   .candidate-card__avatar {
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: var(--surface-accent);
-    color: var(--color-accent);
+    background: var(--surface-muted);
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1357,17 +1365,20 @@
   }
   .candidate-card__name { font-weight: var(--weight-heading); font-size: var(--type-caption); }
   .candidate-card__meta { font-size: var(--type-caption); color: var(--text-secondary); }
-  .candidate-card__amount { font-weight: var(--weight-heading); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .candidate-card__amount { font-weight: var(--weight-heading); white-space: nowrap; }
   .candidate-card__check {
+    position: absolute;
+    top: 12px;
+    right: 12px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     background: var(--color-accent);
     color: var(--color-accent-fg);
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1;
   }
 
@@ -3560,21 +3571,17 @@
     var kandidatiHtml = b.kandidati.map(function (k) {
       var isSel = sel === k.id;
       var cls = "candidate-card" + (isSel ? " candidate-card--selected" : (sel ? " candidate-card--dimmed" : ""));
-      var meta = k.hodnoceni + ' · ' + k.zakazek + ' jobs' + (k.od ? ' · ' + fmtRange(k.od, k.do) : '');
       return '<div class="' + cls + '" data-action="f3-toggle-kandidat" data-index="' + i + '" data-candidate="' + k.id + '">' +
-        '<span class="candidate-card__who">' +
-          '<span class="candidate-card__avatar">' + initialyJmena(k.jmeno) + '</span>' +
-          '<span class="candidate-card__body"><span class="candidate-card__name">' + k.jmeno + '</span><br/>' +
-          '<span class="candidate-card__meta">' + meta + '</span></span>' +
-        '</span>' +
-        '<span class="candidate-card__amount">' + czk(k.castka) +
-          (isSel ? '<span class="candidate-card__check" aria-hidden="true">✓</span>' : '') +
-        '</span>' +
+        (isSel ? '<span class="candidate-card__check" aria-hidden="true">✓</span>' : '') +
+        '<span class="candidate-card__avatar">' + initialyJmena(k.jmeno) + '</span>' +
+        '<span class="candidate-card__name">' + k.jmeno + '</span>' +
+        '<span class="candidate-card__meta">★ ' + k.hodnoceni + ' &nbsp; ' + k.zakazek + ' jobs</span>' +
+        '<span class="candidate-card__amount">' + czk(k.castka) + '</span>' +
       '</div>';
     }).join('');
     return '<div class="f3-section">' +
       '<div class="f3-section__head"><span class="f3-section__title">' + b.nazev + '</span><span class="f3-section__meta">' + b.stav + '</span></div>' +
-      kandidatiHtml +
+      '<div class="candidate-row">' + kandidatiHtml + '</div>' +
     '</div>';
   }
 
