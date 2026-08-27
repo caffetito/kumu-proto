@@ -1783,7 +1783,21 @@
             { id: "eps", nazev: "EPS insulation boards", mnozstvi: 95, jednotka: "m²", znacka: "Isover" },
             { id: "omitka", nazev: "Render system", mnozstvi: 95, jednotka: "m²", znacka: "Weber" },
             { id: "kotveni", nazev: "Fixings and profiles", mnozstvi: null, jednotka: null, znacka: null, neurceno: true }
-          ]
+          ],
+          // [+] N3 „Dodávka s montáží" — vymyšlené, konzistentní s
+          // kandidáty zateplení z briefu 02 (stejná id, stejné jméno).
+          // Jméno/hodnocení/zakázky/badge se tady neopisují — dotahuje
+          // je renderPartnerMontaz() z partner.remeslnici podle id, aby
+          // nevznikla druhá kopie stejných dat (akceptační kritérium
+          // briefu 03: žádné zdvojení mezi remeslnici a bidy).
+          montaz: {
+            poptano: "2026-03-24",
+            bidy: [
+              { id: "dvorak-zatepleni", castka: 112000, vybrany: true },
+              { id: "fasady-brno", castka: 98000, vybrany: false },
+              { id: "izolace-novotny", castka: 124000, vybrany: false }
+            ]
+          }
         },
         {
           id: "family-house-repair",
@@ -1811,7 +1825,69 @@
         navrzeno: 41000,
         objednanoPresKumu: 33000,
         objednanoJinde: 8000
-      }
+      },
+      // [+] Vymyšlené pro N3 „Partner ↔ řemeslník", konzistentní s
+      // kandidáty zateplení z briefu 02 — stejná tři id
+      // (dvorak-zatepleni, izolace-novotny, fasady-brno). Kdyby se
+      // brief 02 v budoucnu propojil s partnerem, jde o stejné entity,
+      // ne duplicitní záznamy.
+      remeslnici: [
+        {
+          id: "dvorak-zatepleni",
+          jmeno: "Zateplovací systémy Dvořák",
+          obor: "Facade insulation contractor",
+          lokalita: "Brno",
+          hodnoceni: "4.8",
+          zakazek: 27,
+          badge: ["sg-certified", "preferred"],
+          vztah: { zakazekSMaterialem: 14, obrat: 1240000, posledni: "2026-04-03" }
+        },
+        {
+          id: "izolace-novotny",
+          jmeno: "Izolace Novotný",
+          obor: "Insulation contractor",
+          lokalita: "Znojmo",
+          hodnoceni: "4.9",
+          zakazek: 12,
+          badge: ["sg-certified"],
+          vztah: { zakazekSMaterialem: 4, obrat: 310000, posledni: "2026-02-18" }
+        },
+        {
+          id: "fasady-brno",
+          jmeno: "Fasády Brno s.r.o.",
+          obor: "Facade contractor",
+          lokalita: "Brno",
+          hodnoceni: "4.5",
+          zakazek: 41,
+          badge: [],
+          vztah: { zakazekSMaterialem: 0, obrat: 0, posledni: null }
+        }
+      ],
+      // viditelnyZakazniikovi — [+] řídí F3 candidate-card u zákazníka
+      // (brief 02/03), ne tuhle obrazovku — partner tady vidí svoje
+      // badge vždycky, bez ohledu na tohle pole (brief 03 §3a).
+      // "preferred" je záměrně false — otevřená designová otázka,
+      // kterou brief výslovně nechává na autorce, ne na mně.
+      badgeKatalog: [
+        { id: "sg-certified", label: "SG certified",
+          popis: "Absolved training on Weber/Isover insulation systems.",
+          viditelnyZakazniikovi: true },
+        { id: "preferred", label: "Preferred partner",
+          popis: "Priority pricing and priority on enquiries.",
+          viditelnyZakazniikovi: false }
+      ],
+      // [+] Vymyšlené pro N3 §3b. Jedno vlákno v demu stačí — ukazuje
+      // mechaniku (šablona → odeslání → objeví se u řemeslníka), ne
+      // celou historii komunikace.
+      zpravy: [
+        {
+          remeslnikId: "dvorak-zatepleni",
+          vlakno: [
+            { od: "partner", text: "Máme nové školení na systém Weber therm+ v květnu, budete mít zájem?", kdy: "2026-04-02" },
+            { od: "remeslnik", text: "Ano, pošlete prosím termín.", kdy: "2026-04-02" }
+          ]
+        }
+      ]
     }
   },
 
@@ -1952,6 +2028,15 @@
         nabidkaPoznamka: null,
         nabidkaSablona: null,
         nabidkaOdeslana: false,
+        // [+] N3 §3c — zjednodušená nabídka na "dodávku s montáží"
+        // (partner.poptavky[i].montaz), samostatná od nabidkaCastka/
+        // nabidkaOdeslana výš, ať se ta dvě odeslání nepletou, když
+        // je view "montaz-nabidka". otevrenaMontazId drží id poptávky
+        // (partner.poptavky[i].id), ne balíčku.
+        otevrenaMontazId: null,
+        montazCastka: null,
+        montazPoznamka: null,
+        montazOdeslana: false,
         fakturaOdeslana: false,
         asistentOtevren: false,
         asistentDotaz: null,
@@ -1983,7 +2068,16 @@
           "house-renovation:dvere": 54000
         },
         produkty: {},
-        odeslane: {}
+        odeslane: {},
+        // [+] N3 — "Vaši řemeslníci" (§3a) a vlákna zpráv (§3b).
+        // otevrenyRemeslnik drží id řemeslníka, jehož vlákno je právě
+        // rozbalené — max. jedno najednou, stejný vzor jako
+        // otevrenaPoptavka výš.
+        filtrObor: "vse",
+        otevrenyBadgeEditor: null,
+        otevrenyRemeslnik: null,
+        zpravaDraft: "",
+        zpravaSablona: null
       },
       // F3 × zákazník (krok 6). vybrane[i] drží id vybraného kandidáta
       // z balicky[i].kandidati (každý balíček s nabídkou má víc karet na
@@ -3291,6 +3385,15 @@
     { label: "Includes call-out", text: "Price includes the initial call-out and a written inspection report." }
   ];
 
+  // [+] N3 §3b — obdoba NABIDKA_SABLONY, ale na partnerově straně
+  // zprávy k řemeslníkovi. Žádný zdroj konkrétní texty neudává.
+  var PARTNER_SABLONY = [
+    { id: "novy-material", nazev: "New material in stock",
+      text: "We have a new system that might suit your current jobs. Want the specs?" },
+    { id: "vyzva-bid", nazev: "Invite to bid",
+      text: "We have an installation enquiry for you — check the Partner enquiries section." }
+  ];
+
   // Přesně podle kumu-copy-en.md, sekce "Asistent — čtyři dotazy a odpovědi".
   var ASISTENT = [
     { dotaz: "When do I start on Královo Pole?", odpoved: "2 March. Demolition runs before you and finishes on 27 February. I'll tell you if that moves." },
@@ -3311,11 +3414,16 @@
   // radky drží přesné znění pro každou kartu zvlášť — tři karty mají
   // navzájem jinou strukturu textu (citace / příchozí SMS / odpověď
   // asistenta), žádná společná šablona by je neopsala všechny správně.
+  // zdroj — [+] N3 §3b. Strojový klíč (stejná povaha jako ENQUIRY_STAV
+  // níž), ne totéž co "od" — "od" je zobrazené jméno/číslo, "zdroj"
+  // říká, jestli zpráva přišla od zákazníka nebo od partnera (řídí,
+  // jak se karta v Messages odliší, viz renderAsistentZpravy).
   var MESSAGES_DEMO = [
     {
       id: "msg-bathroom",
       meta: "Missed call · Today, 10:42",
       od: "+420 776 XXX XXX",
+      zdroj: "zakaznik",
       tag: "New enquiry",
       radky: [
         { typ: "quote", text: "Bathroom retile, about 15 m². Wants a quote by end of month." },
@@ -3328,6 +3436,7 @@
       id: "msg-petra",
       meta: "SMS · Today, 9:15",
       od: "Petra Nováková",
+      zdroj: "zakaznik",
       tag: "Confirmed",
       radky: [
         { typ: "quote", text: "Incoming: “Are you still free for Tuesday?”" },
@@ -3340,6 +3449,7 @@
       id: "msg-jankriz",
       meta: "Missed call · Yesterday, 16:20",
       od: "Jan Kříž",
+      zdroj: "zakaznik",
       tag: "Existing project",
       radky: [
         { typ: "quote", text: "Asked about the Bystrc revision date." },
@@ -3349,6 +3459,22 @@
       // [+] Bez pripominka záměrně — informace už je v REMINDERS_DEMO
       // ("Friday: Revision in Bystrc, moved to 6 March"). Nabízet tu
       // "Add to reminders" by vytvořilo duplicitu.
+    },
+    // [+] N3 §3b — stejný rozhovor jako partner.zpravy[0] výše, ručně
+    // zrcadlený sem jako karta v řemeslníkově inboxu (dvě oddělená
+    // statická pole, ne odvozené jedno z druhého — celá tahle sekce je
+    // dnes záměrně bez napojení na datový model, viz komentář u
+    // REMINDERS_DEMO). Odlišený zdroj: "partner", ne "zakaznik".
+    {
+      id: "msg-partner-dvorak",
+      meta: "Saint-Gobain · Today, 11:05",
+      od: "Saint-Gobain",
+      zdroj: "partner",
+      tag: "Partner",
+      radky: [
+        { typ: "quote", text: "New training on the Weber therm+ system in May — interested?" }
+      ],
+      akce: false
     }
   ];
 
@@ -3364,7 +3490,7 @@
 
   function renderRemeslnikNav() {
     var ui = state.ui.remeslnik;
-    var active = (ui.view === "balicek" || ui.view === "nabidka") ? "prilezitosti" : (ui.view === "faktura-detail" ? "faktury" : ui.view);
+    var active = (ui.view === "balicek" || ui.view === "nabidka" || ui.view === "montaz-nabidka") ? "prilezitosti" : (ui.view === "faktura-detail" ? "faktury" : ui.view);
     var tabs = [
       { id: "dnes", label: "Today" },
       { id: "prilezitosti", label: "Opportunities" },
@@ -3419,12 +3545,30 @@
       extra;
   }
 
+  // [+] N3 §3c — příležitosti teď mají dva zdroje: vlastní balíček
+  // projektu (beze změny, natvrdo jako dřív) a poptávky na dodávku
+  // s montáží napříč partner.poptavky (partnerData(), ne
+  // aktivniProjekt() — je to napříč portfoliem, stejně jako "Vaši
+  // řemeslníci" na partnerově straně). Nesjednocuje se to do jedné
+  // datové struktury, jen vizuálně na jedné obrazovce (brief 03 §3c).
   function renderRemeslnikPrilezitosti() {
+    var pd = partnerData();
+    var montazKarty = pd
+      ? pd.poptavky.filter(function (p) { return p.montaz; }).map(function (p) {
+          return '<div class="opportunity-card" data-action="rem-open-montaz" data-id="' + p.id + '" style="cursor:pointer;">' +
+            '<span class="opportunity-card__badge">Bid ready</span>' +
+            '<div class="opportunity-card__title">' + p.nazev + '</div>' +
+            '<div class="opportunity-card__meta">Saint-Gobain</div>' +
+            '<p class="block-card__note" style="margin-top:6px;">Material supplied by Saint-Gobain. You bid on installation only.</p>' +
+          '</div>';
+        }).join('')
+      : "";
     return '<div class="opportunity-card" data-action="rem-open-balicek" style="cursor:pointer;">' +
         '<span class="opportunity-card__badge">Bid ready</span>' +
         '<div class="opportunity-card__title">Electrical installation</div>' +
         '<div class="opportunity-card__meta">3-room flat · Královo Pole</div>' +
       '</div>' +
+      montazKarty +
       '<p class="block-card__note">2 more opportunities nearby.</p>';
   }
 
@@ -3474,6 +3618,42 @@
       '</div>' +
       '<button type="button" class="nabidka-attach" data-action="noop">+ Add attachment</button>' +
       '<div class="block-card__cta"><button type="button" class="pill-btn pill-btn--primary" data-action="rem-nabidka-send">Send bid</button></div>' +
+    '</div>';
+  }
+
+  // [+] N3 §3c — zjednodušená verze renderRemeslnikNabidka() výš: cena,
+  // poznámka, odeslání, žádné šablony ani přílohy (brief 03 to takhle
+  // explicitně žádá — "zjednodušená verze"). Zapisuje přímo do
+  // partner.poptavky[i].montaz.bidy[], ne do zvláštní kopie —
+  // konkrétně do bidu, který má vybrany: true (stejná konvence jako
+  // "vybraná" nabídka jinde v souboru — viz balVychoziKandidat).
+  function renderRemeslnikMontazNabidka() {
+    var ui = state.ui.remeslnik;
+    var pd = partnerData();
+    var p = pd.poptavky.filter(function (x) { return x.id === ui.otevrenaMontazId; })[0];
+    var bid = p.montaz.bidy.filter(function (b) { return b.vybrany; })[0];
+    var header = '<div class="nabidka-header">' +
+        '<div class="nabidka-header__title">' + p.nazev + '</div>' +
+        '<div class="nabidka-header__meta">Installation only · material supplied by Saint-Gobain</div>' +
+      '</div><hr class="hairline" />';
+    if (ui.montazOdeslana) {
+      return '<div class="block-card">' + header +
+        '<p class="block-card__title" style="margin-top:var(--space-3);">Bid sent</p>' +
+        '<p class="block-card__note">' + czk(bid.castka) + ' for ' + p.nazev + '.</p>' +
+      '</div>';
+    }
+    var castka = ui.montazCastka !== null ? ui.montazCastka : bid.castka;
+    var poznamka = ui.montazPoznamka !== null ? ui.montazPoznamka : "Price covers installation labour only.";
+    return '<div class="block-card">' + header +
+      '<div class="block-card__kicker"><span class="microlabel">Your bid</span></div>' +
+      '<div class="nabidka-field-wrap">' +
+        '<input class="nabidka-field" type="number" step="1000" data-bind="montaz-castka" value="' + castka + '" />' +
+        '<span class="amount-ccy">CZK</span>' +
+      '</div>' +
+      '<div class="nabidka-box"><span class="nabidka-box__label">Note</span>' +
+        '<textarea class="nabidka-box__textarea" rows="3" data-bind="montaz-poznamka">' + poznamka + '</textarea>' +
+      '</div>' +
+      '<div class="block-card__cta"><button type="button" class="pill-btn pill-btn--primary" data-action="rem-montaz-send">Send bid</button></div>' +
     '</div>';
   }
 
@@ -3633,6 +3813,7 @@
     else if (ui.view === "prilezitosti") content = renderRemeslnikPrilezitosti();
     else if (ui.view === "balicek") content = renderRemeslnikBalicek();
     else if (ui.view === "nabidka") content = renderRemeslnikNabidka();
+    else if (ui.view === "montaz-nabidka") content = renderRemeslnikMontazNabidka();
     else if (ui.view === "profil") content = renderRemeslnikProfil();
     else if (ui.view === "faktura-detail") content = renderRemeslnikFakturaDetail();
     else content = renderRemeslnikFaktury();
@@ -3668,6 +3849,24 @@
     odeslana:      { label: "Waiting response", editovatelna: false },
     hotova:        { label: "Done",             editovatelna: false }
   };
+
+  // [+] N3 — partner{} (Saint-Gobain) dnes žije jen na jednom projektu
+  // (byt-3-1) — je to jeden partner napříč celým portfoliem, ne
+  // partner "toho projektu", jen tam zatím nemá jiné místo (stejná
+  // situace jako partner.poptavky, které taky nesou i cizí, anonymní
+  // zakázky). remeslnici/badgeKatalog/zpravy proto čte odsud, ne z
+  // aktivniProjekt() — "Vaši řemeslníci" a Opportunities u řemeslníka
+  // (§3c) musí být vidět bez ohledu na to, který projekt je zrovna
+  // otevřený v demo přepínači.
+  function partnerData() {
+    var s = projekty.filter(function (p) { return p.partner; })[0];
+    return s && s.partner;
+  }
+
+  function partnerRemeslnik(id) {
+    var pd = partnerData();
+    return pd && pd.remeslnici.filter(function (r) { return r.id === id; })[0];
+  }
 
   function partnerKlic(p, m) {
     return p.id + ":" + m.id;
@@ -3790,7 +3989,7 @@
           '</div>';
         }
 
-        body = '<hr class="hairline" style="margin:var(--space-2) 0;" />' + table + foot;
+        body = '<hr class="hairline" style="margin:var(--space-2) 0;" />' + table + foot + renderPartnerMontaz(p, pi);
       }
 
       return '<div class="opportunity-card">' + head + body + '</div>';
@@ -3800,6 +3999,43 @@
       '<span class="microlabel">Enquiries</span>' +
       '<div style="margin-top:var(--space-1);">' + cards + '</div>' +
     '</div>';
+  }
+
+  // --- N3 §3c — dodávka s montáží: bidovací karty uvnitř poptávky -----
+
+  // Jméno/hodnocení/zakázky/badge se sem nekopírují — dotahují se z
+  // partner.remeslnici podle bid.id (akceptační kritérium briefu 03:
+  // žádné zdvojení dat mezi remeslnici a bidy). Badge se tu zobrazují
+  // vždy, bez ohledu na viditelnyZakazniikovi — to pole řídí jen F3 u
+  // zákazníka (renderF3Sekce), ne partnerovu vlastní obrazovku.
+  function renderPartnerMontaz(p, pi) {
+    var pd = partnerData();
+    if (!p.montaz) {
+      return '<hr class="hairline" style="margin:var(--space-2) 0;" />' +
+        '<span class="microlabel">Installation</span>' +
+        '<div class="block-card__cta" style="margin-top:var(--space-1);">' +
+          '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="partner-request-montaz" data-index="' + pi + '">Request installation bids</button>' +
+        '</div>';
+    }
+    var bidy = p.montaz.bidy;
+    var cards = bidy.map(function (bid) {
+      var r = partnerRemeslnik(bid.id);
+      var badgeHtml = r ? r.badge.map(function (bid2) {
+        var b = pd.badgeKatalog.filter(function (x) { return x.id === bid2; })[0];
+        return ' · ✓' + (b ? b.label : bid2);
+      }).join('') : '';
+      var cls = "candidate-card" + (bid.vybrany ? " candidate-card--selected" : " candidate-card--dimmed");
+      return '<div class="' + cls + '" data-action="partner-vybrat-montaz" data-index="' + pi + '" data-bid="' + bid.id + '">' +
+        (bid.vybrany ? '<span class="candidate-card__check" aria-hidden="true">✓</span>' : '') +
+        '<span class="candidate-card__avatar">' + initialyJmena(r ? r.jmeno : bid.id) + '</span>' +
+        '<span class="candidate-card__name">' + (r ? r.jmeno : bid.id) + '</span>' +
+        '<span class="candidate-card__meta">★ ' + (r ? r.hodnoceni : "—") + badgeHtml + '</span>' +
+        '<span class="candidate-card__amount">' + czk(bid.castka) + '</span>' +
+      '</div>';
+    }).join('');
+    return '<hr class="hairline" style="margin:var(--space-2) 0;" />' +
+      '<span class="microlabel">Installation — ' + bidy.length + ' bids (sent ' + fmtDate(p.montaz.poptano) + ')</span>' +
+      '<div class="candidate-row" style="margin-top:var(--space-1);">' + cards + '</div>';
   }
 
   // Layout přehledu podle referenčního screenshotu: čtyři metriky
@@ -3823,6 +4059,103 @@
       '<div class="partner-region__empty">Missing data for regional breakdown</div>' +
     '</div>';
     return statsHtml + region;
+  }
+
+  // --- N3 §3a/§3b — "Vaši řemeslníci": databáze, badge, zprávy --------
+
+  // Vlákno jednoho řemeslníka — beze zprávy dosud žádné vlákno není,
+  // proto pd.zpravy může chybět a začíná se prázdným polem (odešle se
+  // v partner-zprava-send, viz handleAction).
+  function renderPartnerVlakno(r) {
+    var pd = partnerData();
+    var ui = state.ui.partner;
+    var vlaknoObj = pd.zpravy.filter(function (z) { return z.remeslnikId === r.id; })[0];
+    var zpravy = vlaknoObj ? vlaknoObj.vlakno : [];
+    var messages = zpravy.map(function (m) {
+      return '<div class="dialog__msg' + (m.od === "partner" ? " dialog__msg--user" : "") + '">' +
+        '<span class="dialog__bubble">' + m.text + '</span>' +
+      '</div>';
+    }).join('') || '<p class="block-card__note" style="margin:0;">No messages yet.</p>';
+    var chips = PARTNER_SABLONY.map(function (s, i) {
+      return '<button type="button" class="chip" aria-pressed="' + (ui.zpravaSablona === i) + '" data-action="partner-zprava-sablona" data-index="' + i + '">' + s.nazev + '</button>';
+    }).join('');
+    return '<hr class="hairline" style="margin:var(--space-2) 0;" />' +
+      '<div class="dialog" style="padding:0;gap:8px;">' + messages + '</div>' +
+      '<div class="chip-row" style="margin:var(--space-2) 0 var(--space-1);">' + chips + '</div>' +
+      '<div class="dialog__input-row">' +
+        '<input type="text" class="dialog__input" data-bind="partner-zprava-draft" value="' + (ui.zpravaDraft || "").replace(/"/g, "&quot;") + '" placeholder="Type a message…" />' +
+        '<button type="button" class="pill-btn pill-btn--primary pill-btn--small" data-action="partner-zprava-send" data-id="' + r.id + '">Send</button>' +
+      '</div>';
+  }
+
+  // Řemeslnická karta — variace na opportunity-card/candidate-card
+  // (avatar z iniciál, hodnocení, meta řádek), ne nová komponenta.
+  function renderPartnerRemeslnikKarta(r, pd, ui) {
+    var badgeHtml = r.badge.length
+      ? r.badge.map(function (bid) {
+          var b = pd.badgeKatalog.filter(function (x) { return x.id === bid; })[0];
+          return '<span class="opportunity-card__badge" style="margin-right:10px;">✓ ' + (b ? b.label : bid) + '</span>';
+        }).join('')
+      : '<span class="block-card__note" style="margin:0;">No badges yet</span>';
+
+    var vztahText = r.vztah.zakazekSMaterialem > 0
+      ? r.vztah.zakazekSMaterialem + ' jobs with SG material · ' + czk(r.vztah.obrat) + ' turnover · last ' + fmtDate(r.vztah.posledni)
+      : '0 jobs through Kumu yet';
+
+    var editorOpen = ui.otevrenyBadgeEditor === r.id;
+    var threadOpen = ui.otevrenyRemeslnik === r.id;
+
+    var editor = editorOpen
+      ? '<div class="row-list" style="margin-top:var(--space-1);">' + pd.badgeKatalog.map(function (b) {
+          var checked = r.badge.indexOf(b.id) !== -1;
+          return '<div class="lever-row" data-action="partner-badge-toggle" data-remeslnik="' + r.id + '" data-badge="' + b.id + '" style="cursor:pointer;">' +
+            '<span class="lever-row__box" style="' + (checked ? "background:var(--check-fill-on);border-color:var(--check-fill-on);" : "") + '"></span>' +
+            '<span class="lever-row__body"><span class="lever-row__head"><span>' + b.label + '</span></span>' +
+            '<span class="lever-row__impact">' + b.popis + '</span></span>' +
+          '</div>';
+        }).join('') + '</div>'
+      : "";
+
+    return '<div class="opportunity-card">' +
+      '<div class="team-slot__who">' +
+        '<span class="candidate-card__avatar">' + initialyJmena(r.jmeno) + '</span>' +
+        '<span><span class="enquiry-head__title" style="display:block;">' + r.jmeno + '</span>' +
+        '<span class="enquiry-head__meta">' + r.lokalita + ' · ★' + r.hodnoceni + ' (' + r.zakazek + ')</span></span>' +
+      '</div>' +
+      '<div style="margin:8px 0;">' + badgeHtml + '</div>' +
+      '<p class="block-card__note" style="margin:0 0 var(--space-1);">' + vztahText + '</p>' +
+      '<div class="message-card__actions">' +
+        '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="partner-zprava-toggle-thread" data-id="' + r.id + '">' + (threadOpen ? "Close" : "Message") + '</button>' +
+        '<button type="button" class="pill-btn pill-btn--secondary pill-btn--small" data-action="partner-badge-toggle-editor" data-id="' + r.id + '">' + (editorOpen ? "Done" : (r.badge.length ? "Edit badges" : "Add badges")) + '</button>' +
+      '</div>' +
+      editor + (threadOpen ? renderPartnerVlakno(r) : "") +
+    '</div>';
+  }
+
+  // [!] Filtr oboru je v briefu popsaný jako "dropdown", implementovaný
+  // jako chip-row — v souboru není žádný stylovaný <select>, chipy pro
+  // filtrování/výběr už existují (pilulky F1, šablony u nabídky) a
+  // dělají přesně tohle. Nová vizuální komponenta jen kvůli jednomu
+  // filtru by byla přesně to, co brief žádá nedělat.
+  function renderPartnerRemeslnici() {
+    var pd = partnerData();
+    if (!pd) return "";
+    var ui = state.ui.partner;
+    var obory = [];
+    pd.remeslnici.forEach(function (r) { if (obory.indexOf(r.obor) === -1) obory.push(r.obor); });
+    var filtrChips = ['<button type="button" class="chip" aria-pressed="' + (ui.filtrObor === "vse") + '" data-action="partner-obor-filter" data-value="vse">All trades</button>']
+      .concat(obory.map(function (o) {
+        return '<button type="button" class="chip" aria-pressed="' + (ui.filtrObor === o) + '" data-action="partner-obor-filter" data-value="' + o + '">' + o + '</button>';
+      })).join('');
+    var seznam = pd.remeslnici.filter(function (r) { return ui.filtrObor === "vse" || r.obor === ui.filtrObor; });
+    var cards = seznam.map(function (r) { return renderPartnerRemeslnikKarta(r, pd, ui); }).join('');
+    return '<div>' +
+      '<div class="enquiry-head" style="align-items:center;margin-bottom:var(--space-1);">' +
+        '<span class="microlabel">Your trades</span>' +
+        '<div class="chip-row" style="margin:0;">' + filtrChips + '</div>' +
+      '</div>' +
+      cards +
+    '</div>';
   }
 
   // --- F3 × zákazník — skládání týmu (krok 6) --------------------------
@@ -4176,8 +4509,10 @@
     } else {
       // Layout podle referenčního screenshotu: přehled nahoře na celou
       // šířku, poptávky pod ním — ne vedle sebe jako dřív ve dvou sloupcích.
+      // [+] N3 §3a — "Vaši řemeslníci" sedí vedle agregátu (napříč
+      // portfoliem), ne uvnitř detailu jedné poptávky.
       content = '<div style="display:flex;flex-direction:column;gap:var(--space-3);">' +
-        renderPartnerAgregat() + renderPartnerMaterialy() +
+        renderPartnerAgregat() + renderPartnerRemeslnici() + renderPartnerMaterialy() +
       '</div>';
     }
     return '<div class="screen">' +
@@ -4437,6 +4772,76 @@
         ui.partner.otevrenaPoptavka = ui.partner.otevrenaPoptavka === pIdx ? null : pIdx;
         ui.partner.otevrenaPolozka = null;
       });
+    // --- N3 §3a — "Vaši řemeslníci": filtr, badge editor ----------------
+    } else if (action === "partner-obor-filter") {
+      updateUi(function (ui) { ui.partner.filtrObor = el.getAttribute("data-value"); });
+    } else if (action === "partner-badge-toggle-editor") {
+      var remId = el.getAttribute("data-id");
+      updateUi(function (ui) { ui.partner.otevrenyBadgeEditor = ui.partner.otevrenyBadgeEditor === remId ? null : remId; });
+    } else if (action === "partner-badge-toggle") {
+      var r = partnerRemeslnik(el.getAttribute("data-remeslnik"));
+      var badgeId = el.getAttribute("data-badge");
+      updateUi(function () {
+        var i = r.badge.indexOf(badgeId);
+        if (i === -1) r.badge.push(badgeId); else r.badge.splice(i, 1);
+      });
+    // --- N3 §3b — vlákno partner ↔ řemeslník ----------------------------
+    } else if (action === "partner-zprava-toggle-thread") {
+      var threadId = el.getAttribute("data-id");
+      updateUi(function (ui) {
+        ui.partner.otevrenyRemeslnik = ui.partner.otevrenyRemeslnik === threadId ? null : threadId;
+        ui.partner.zpravaDraft = "";
+        ui.partner.zpravaSablona = null;
+      });
+    } else if (action === "partner-zprava-sablona") {
+      var sabIdx = Number(el.getAttribute("data-index"));
+      updateUi(function (ui) {
+        ui.partner.zpravaSablona = sabIdx;
+        ui.partner.zpravaDraft = PARTNER_SABLONY[sabIdx].text;
+      });
+    } else if (action === "partner-zprava-send") {
+      var zRemeslnikId = el.getAttribute("data-id");
+      var draft = (state.ui.partner.zpravaDraft || "").trim();
+      if (!draft) return;
+      var pd3b = partnerData();
+      var vlaknoObj = pd3b.zpravy.filter(function (z) { return z.remeslnikId === zRemeslnikId; })[0];
+      if (!vlaknoObj) {
+        vlaknoObj = { remeslnikId: zRemeslnikId, vlakno: [] };
+        pd3b.zpravy.push(vlaknoObj);
+      }
+      updateUi(function (ui) {
+        vlaknoObj.vlakno.push({ od: "partner", text: draft, kdy: "2026-04-03" });
+        ui.partner.zpravaDraft = "";
+        ui.partner.zpravaSablona = null;
+      });
+    // --- N3 §3c — dodávka s montáží -------------------------------------
+    } else if (action === "partner-request-montaz") {
+      var mqIdx = Number(el.getAttribute("data-index"));
+      updateUi(function () {
+        partnerData().poptavky[mqIdx].montaz = { poptano: "2026-04-03", bidy: [] };
+      });
+    } else if (action === "partner-vybrat-montaz") {
+      var mqIdx2 = Number(el.getAttribute("data-index"));
+      var bidId = el.getAttribute("data-bid");
+      updateUi(function () {
+        partnerData().poptavky[mqIdx2].montaz.bidy.forEach(function (b) { b.vybrany = (b.id === bidId); });
+      });
+    } else if (action === "rem-open-montaz") {
+      var openMontazId = el.getAttribute("data-id");
+      updateUi(function (ui) {
+        ui.remeslnik.view = "montaz-nabidka";
+        ui.remeslnik.otevrenaMontazId = openMontazId;
+        ui.remeslnik.montazCastka = null;
+        ui.remeslnik.montazPoznamka = null;
+        ui.remeslnik.montazOdeslana = false;
+      });
+    } else if (action === "rem-montaz-send") {
+      updateUi(function (ui) {
+        var p = partnerData().poptavky.filter(function (x) { return x.id === ui.remeslnik.otevrenaMontazId; })[0];
+        var bid = p.montaz.bidy.filter(function (b) { return b.vybrany; })[0];
+        bid.castka = ui.remeslnik.montazCastka !== null ? ui.remeslnik.montazCastka : bid.castka;
+        ui.remeslnik.montazOdeslana = true;
+      });
     } else if (action === "f3-toggle-kandidat") {
       var fi = Number(el.getAttribute("data-index"));
       var cand = el.getAttribute("data-candidate");
@@ -4489,6 +4894,15 @@
       state.ui.f1.dialogDraft = e.target.value;
     } else if (bind === "nabidka-poznamka") {
       state.ui.remeslnik.nabidkaPoznamka = e.target.value;
+    } else if (bind === "partner-zprava-draft") {
+      state.ui.partner.zpravaDraft = e.target.value;
+    } else if (bind === "montaz-castka") {
+      var montazVal = Number(e.target.value);
+      if (!isNaN(montazVal)) {
+        state.ui.remeslnik.montazCastka = montazVal;
+      }
+    } else if (bind === "montaz-poznamka") {
+      state.ui.remeslnik.montazPoznamka = e.target.value;
     }
   });
 
