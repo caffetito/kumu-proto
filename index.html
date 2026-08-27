@@ -1523,7 +1523,15 @@
      po třech pákách = 1 181 000, pět vybraných nabídek F3 = 564 000.
      ========================================================== */
 
-  var projekt = {
+  // [+] N1 „Moje projekty" — projekt se přejmenoval na kolekci projekty[].
+  // faze se přestěhovala dovnitř každého projektu (dřív byla globální
+  // v state.faze) — je to teď vlastnost projektu, ne osy nezávislé na
+  // tom, který projekt se právě dívá. Role zůstává globální (kostra §1:
+  // "role jsou přepínatelné nezávisle" platí napříč projekty stejně).
+  var projekty = [
+  {
+    id: "byt-3-1",
+    faze: "F1",
     identita: {
       nazev: "Byt 3+1, Královo Pole",
       plocha: 74,
@@ -1792,7 +1800,52 @@
         objednanoJinde: 8000
       }
     }
-  };
+  },
+
+  // [+] Vymyšlené pro N1 „Moje projekty" — čísla nejsou nikde ověřená,
+  // jen demonstrují různé fáze rozpracování. remeslnik/partner zůstávají
+  // null: tenhle brief neřeší sdílení řemeslníků/partnera mezi projekty,
+  // takže dokud se to nerozhodne, se tenhle projekt v roli řemeslník/
+  // partner nezobrazí jako skutečná obrazovka (renderScreen to hlídá
+  // a spadne zpátky na scaffold, stejně jako dnes F1/F2 u řemeslníka).
+  {
+    id: "chata-vranov",
+    faze: "F2",
+    identita: { nazev: "Chata Vranov", plocha: 60, typ: "chata 1985, rekreační objekt", lokalita: "Vranov nad Dyjí" },
+    zadani: { strop: 800000, terminDo: "31. 5. 2027 (před sezónou)", bydliBehem: false, jadroBourat: false, kuchynNaMiru: false, svepomoci: [], terminPevny: false },
+    polozky: [
+      { nazev: "Roof repair", castka: 320000 },
+      { nazev: "Window replacement", castka: 185000 },
+      { nazev: "Exterior painting", castka: 95000 },
+      { nazev: "Terrace decking", castka: 142000 },
+      { nazev: "Electrical rewiring", castka: 100000 }
+    ],
+    paky: [
+      { id: "terasa-mensi", popis: "Smaller terrace", uspora: 38000, dopad: "Loses about a third of the covered area." }
+    ],
+    poptavka: { zpusob: "oboji" },
+    balicky: [], nabidkyFirem: [], klicoveOtazky: [], vicepráce: [], vyuctovani: [],
+    rezervaMimoBalicky: 0, predani: null,
+    remeslnik: null, partner: null
+  },
+  {
+    id: "zatepleni-bystrc",
+    faze: "F1",
+    identita: { nazev: "Zateplení RD, Brno-Bystrc", plocha: 140, typ: "RD 1996, nezateplený", lokalita: "Brno-Bystrc" },
+    zadani: { strop: 350000, terminDo: "30. 9. 2026", bydliBehem: true, jadroBourat: false, kuchynNaMiru: false, svepomoci: [], terminPevny: false },
+    polozky: [], paky: [], poptavka: { zpusob: "oboji" },
+    balicky: [], nabidkyFirem: [], klicoveOtazky: [], vicepráce: [], vyuctovani: [],
+    rezervaMimoBalicky: 0, predani: null,
+    remeslnik: null, partner: null
+  }
+  ];
+
+  // [+] N1 — jediné místo, které čte state.aktivniProjektId. Všechny
+  // funkce, které dřív četly globální `projekt` přímo, si ho teď na
+  // začátku vezmou jako lokální proměnnou přes aktivniProjekt().
+  function aktivniProjekt() {
+    return projekty.filter(function (p) { return p.id === state.aktivniProjektId; })[0];
+  }
 
   /* ==========================================================
      GLOBÁLNÍ STAV
@@ -1897,9 +1950,14 @@
   }
 
   var state = {
-    faze: "F1",
+    // [+] N1 — nahrazuje dřívější state.faze jako "kde jsme". Fáze teď
+    // žije na projektu (viz projekty[].faze výše), aktivniProjektId říká
+    // jen KTERÝ projekt se právě dívá.
+    aktivniProjektId: "byt-3-1",
+    // [+] N1 — "moje-projekty" (přehled) nebo "projekt" (F1—F5 osa
+    // otevřeného projektu). Výchozí při načtení stránky je přehled.
+    pohled: "moje-projekty",
     role: "zakaznik",
-    projekt: projekt,
     scenar: null,
     krok: 0,
     ui: vychoziUi()
@@ -1907,16 +1965,26 @@
 
   var listeners = [];
 
+  // [+] N1 — patch.faze se dřív zapisoval přímo do state.faze. Fáze teď
+  // patří projektu, ne globálnímu stavu, takže setState() ji odbočí na
+  // aktivniProjekt().faze a ze zbytku patch objektu ji vyjme, ať
+  // Object.assign() na state nenechá ležet nepoužívanou kopii.
   function setState(patch) {
+    var projekt = aktivniProjekt();
     // Přepnutí fáze demo přepínačem vrátí řemeslnickou plochu na "Dnes" —
     // jinak by po přepnutí F3 → F4 zůstal viditelný podřazený pohled
     // (balíček/nabídka) z jiné fáze, který tam nedává smysl.
-    if ("faze" in patch && patch.faze !== state.faze) {
+    if ("faze" in patch && patch.faze !== projekt.faze) {
       state.ui.remeslnik.view = "dnes";
       state.ui.remeslnik.nabidkaOdeslana = false;
       state.ui.remeslnik.fakturaOdeslana = false;
       state.ui.remeslnik.zpravyProhlednuty = false;
       state.ui.remeslnik.pripominkyPridane = [];
+    }
+    if ("faze" in patch) {
+      projekt.faze = patch.faze;
+      patch = Object.assign({}, patch);
+      delete patch.faze;
     }
     Object.assign(state, patch);
     listeners.forEach(function (fn) { fn(state); });
@@ -1987,10 +2055,12 @@
      ========================================================== */
 
   function soucetPolozek() {
+    var projekt = aktivniProjekt();
     return projekt.polozky.reduce(function (sum, p) { return sum + p.castka; }, 0);
   }
 
   function soucetPak() {
+    var projekt = aktivniProjekt();
     return projekt.paky.reduce(function (sum, p) { return sum + p.uspora; }, 0);
   }
 
@@ -1999,10 +2069,12 @@
   // 1 181 000 — stejně jako soucetPak(), protože je to tentýž
   // rozpočet, jen rozepsaný po profesích místo po položkách.
   function balickyVybrane() {
+    var projekt = aktivniProjekt();
     return projekt.balicky.filter(function (b) { return b.nabidka; });
   }
 
   function balickyCekajici() {
+    var projekt = aktivniProjekt();
     return projekt.balicky.filter(function (b) { return !b.nabidka; });
   }
 
@@ -2011,6 +2083,7 @@
   }
 
   function soucetPoSestaveniTymu() {
+    var projekt = aktivniProjekt();
     var cekajici = balickyCekajici().reduce(function (sum, b) { return sum + b.odhad; }, 0);
     return soucetVybranychNabidek() + cekajici + projekt.rezervaMimoBalicky;
   }
@@ -2022,6 +2095,7 @@
   }
 
   function soucetVyuctovani() {
+    var projekt = aktivniProjekt();
     return projekt.vyuctovani.reduce(function (sum, r) { return sum + r.castka; }, rozpocetPoPakach());
   }
 
@@ -2030,11 +2104,13 @@
   // Generický přístup ke kandidátům na balíček i (viz projekt.balicky[i]
   // .kandidati) — nahrazuje dřívější elektro-specifické elektroKandidat().
   function balKandidat(i, id) {
+    var projekt = aktivniProjekt();
     var kandidati = projekt.balicky[i].kandidati;
     return kandidati && kandidati.filter(function (k) { return k.id === id; })[0];
   }
 
   function balVychoziKandidat(i) {
+    var projekt = aktivniProjekt();
     var kandidati = projekt.balicky[i].kandidati;
     return kandidati && kandidati.filter(function (k) { return k.vybrana; })[0];
   }
@@ -2053,6 +2129,7 @@
   // Elektro je jediný balíček, kde kandidáti nesou vlastní od/do —
   // ostatní balíčky mají jen jeden termín bez ohledu na kandidáta.
   function f3EfektivniBalicky() {
+    var projekt = aktivniProjekt();
     var vybranyId = state.ui.f3.vybrane[2];
     var zaklad = balVychoziKandidat(2);
     var kandidat = (vybranyId && balKandidat(2, vybranyId)) || zaklad;
@@ -2074,6 +2151,7 @@
   }
 
   function f3CenaBalicku(i) {
+    var projekt = aktivniProjekt();
     var b = projekt.balicky[i];
     if (!b.kandidati) return b.odhad;
     var sel = state.ui.f3.vybrane[i];
@@ -2082,6 +2160,7 @@
   }
 
   function f3Soucet() {
+    var projekt = aktivniProjekt();
     var celkem = 0;
     for (var i = 0; i < projekt.balicky.length; i++) celkem += f3CenaBalicku(i);
     return celkem + projekt.rezervaMimoBalicky;
@@ -2093,6 +2172,7 @@
   }
 
   function f3PocetSNabidkou() {
+    var projekt = aktivniProjekt();
     return projekt.balicky.filter(function (b) { return b.nabidka; }).length;
   }
 
@@ -2132,14 +2212,15 @@
   }
 
   function renderCell() {
+    var projekt = aktivniProjekt();
     var cellEl = document.querySelector("[data-cell]");
-    var cell = matrix[state.faze][state.role];
-    var faLabel = FAZE.filter(function (f) { return f.id === state.faze; })[0].label;
+    var cell = matrix[projekt.faze][state.role];
+    var faLabel = FAZE.filter(function (f) { return f.id === projekt.faze; })[0].label;
     var roLabel = ROLE.filter(function (r) { return r.id === state.role; })[0].label;
 
     cellEl.innerHTML =
       '<div class="cell__heading">' +
-        '<h2 class="cell__combo">' + state.faze + ' · ' + roLabel + '</h2>' +
+        '<h2 class="cell__combo">' + projekt.faze + ' · ' + roLabel + '</h2>' +
         (cell.active
           ? '<span class="cell__badge">' + faLabel + '</span>'
           : '<span class="cell__badge cell__badge--inactive">Mimo tuto fázi</span>') +
@@ -2149,6 +2230,7 @@
   }
 
   function renderDebug() {
+    var projekt = aktivniProjekt();
     var soucet = soucetPolozek();
     var strop = projekt.zadani.strop;
     document.querySelector('[data-debug="soucet"]').textContent = soucet.toLocaleString("en-US") + " CZK";
@@ -2159,8 +2241,9 @@
   }
 
   function render() {
+    var projekt = aktivniProjekt();
     document.body.setAttribute("data-role", state.role);
-    document.body.setAttribute("data-faze", state.faze);
+    document.body.setAttribute("data-faze", projekt.faze);
     var picker = document.querySelector('[data-chrome-picker]');
     var playback = document.querySelector('[data-chrome-playback]');
     // Při běhu scénáře chrome skrývá výběr role/fáze a nahradí ho
@@ -2174,7 +2257,7 @@
       picker.style.display = "contents";
       playback.style.display = "none";
       renderPills(document.querySelector('[data-pills="role"]'), ROLE, state.role, function (id) { setState({ role: id }); });
-      renderPills(document.querySelector('[data-pills="faze"]'), FAZE, state.faze, function (id) { setState({ faze: id }); });
+      renderPills(document.querySelector('[data-pills="faze"]'), FAZE, projekt.faze, function (id) { setState({ faze: id }); });
       renderPills(document.querySelector('[data-pills="scenar"]'), SCENAR_LIST, null, function (id) { scenarStart(id); });
     }
     renderCell();
@@ -2222,7 +2305,8 @@
       bodyHtml +
       (opts.note ? '<p class="block-card__note">' + opts.note + '</p>' : "") +
       (opts.cta ? '<div class="block-card__cta"><button type="button" class="pill-btn pill-btn--primary"' +
-        (opts.ctaAction ? ' data-action="' + opts.ctaAction + '"' : '') + '>' + opts.cta + '</button></div>' : "") +
+        (opts.ctaAction ? ' data-action="' + opts.ctaAction + '"' : '') +
+        (opts.ctaAttrs ? ' ' + opts.ctaAttrs : '') + '>' + opts.cta + '</button></div>' : "") +
     '</div>';
   }
 
@@ -2253,6 +2337,7 @@
   }
 
   function renderStateSample() {
+    var projekt = aktivniProjekt();
     var soucet = soucetPolozek();
     var strop = projekt.zadani.strop;
     var rozdilOdhad = soucet - strop;
@@ -2271,6 +2356,7 @@
   // --- B1 / B2 -------------------------------------------------------
 
   function renderB1() {
+    var projekt = aktivniProjekt();
     var z = projekt.zadani;
     var id = projekt.identita;
     var body = '<dl class="def-list">' +
@@ -2285,6 +2371,7 @@
   }
 
   function renderB2() {
+    var projekt = aktivniProjekt();
     var body = '<div class="question-list">' + projekt.klicoveOtazky.map(function (q) {
       return '<div class="row"><span class="row__label">' + q.tema +
         '<span class="row__impact">' + q.dopad + " " + czk(q.castka) + '</span></span></div>';
@@ -2295,6 +2382,7 @@
   // --- B3 — tři režimy -------------------------------------------------
 
   function renderB3Odhad() {
+    var projekt = aktivniProjekt();
     var soucet = soucetPolozek();
     var strop = projekt.zadani.strop;
     var rozdil = soucet - strop;
@@ -2311,6 +2399,7 @@
   }
 
   function renderB3PoNabidkach() {
+    var projekt = aktivniProjekt();
     var vybrane = balickyVybrane().map(function (b) {
       return { label: b.nazev, amount: czk(b.nabidka.castka), tag: b.nabidka.dodavatel };
     });
@@ -2331,6 +2420,7 @@
   }
 
   function renderB3Vyuctovani() {
+    var projekt = aktivniProjekt();
     var zaklad = rozpocetPoPakach();
     var items = [{ label: "Plan after levers", amount: czk(zaklad) }].concat(
       projekt.vyuctovani.map(function (r) {
@@ -2356,8 +2446,18 @@
 
   // --- B4 — dva režimy -------------------------------------------------
 
+  // [!] Zjištěno při N1 — B4 zákaznický čte materiál z
+  // projekt.partner.poptavky[0], ne z vlastního pole na projektu. Pro
+  // byt-3-1 to sedí (je to stejný materiál, jen jiný pohled — kostra
+  // §4 bod 5/komponenta 10). U projektů bez partnera (Chata Vranov,
+  // Zateplení Bystrc — brief §1 je má null) by to bez pojistky spadlo.
   function renderB4Zakaznicky() {
-    var items = projekt.partner.poptavky[0].polozky;
+    var projekt = aktivniProjekt();
+    var poptavka = projekt.partner && projekt.partner.poptavky[0];
+    if (!poptavka) {
+      return blockCard("B4", "", "customer", '<p class="block-card__note" style="margin:0;">Materials list isn\'t ready yet.</p>');
+    }
+    var items = poptavka.polozky;
     var body = '<details class="disclosure" open><summary>Materials list</summary><ul>' +
       items.map(function (m) {
         return '<li><span>' + m.nazev + '</span><span>' + partnerMnozstvi(m) + '</span></li>';
@@ -2367,6 +2467,7 @@
   }
 
   function renderB4Partnersky() {
+    var projekt = aktivniProjekt();
     var items = projekt.partner.poptavky[0].polozky;
     var rows = items.map(function (m) {
       var znacka = m.neurceno ? "Not specified" : (m.znacka || "—");
@@ -2388,6 +2489,7 @@
   // --- B5 — dva režimy -------------------------------------------------
 
   function renderB5Prehled() {
+    var projekt = aktivniProjekt();
     var rows = projekt.balicky.map(function (b) {
       var dotClass = "package-list__dot" + (b.nabidka ? " package-list__dot--filled" : "");
       return '<div class="row">' +
@@ -2401,6 +2503,7 @@
   }
 
   function renderB5Rozbaleny() {
+    var projekt = aktivniProjekt();
     var elektro = projekt.balicky[2]; // Electrical installation
     var body = '<dl class="def-list">' +
       '<dt>Scope</dt><dd>Full rewire, consumer unit, 38 outlets, certification</dd>' +
@@ -2467,6 +2570,7 @@
   }
 
   function renderB6(mode) {
+    var projekt = aktivniProjekt();
     var stavTrida = mode === "plan"
       ? function (i, b) { return b.nabidka ? "filled" : ""; }
       : function (i, b) { return i < 3 ? "done" : (i === 3 ? "active" : ""); };
@@ -2478,6 +2582,7 @@
   // --- B8 — tři režimy -------------------------------------------------
 
   function renderB8Vyber() {
+    var projekt = aktivniProjekt();
     var rows = projekt.paky.map(function (p) {
       return '<div class="lever-row">' +
         '<span class="lever-row__box"></span>' +
@@ -2509,6 +2614,7 @@
   }
 
   function renderB8Nabidky() {
+    var projekt = aktivniProjekt();
     var cards = projekt.nabidkyFirem.map(function (f) {
       var rozdilText = f.rozdilOdStropu < 0
         ? czk(Math.abs(f.rozdilOdStropu)) + " under your ceiling"
@@ -2637,7 +2743,10 @@
     { id: "S5", label: "Extra work" }
   ];
 
-  var VSECHNY_PAKY = projekt.paky.map(function (p) { return p.id; });
+  // Scénáře pořád jedou nad byt-3-1 (viz applyScenarKrok) a state je
+  // v tuhle chvíli běhu skriptu už definovaný, takže aktivniProjekt()
+  // tady bezpečně vrátí byt-3-1, přesně jako dřív bare `projekt`.
+  var VSECHNY_PAKY = aktivniProjekt().paky.map(function (p) { return p.id; });
 
   var SCENARIOS = {
     S1: {
@@ -2702,7 +2811,7 @@
   // a zároveň se scénář nepustí se zbytky z předchozího klikání.
   function applyScenarKrok(krok) {
     state.role = krok.role;
-    state.faze = krok.faze;
+    aktivniProjekt().faze = krok.faze;
     var vychozi = vychoziUi();
     Object.keys(krok.ui || {}).forEach(function (klic) {
       state.ui[klic] = Object.assign({}, vychozi[klic], krok.ui[klic]);
@@ -2710,6 +2819,12 @@
   }
 
   function scenarStart(id) {
+    // Scénáře pořád pracují nad jedním, výchozím projektem (byt-3-1) —
+    // start scénáře proto vždy přepne i pohled/aktivní projekt, ať se
+    // spustí ze "Moje projekty" nebo z libovolného jiného otevřeného
+    // projektu.
+    state.aktivniProjektId = "byt-3-1";
+    state.pohled = "projekt";
     state.scenar = id;
     state.krok = 0;
     applyScenarKrok(SCENARIOS[id].kroky[0]);
@@ -2743,9 +2858,11 @@
       '</div>';
   }
 
+  // [+] N1 — logo teď vede zpět na "Moje projekty". Zůstává vizuálně
+  // beze změny (stejná třída .kumu-wordmark), jen span → odkaz.
   function renderKumuTopbar() {
     return '<header class="kumu-topbar">' +
-      '<span class="kumu-wordmark">Kumu</span>' +
+      '<a href="#" class="kumu-wordmark" style="text-decoration:none;color:inherit;" data-action="goto-moje-projekty">Kumu</a>' +
       '<a href="#" class="kumu-login" data-action="noop">Log in</a>' +
     '</header>';
   }
@@ -2944,6 +3061,7 @@
   // --- F2 — živé B3/B8, ne statická ukázka z katalogu -----------------
 
   function renderF2Rozpocet() {
+    var projekt = aktivniProjekt();
     var vybrane = state.ui.f2.vybranePaky;
     var uspora = projekt.paky.filter(function (p) { return vybrane.indexOf(p.id) !== -1; })
       .reduce(function (sum, p) { return sum + p.uspora; }, 0);
@@ -2965,6 +3083,7 @@
   }
 
   function renderB8VyberInteractive() {
+    var projekt = aktivniProjekt();
     var vybrane = state.ui.f2.vybranePaky;
     var rows = projekt.paky.map(function (p) {
       var checked = vybrane.indexOf(p.id) !== -1;
@@ -3119,6 +3238,7 @@
   }
 
   function renderRemeslnikDnes() {
+    var projekt = aktivniProjekt();
     // Reminders zůstávají na Dnes napříč všemi fázemi. Zprávy samotné se
     // přesunuly do sheetu asistenta (sekce Messages) — tady zbývá jen
     // krátká indikace, dokud si je uživatel neotevře aspoň jednou.
@@ -3130,7 +3250,7 @@
     var extra = '<hr class="hairline" style="margin:var(--space-3) 0;" />' +
       renderRemeslnikReminders() +
       indikace;
-    if (state.faze === "F4") {
+    if (projekt.faze === "F4") {
       return '<p class="remeslnik-date">Byt 3+1, Královo Pole — electrical installation, day 8 of 10</p>' +
         '<div class="row-list"><div class="row"><span class="row__label">Today’s task</span><span class="row__amount--muted">Final circuit testing</span></div></div>' +
         '<div class="block-card__cta" style="display:flex;gap:8px;margin-top:var(--space-2);">' +
@@ -3140,7 +3260,7 @@
         '<p class="block-card__note" style="margin-top:var(--space-2);">Your bid was accepted on 20 Feb.</p>' +
         extra;
     }
-    if (state.faze === "F5") {
+    if (projekt.faze === "F5") {
       var f = projekt.remeslnik.faktury[0];
       return '<p class="remeslnik-date">Friday, 1 May</p>' +
         '<div class="opportunity-card" data-action="rem-open-faktura" style="cursor:pointer;">' +
@@ -3170,6 +3290,7 @@
   }
 
   function renderRemeslnikBalicek() {
+    var projekt = aktivniProjekt();
     var b = projekt.balicky[2]; // Electrical installation
     return '<dl class="def-list">' +
         '<dt>Scope</dt><dd>Full rewire, consumer unit, 38 outlets, certification</dd>' +
@@ -3181,6 +3302,7 @@
   }
 
   function renderRemeslnikNabidka() {
+    var projekt = aktivniProjekt();
     var ui = state.ui.remeslnik;
     var b = projekt.balicky[2];
     var header = '<div class="nabidka-header">' +
@@ -3217,6 +3339,7 @@
   }
 
   function renderRemeslnikProfil() {
+    var projekt = aktivniProjekt();
     var r = projekt.remeslnik;
     return '<h3 class="block-card__title" style="margin-top:0;">' + r.jmeno + '</h3>' +
       '<p class="block-card__note" style="margin-top:-8px;">' + r.obor + ' · ' + r.lokalita + ' · ' + r.hodnoceni + '</p>' +
@@ -3233,7 +3356,8 @@
   }
 
   function renderRemeslnikFaktury() {
-    if (state.faze === "F5") {
+    var projekt = aktivniProjekt();
+    if (projekt.faze === "F5") {
       var f = projekt.remeslnik.faktury[0];
       return '<div class="opportunity-card" data-action="rem-open-faktura" style="cursor:pointer;">' +
           '<span class="opportunity-card__badge">Ready to invoice</span>' +
@@ -3250,6 +3374,7 @@
   // výplň formuláře, ne rozpočtové číslo ze zdroje pravdy — proto tu je
   // jen "Due in 14 days" jako obvyklá konvence, ne konkrétní datum.
   function renderRemeslnikFakturaDetail() {
+    var projekt = aktivniProjekt();
     var ui = state.ui.remeslnik;
     var f = projekt.remeslnik.faktury[0];
     var b = projekt.balicky[2];
@@ -3431,6 +3556,7 @@
   }
 
   function renderPartnerMaterialy() {
+    var projekt = aktivniProjekt();
     var ui = state.ui.partner;
     var cards = projekt.partner.poptavky.map(function (p, pi) {
       var open = ui.otevrenaPoptavka === pi;
@@ -3541,6 +3667,7 @@
   // vodorovně, pod tím ohraničený box "Regional distribution". Data pro
   // rozložení po krajích nikde nejsou — box to přiznává, nepředstírá graf.
   function renderPartnerAgregat() {
+    var projekt = aktivniProjekt();
     var a = projekt.partner.agregat;
     var stats = [
       { label: "Projects in preparation this month", value: String(a.projektuVPriprave) },
@@ -3589,6 +3716,7 @@
   // pseudo-kartu „Selected bid“. Datum (fmtRange) se u ostatních
   // balíčků nemění podle kandidáta, takže je zobrazený jen u elektra.
   function renderF3Sekce(i) {
+    var projekt = aktivniProjekt();
     var b = projekt.balicky[i];
     var sel = state.ui.f3.vybrane[i];
     if (!b.kandidati) {
@@ -3615,6 +3743,7 @@
   }
 
   function renderF3TeamPanel() {
+    var projekt = aktivniProjekt();
     var f3 = state.ui.f3;
 
     if (f3.cesta === "naklic") {
@@ -3677,6 +3806,7 @@
   }
 
   function renderF3NaKlic() {
+    var projekt = aktivniProjekt();
     var vybranaFirma = state.ui.f3.vybranaFirma;
     var cards = projekt.nabidkyFirem.map(function (f, i) {
       var isSel = vybranaFirma === i;
@@ -3727,6 +3857,7 @@
   // --- F4 × zákazník — realizace (krok 7) ------------------------------
 
   function renderF4StageCard() {
+    var projekt = aktivniProjekt();
     var b = projekt.balicky[3]; // Plasterboard and surfaces — etapa 4, viz renderB6("status")
     var photos = [1, 2, 3].map(function () {
       return '<div class="photo-placeholder"><span class="photo-placeholder__label">Photo</span></div>';
@@ -3740,6 +3871,7 @@
   }
 
   function renderF4Budget() {
+    var projekt = aktivniProjekt();
     var zaklad = rozpocetPoPakach();
     var schvaleno = state.ui.f4.vicepraceSchvalena;
     var celkem = schvaleno ? zaklad + projekt.vicepráce[0].castka : zaklad;
@@ -3750,6 +3882,7 @@
   }
 
   function renderF4Vicepráce() {
+    var projekt = aktivniProjekt();
     var v = projekt.vicepráce[0];
     var f4 = state.ui.f4;
     var body = '<p>' + v.popis + '</p><p class="block-card__note">' + v.dopadNaTermin + '</p>';
@@ -3795,6 +3928,7 @@
   }
 
   function renderF5Hodnoceni() {
+    var projekt = aktivniProjekt();
     var rows = projekt.balicky.map(function (b) {
       return '<div class="row"><span class="row__label">' + b.realizator.jmeno + '<span class="row__tag">' + b.realizator.profese + '</span></span>' +
         '<span class="row__amount--muted">★★★★★</span></div>';
@@ -3818,6 +3952,7 @@
   // --- F4/F5 × partner — objednávka a spotřeba (krok 7) -----------------
 
   function renderPartnerObjednavka() {
+    var projekt = aktivniProjekt();
     var id = projekt.identita;
     var items = [
       { nazev: "Plasterboard", mnozstvi: "18 m²" },
@@ -3834,6 +3969,7 @@
   }
 
   function renderPartnerSpotreba() {
+    var projekt = aktivniProjekt();
     var s = projekt.partner.f5RealizovanaSpotreba;
     var items = [
       { label: "Proposed in the budget", amount: czk(s.navrzeno) },
@@ -3846,10 +3982,11 @@
   }
 
   function renderPartnerScreen() {
+    var projekt = aktivniProjekt();
     var content;
-    if (state.faze === "F4") {
+    if (projekt.faze === "F4") {
       content = '<div class="catalog__row">' + renderPartnerObjednavka() + '</div>';
-    } else if (state.faze === "F5") {
+    } else if (projekt.faze === "F5") {
       content = '<div class="catalog__row">' + renderPartnerSpotreba() + '</div>';
     } else {
       // Layout podle referenčního screenshotu: přehled nahoře na celou
@@ -3864,15 +4001,86 @@
     '</div>';
   }
 
+  // --- "Moje projekty" — vstupní obrazovka nad celou F1—F5 osou (N1) ----
+
+  // [+] Vlastní krátký text pro tuhle obrazovku — v žádném copy dokumentu
+  // není, protože obrazovka teprve tímhle briefem vzniká. Anglicky a ve
+  // stejném tónu jako kumu-copy-en.md (klidně, věcně, bez vykřičníků).
+  // Obecný podle fáze, ne dopočítaný z konkrétních dat balíčku/víceprací —
+  // to by u F4 muselo opakovat renderF4StageCard() a kreslit stejnou
+  // informaci podruhé jinak.
+  var MOJE_PROJEKTY_POZNAMKA = {
+    F1: "Finish the brief so we can put a budget together.",
+    F2: "Waiting on your decision on the cost-saving levers.",
+    F3: "Bids are coming in — build your team.",
+    F4: "Work is underway on site.",
+    F5: "Done — see the final numbers."
+  };
+
+  function renderMojeProjektyScreen() {
+    var cards = projekty.map(function (p) {
+      var faLabel = FAZE.filter(function (f) { return f.id === p.faze; })[0].label;
+      var hasItems = p.polozky.length > 0;
+      var soucet = p.polozky.reduce(function (sum, it) { return sum + it.castka; }, 0);
+      // Stejná logika jako renderF2Rozpocet() — součet položek minus
+      // vybrané páky. Výběr pák (state.ui.f2.vybranePaky) je ale pořád
+      // jedna sdílená plocha UI stavu, ne rozdělená po projektech, takže
+      // dává smysl jen pro projekt, který je právě otevřený; u ostatních
+      // se počítá bez pák (nic tam zatím nebylo zaškrtnuto).
+      var uspora = (p.id === state.aktivniProjektId)
+        ? p.paky.filter(function (pk) { return state.ui.f2.vybranePaky.indexOf(pk.id) !== -1; })
+            .reduce(function (sum, pk) { return sum + pk.uspora; }, 0)
+        : 0;
+      var celkem = soucet - uspora;
+      var strop = p.zadani.strop;
+      var amountText = (hasItems ? celkem.toLocaleString("en-US") : "—") + " / " + strop.toLocaleString("en-US") + " CZK";
+      var mode = hasItems ? (celkem > strop ? "over" : "under") : "neutral";
+      var body = totalRowHtml("Budget", amountText, mode);
+      return blockCard("", p.identita.nazev, null, body, {
+        badge: p.faze + " · " + faLabel,
+        note: MOJE_PROJEKTY_POZNAMKA[p.faze] || "",
+        cta: "Open project",
+        ctaAction: "otevrit-projekt",
+        ctaAttrs: 'data-project-id="' + p.id + '"'
+      });
+    }).join('');
+    return '<div class="screen">' +
+      renderKumuTopbar() +
+      '<div class="f2-screen" style="max-width:var(--container);">' +
+        '<h2 class="f5-done-heading">My projects</h2>' +
+        '<div class="catalog__row">' + cards + '</div>' +
+        '<div class="block-card__cta"><button type="button" class="pill-btn pill-btn--secondary" data-action="novy-projekt">+ New project</button></div>' +
+      '</div>' +
+    '</div>';
+  }
+
   function renderScreen() {
     var el = document.querySelector('[data-screen]');
     var scaffold = document.querySelector('[data-scaffold]');
-    var isZakaznikScreen = state.role === "zakaznik";
-    var isRemeslnikScreen = state.role === "remeslnik" && (state.faze === "F3" || state.faze === "F4" || state.faze === "F5");
-    var isPartnerScreen = state.role === "partner" && state.faze !== "F1";
+    // [+] N1 — nová obrazovka nad celou F1—F5 osou. Nemá roli ani fázi,
+    // takže se rozhoduje dřív a samostatně, ne jako čtvrtá větev matice.
+    if (state.pohled === "moje-projekty") {
+      el.innerHTML = renderMojeProjektyScreen();
+      scaffold.style.display = "none";
+      return;
+    }
+    var projekt = aktivniProjekt();
+    var isZakaznikScreen = state.role === "zakaznik" &&
+      // [+] N1 — F3—F5 zákaznická cesta předpokládá přesně sedm balíčků
+      // (kandidáti, harmonogram po indexech). Chata Vranov a Zateplení
+      // Bystrc balicky vůbec nemají — F1/F2 jim beze změny fungují,
+      // F3—F5 zatím ne. Stejný fallback na scaffold jako u řemeslníka/
+      // partnera níž, ne nová vizuální obrazovka mimo osm bloků.
+      (projekt.faze === "F1" || projekt.faze === "F2" || projekt.balicky.length > 0);
+    // [+] N1 — Chata Vranov a Zateplení Bystrc mají remeslnik/partner
+    // null (brief §4: sdílení mezi projekty se tady neřeší). Bez týhle
+    // podmínky by přepnutí role demo přepínačem na takovém projektu spadlo.
+    var isRemeslnikScreen = state.role === "remeslnik" && !!projekt.remeslnik &&
+      (projekt.faze === "F3" || projekt.faze === "F4" || projekt.faze === "F5");
+    var isPartnerScreen = state.role === "partner" && !!projekt.partner && projekt.faze !== "F1";
     if (isZakaznikScreen) {
       var zakaznikRenderers = { F1: renderF1Screen, F2: renderF2Screen, F3: renderF3Screen, F4: renderF4Screen, F5: renderF5Screen };
-      el.innerHTML = zakaznikRenderers[state.faze]();
+      el.innerHTML = zakaznikRenderers[projekt.faze]();
       scaffold.style.display = "none";
     } else if (isRemeslnikScreen) {
       el.innerHTML = renderRemeslnikScreen();
@@ -3889,6 +4097,7 @@
   // --- Obsluha kliknutí — jedno delegované místo pro celý dokument ----
 
   function handleAction(action, el) {
+    var projekt = aktivniProjekt();
     if (action === "noop") return;
     if (action === "f1-pilulka") {
       updateUi(function (ui) { ui.f1.pilulka = el.getAttribute("data-pilulka-id"); });
@@ -3914,6 +4123,27 @@
       setState({ faze: "F2" });
     } else if (action === "goto-f3") {
       setState({ faze: "F3" });
+    } else if (action === "goto-moje-projekty") {
+      setState({ pohled: "moje-projekty" });
+    } else if (action === "otevrit-projekt") {
+      setState({ aktivniProjektId: el.getAttribute("data-project-id"), pohled: "projekt" });
+    } else if (action === "novy-projekt") {
+      // [+] N1 §3 — žádný skutečný formulář, jen prázdný projekt na F1
+      // (kopie struktury Zateplení Bystrc bez dat), aby šlo ukázat, že
+      // "Moje projekty" umí přibývat. Dialog na F1 zadání doplní stejně
+      // jako u kteréhokoli jiného projektu.
+      var novyId = "novy-projekt-" + (projekty.length + 1);
+      projekty.push({
+        id: novyId,
+        faze: "F1",
+        identita: { nazev: "New project", plocha: 0, typ: "", lokalita: "" },
+        zadani: { strop: 0, terminDo: "", bydliBehem: false, jadroBourat: false, kuchynNaMiru: false, svepomoci: [], terminPevny: false },
+        polozky: [], paky: [], poptavka: { zpusob: "oboji" },
+        balicky: [], nabidkyFirem: [], klicoveOtazky: [], vicepráce: [], vyuctovani: [],
+        rezervaMimoBalicky: 0, predani: null,
+        remeslnik: null, partner: null
+      });
+      setState({ aktivniProjektId: novyId, pohled: "projekt" });
     } else if (action === "rem-nav") {
       updateUi(function (ui) { ui.remeslnik.view = el.getAttribute("data-view"); });
     } else if (action === "rem-open-balicek") {
