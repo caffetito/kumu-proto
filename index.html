@@ -1605,11 +1605,11 @@
       zpusob: "oboji"
     },
 
-    // Sedm balíčků z F3 (kumu-kostra.md §5). Názvy anglicky, přesně
+    // Osm jobů z F3 (kumu-kostra.md §5). Názvy anglicky, přesně
     // podle kumu-copy-en.md F3. Kde už dorazila a byla vybrána nabídka,
-    // je rovnou na balíčku (pole nabidka) — ne ve druhém, odděleném
+    // je rovnou na jobu (pole nabidka) — ne ve druhém, odděleném
     // seznamu, který by se musel párovat podle jména a mohl se rozejít.
-    // realizator — [+] Vymyšlené jméno a profese pro každý balíček,
+    // realizator — [+] Vymyšlené jméno a profese pro každý job,
     // odsouhlaseno autorkou (kroky 7). Odděleně od "nabidka.dodavatel",
     // který zůstává jako v kroku 6 — kdo skutečně dělá práci, se neváže
     // na to, jestli ve F3 "day 6" snímku dorazila nabídka. "Instalace
@@ -1617,8 +1617,8 @@
     // kumu-copy-en.md (Asistent, otázka "Who's doing the plumbing there?").
     //
     // kandidati[] — [+] Druhý (u elektra třetí) konkurenční kandidát na
-    // každý balíček s nabídkou, pro F3 karty výběru řemeslníka. Vymyšlené,
-    // odsouhlaseno autorkou (krok „candidate cards“). U každého balíčku
+    // každý job s nabídkou, pro F3 karty výběru řemeslníka. Vymyšlené,
+    // odsouhlaseno autorkou (krok „candidate cards“). U každého jobu
     // je "vybraná" varianta ta, jejíž částka odpovídá poli nabidka.castka
     // výše — součet pěti vybraných tak zůstává 564 000. U vodoinstalace
     // zůstává vybraný "Instalace Kříž", ne jméno ze snímku obrazovky
@@ -1626,43 +1626,69 @@
     // opakuje i mimo F3 (Asistent, viz výše), a kdyby ve F3 vyhrál někdo
     // jiný, ta věta by přestala sedět. "Vodní práce Praha" je tu jako
     // druhý, nevybraný kandidát. Elektro má navíc pole od/do — jediný
-    // balíček, kde výběr kandidáta posouvá harmonogram (kostra §5).
-    // dokonceno — [+] N2 „Jedna práce". Nové pole, jen na balíčcích, kde
+    // job, kde výběr kandidáta posouvá harmonogram (kostra §5).
+    // dokonceno — [+] N2 „Jedna práce". Nové pole, jen na jobech, kde
     // je etapa už za sebou (kostra §5 F4: "etapy 1—3 hotové, etapa 4
     // probíhá"). Slouží f4AktualniIndex() k obecnému nalezení "aktuálně
-    // probíhajícího" balíčku (první s nabidka a bez dokonceno) — dřív
-    // to bylo natvrdo balicky[3], vázané jen na Byt 3+1.
-    balicky: [
-      { nazev: "Demolition and waste removal", odhad: 85000, od: "2026-02-16", do: "2026-02-20", stav: "3 bids", nabidka: { castka: 82000, odchylka: -3000 }, realizator: { jmeno: "Bourací práce Novák", profese: "Demolition contractor" }, dokonceno: true,
+    // probíhajícího" jobu (první s nabidka a bez dokonceno) — dřív
+    // to bylo natvrdo joby[3], vázané jen na Byt 3+1.
+    // stavPopisek — [+] brief 04. Přejmenováno z původního "stav", aby
+    // se nepletlo s novým strojovým polem stavTrhu níž — tohle zůstává
+    // text do rozhraní ("3 bids", "Waiting on bids", "Postponed"),
+    // přesně jako dřív.
+    // zralost / stavTrhu — [+] brief 04. Dopočítané jednorázově podle
+    // pravidla v komentáři u funkce dopocitejStavJobu (brief 04, sekce 3):
+    // dokonceno → zadano/hotovo; nabidka a ne dokonceno → zadano/
+    // zadano-remeslnikovi; bez nabídky, ale stavPopisek řekne "Waiting
+    // on bids" → zadano/poptano; stavPopisek "Postponed" → napad/null.
+    // Zatím to nic neřídí (dokonceno pořád je zdroj pravdy) — brief 05
+    // na stavTrhu naváže render a dokonceno pak zmizí.
+    joby: [
+      { nazev: "Demolition and waste removal", odhad: 85000, od: "2026-02-16", do: "2026-02-20", stavPopisek: "3 bids", nabidka: { castka: 82000, odchylka: -3000 }, realizator: { jmeno: "Bourací práce Novák", profese: "Demolition contractor" }, dokonceno: true,
+        zralost: "zadano", stavTrhu: "hotovo",
         kandidati: [
           { id: "novak-demolice", jmeno: "Bourací práce Novák", castka: 82000, hodnoceni: "4.7", zakazek: 22, vybrana: true },
           { id: "boril", jmeno: "Bořil s.r.o.", castka: 89000, hodnoceni: "4.5", zakazek: 9, vybrana: false }
         ] },
-      { nazev: "Water and drainage", odhad: 95000, od: "2026-02-23", do: "2026-03-02", stav: "2 bids", nabidka: { castka: 98000, odchylka: 3000 }, realizator: { jmeno: "Instalace Kříž", profese: "Plumber" }, dokonceno: true,
+      { nazev: "Water and drainage", odhad: 95000, od: "2026-02-23", do: "2026-03-02", stavPopisek: "2 bids", nabidka: { castka: 98000, odchylka: 3000 }, realizator: { jmeno: "Instalace Kříž", profese: "Plumber" }, dokonceno: true,
+        zralost: "zadano", stavTrhu: "hotovo",
         kandidati: [
           { id: "instalace-kriz", jmeno: "Instalace Kříž", castka: 98000, hodnoceni: "4.8", zakazek: 24, vybrana: true },
           { id: "vodni-prace-praha", jmeno: "Vodní práce Praha", castka: 91000, hodnoceni: "4.6", zakazek: 15, vybrana: false }
         ] },
-      { nazev: "Electrical installation", odhad: 165000, od: "2026-03-02", do: "2026-03-13", stav: "3 bids", nabidka: { castka: 158000, odchylka: -7000, dodavatel: "Jiří Vaněk" }, realizator: { jmeno: "Jiří Vaněk", profese: "Electrician" }, dokonceno: true,
+      { nazev: "Electrical installation", odhad: 165000, od: "2026-03-02", do: "2026-03-13", stavPopisek: "3 bids", nabidka: { castka: 158000, odchylka: -7000, dodavatel: "Jiří Vaněk" }, realizator: { jmeno: "Jiří Vaněk", profese: "Electrician" }, dokonceno: true,
+        zralost: "zadano", stavTrhu: "hotovo",
         kandidati: [
           { id: "vanek", jmeno: "Jiří Vaněk", castka: 158000, hodnoceni: "4.8", zakazek: 31, od: "2026-03-02", do: "2026-03-13", vybrana: true },
           { id: "novotny", jmeno: "Pavel Novotný", castka: 149000, hodnoceni: "4.6", zakazek: 12, od: "2026-03-09", do: "2026-03-20", vybrana: false },
           { id: "elektro-maly", jmeno: "Elektro Malý", castka: 171000, hodnoceni: "4.5", zakazek: 7, od: "2026-03-02", do: "2026-03-13", vybrana: false }
         ] },
-      { nazev: "Plasterboard and surfaces", odhad: 174000, od: "2026-03-16", do: "2026-03-26", stav: "2 bids", nabidka: { castka: 181000, odchylka: 7000 }, realizator: { jmeno: "Sádrokartony Holý s.r.o.", profese: "Drylining contractor" },
+      { nazev: "Plasterboard and surfaces", odhad: 174000, od: "2026-03-16", do: "2026-03-26", stavPopisek: "2 bids", nabidka: { castka: 181000, odchylka: 7000 }, realizator: { jmeno: "Sádrokartony Holý s.r.o.", profese: "Drylining contractor" },
+        zralost: "zadano", stavTrhu: "zadano-remeslnikovi",
         kandidati: [
           { id: "sadrokartony-holy", jmeno: "Sádrokartony Holý s.r.o.", castka: 181000, hodnoceni: "4.7", zakazek: 19, vybrana: true },
           { id: "sucho-syn", jmeno: "Sucho & syn", castka: 176000, hodnoceni: "4.4", zakazek: 11, vybrana: false }
         ] },
-      { nazev: "Tiling and flooring", odhad: 388000, od: "2026-03-30", do: "2026-04-14", stav: "Waiting on bids", nabidka: null, realizator: { jmeno: "Tomáš Procházka", profese: "Tiler and flooring fitter" } },
-      { nazev: "Painting", odhad: 45000, od: "2026-04-15", do: "2026-04-20", stav: "3 bids", nabidka: { castka: 45000, odchylka: 0 }, realizator: { jmeno: "Malby Svoboda", profese: "Painter and decorator" },
+      { nazev: "Tiling and flooring", odhad: 388000, od: "2026-03-30", do: "2026-04-14", stavPopisek: "Waiting on bids", nabidka: null, realizator: { jmeno: "Tomáš Procházka", profese: "Tiler and flooring fitter" },
+        zralost: "zadano", stavTrhu: "poptano" },
+      { nazev: "Painting", odhad: 45000, od: "2026-04-15", do: "2026-04-20", stavPopisek: "3 bids", nabidka: { castka: 45000, odchylka: 0 }, realizator: { jmeno: "Malby Svoboda", profese: "Painter and decorator" },
+        zralost: "zadano", stavTrhu: "zadano-remeslnikovi",
         kandidati: [
           { id: "malby-svoboda", jmeno: "Malby Svoboda", castka: 45000, hodnoceni: "4.9", zakazek: 37, vybrana: true },
           { id: "malbari-kratochvil", jmeno: "Malíři Kratochvíl", castka: 42000, hodnoceni: "4.6", zakazek: 14, vybrana: false }
         ] },
-      { nazev: "Kitchen and doors", odhad: 130000, od: "2026-04-21", do: "2026-04-27", stav: "Waiting on bids", nabidka: null, realizator: { jmeno: "Kuchyně Bárta s.r.o.", profese: "Kitchen fitter" } }
+      { nazev: "Kitchen units and fitting", odhad: 130000, od: "2026-04-21", do: "2026-04-27",
+        stavPopisek: "Waiting on bids", nabidka: null, realizator: { jmeno: "Kuchyně Bárta s.r.o.", profese: "Kitchen fitter" },
+        zralost: "zadano", stavTrhu: "poptano" },
+      // [+] Rozdělení dřívějšího balíčku „Kitchen and doors". Dveře stojí
+      // samostatně, protože páka dvere-odlozit je odkládá jako celek — jako
+      // součást kuchyňského jobu by odložila i kuchyň. odhad: 0, protože
+      // páka je v demu zaškrtnutá; původní hodnota položky je 92 000.
+      { nazev: "Doors and frames", odhad: 0, od: null, do: null,
+        stavPopisek: "Postponed", nabidka: null, realizator: { jmeno: "Kuchyně Bárta s.r.o.", profese: "Kitchen fitter" },
+        zralost: "napad", stavTrhu: null }
     ],
-    rezervaMimoBalicky: 99000,
+    rezervaMimoJoby: 99000,
     predani: "2026-04-27",
 
     nabidkyFirem: [
@@ -1914,13 +1940,13 @@
       { id: "terasa-mensi", popis: "Smaller terrace", uspora: 38000, dopad: "Loses about a third of the covered area." }
     ],
     poptavka: { zpusob: "oboji" },
-    balicky: [], nabidkyFirem: [], klicoveOtazky: [], vicepráce: [], vyuctovani: [],
-    rezervaMimoBalicky: 0, predani: null,
+    joby: [], nabidkyFirem: [], klicoveOtazky: [], vicepráce: [], vyuctovani: [],
+    rezervaMimoJoby: 0, predani: null,
     remeslnik: null, partner: null
   },
   // [+] N2 „Jedna práce" — čísla nejsou v žádném zdroji, konzistentní
   // demo hodnoty odsouhlasené autorkou (brief 02, sekce 2). Jediný
-  // balíček (délka pole balicky === 1) je to, co celou cestu F1—F5
+  // job (délka pole joby === 1) je to, co celou cestu F1—F5
   // zjednodušuje — žádné skládání týmu, žádný harmonogram napříč
   // profesemi. partner zůstává null — napojení řeší brief 03.
   {
@@ -1947,10 +1973,11 @@
         uspora: 22000, dopad: "Slightly lower energy savings. Still qualifies for the subsidy." }
     ],
     poptavka: { zpusob: "oboji" },
-    balicky: [
+    joby: [
       { nazev: "External wall insulation", odhad: 314000, od: "2026-06-01", do: "2026-07-10",
-        stav: "3 bids", nabidka: { castka: 305000, odchylka: -9000 },
+        stavPopisek: "3 bids", nabidka: { castka: 305000, odchylka: -9000 },
         realizator: { jmeno: "Zateplovací systémy Dvořák", profese: "Facade insulation contractor" },
+        zralost: "zadano", stavTrhu: "zadano-remeslnikovi",
         kandidati: [
           { id: "dvorak-zatepleni", jmeno: "Zateplovací systémy Dvořák", castka: 305000, hodnoceni: "4.8", zakazek: 27, vybrana: true },
           { id: "fasady-brno", jmeno: "Fasády Brno s.r.o.", castka: 298000, hodnoceni: "4.5", zakazek: 41, vybrana: false },
@@ -1961,7 +1988,7 @@
     vyuctovani: [
       { nazev: "Less scaffolding time needed", castka: -6000, duvod: "" }
     ],
-    rezervaMimoBalicky: 0,
+    rezervaMimoJoby: 0,
     predani: "2026-07-10",
     remeslnik: null,
     partner: null
@@ -2018,10 +2045,10 @@
       f1: { pilulka: "napad", textZadany: "", odeslano: false, krokDialogu: 0, odpovedi: [], dialogDraft: "", pendingOdpoved: null, mysli: false },
       f2: { vybranePaky: [], poptavka: "oboji" },
       // F3 × řemeslník (krok 4). "view" drží i podřazené obrazovky
-      // balicek/nabidka, které nejsou samostatnou položkou spodní
+      // job/nabidka, které nejsou samostatnou položkou spodní
       // navigace — ta zvýrazní "Příležitosti", dokud se z nich
       // uživatel nevrátí. nabidkaCastka je null, dokud se pole
-      // needituje — zobrazí se pak odhad balíčku (165 000).
+      // needituje — zobrazí se pak odhad jobu (165 000).
       remeslnik: {
         view: "dnes",
         nabidkaCastka: null,
@@ -2032,7 +2059,7 @@
         // (partner.poptavky[i].montaz), samostatná od nabidkaCastka/
         // nabidkaOdeslana výš, ať se ta dvě odeslání nepletou, když
         // je view "montaz-nabidka". otevrenaMontazId drží id poptávky
-        // (partner.poptavky[i].id), ne balíčku.
+        // (partner.poptavky[i].id), ne jobu.
         otevrenaMontazId: null,
         montazCastka: null,
         montazPoznamka: null,
@@ -2080,9 +2107,9 @@
         zpravaSablona: null
       },
       // F3 × zákazník (krok 6). vybrane[i] drží id vybraného kandidáta
-      // z balicky[i].kandidati (každý balíček s nabídkou má víc karet na
+      // z joby[i].kandidati (každý job s nabídkou má víc karet na
       // výběr — viz „candidate cards“). Výchozí = ten kandidát u každého
-      // balíčku, který má vybrana: true — tedy přesně těch pět balíčků,
+      // jobu, který má vybrana: true — tedy přesně těch pět jobů,
       // které mají nabídku (kostra §5: "Vybráno 5 ze 7").
       f3: {
         cesta: "profese",
@@ -2210,28 +2237,35 @@
     return projekt.paky.reduce(function (sum, p) { return sum + p.uspora; }, 0);
   }
 
-  // Rozpočet po sestavení týmu (F3): pět vybraných nabídek + odhad
-  // dvou zbývajících balíčků + rezerva mimo balíčky. Musí dát
-  // 1 181 000 — stejně jako soucetPak(), protože je to tentýž
-  // rozpočet, jen rozepsaný po profesích místo po položkách.
-  function balickyVybrane() {
+  // [+] brief 04, sekce 2. Job se stavPopisek "Postponed" (dveře,
+  // odložené pákou dvere-odlozit) nesmí vystoupit v harmonogramu, v
+  // hodnocení ani v rozpočtu po sestavení týmu — filtruje se tady, na
+  // jednom místě, podle stavPopisek, ne podle nulového odhadu.
+  function jobyAktivni() {
     var projekt = aktivniProjekt();
-    return projekt.balicky.filter(function (b) { return b.nabidka; });
+    return projekt.joby.filter(function (j) { return j.stavPopisek !== "Postponed"; });
   }
 
-  function balickyCekajici() {
-    var projekt = aktivniProjekt();
-    return projekt.balicky.filter(function (b) { return !b.nabidka; });
+  // Rozpočet po sestavení týmu (F3): pět vybraných nabídek + odhad
+  // dvou zbývajících jobů + rezerva mimo joby. Musí dát
+  // 1 181 000 — stejně jako soucetPak(), protože je to tentýž
+  // rozpočet, jen rozepsaný po profesích místo po položkách.
+  function jobySVybranouNabidkou() {
+    return jobyAktivni().filter(function (b) { return b.nabidka; });
+  }
+
+  function jobyBezNabidky() {
+    return jobyAktivni().filter(function (b) { return !b.nabidka; });
   }
 
   function soucetVybranychNabidek() {
-    return balickyVybrane().reduce(function (sum, b) { return sum + b.nabidka.castka; }, 0);
+    return jobySVybranouNabidkou().reduce(function (sum, b) { return sum + b.nabidka.castka; }, 0);
   }
 
   function soucetPoSestaveniTymu() {
     var projekt = aktivniProjekt();
-    var cekajici = balickyCekajici().reduce(function (sum, b) { return sum + b.odhad; }, 0);
-    return soucetVybranychNabidek() + cekajici + projekt.rezervaMimoBalicky;
+    var cekajici = jobyBezNabidky().reduce(function (sum, b) { return sum + b.odhad; }, 0);
+    return soucetVybranychNabidek() + cekajici + projekt.rezervaMimoJoby;
   }
 
   // soucetPak() vrací úsporu z pák (207 000), ne rozpočet po jejich
@@ -2247,34 +2281,34 @@
 
   // --- F3 — skládání týmu (krok 6) -------------------------------------
 
-  // Generický přístup ke kandidátům na balíček i (viz projekt.balicky[i]
+  // Generický přístup ke kandidátům na job i (viz projekt.joby[i]
   // .kandidati) — nahrazuje dřívější elektro-specifické elektroKandidat().
-  function balKandidat(i, id) {
+  function jobKandidat(i, id) {
     var projekt = aktivniProjekt();
-    var kandidati = projekt.balicky[i].kandidati;
+    var kandidati = projekt.joby[i].kandidati;
     return kandidati && kandidati.filter(function (k) { return k.id === id; })[0];
   }
 
-  function balVychoziKandidat(i) {
+  function jobVychoziKandidat(i) {
     var projekt = aktivniProjekt();
-    var kandidati = projekt.balicky[i].kandidati;
+    var kandidati = projekt.joby[i].kandidati;
     return kandidati && kandidati.filter(function (k) { return k.vybrana; })[0];
   }
 
   // [+] N2 „Jedna práce" — sebe-opravné čtení vybraného kandidáta.
   // state.ui.f3.vybrane je sdílený stav napříč projekty (kostra §1 na
   // projekty nerozdělený), takže po přepnutí na jiný projekt může
-  // pořád držet id kandidáta z předchozího balíčku, který v tomhle
-  // vůbec neexistuje. Když k tomu dojde (nebo když se na balíček ještě
+  // pořád držet id kandidáta z předchozího jobu, který v tomhle
+  // vůbec neexistuje. Když k tomu dojde (nebo když se na job ještě
   // nekliklo), spadne to na kandidáta s vybrana: true — přesně to, co
   // by ukázal čerstvě otevřený projekt.
   function f3VybranyId(i) {
     var projekt = aktivniProjekt();
-    var b = projekt.balicky[i];
+    var b = projekt.joby[i];
     if (!b || !b.kandidati) return null;
     var sel = state.ui.f3.vybrane[i];
-    if (sel && balKandidat(i, sel)) return sel;
-    var vychozi = balVychoziKandidat(i);
+    if (sel && jobKandidat(i, sel)) return sel;
+    var vychozi = jobVychoziKandidat(i);
     return vychozi ? vychozi.id : null;
   }
 
@@ -2284,20 +2318,21 @@
     return d.toISOString().slice(0, 10);
   }
 
-  // Balíčky s daty přepočítanými podle toho, kterého elektrikáře má
-  // zákazník právě vybraného. projekt.balicky se nemění — tohle je jen
+  // Joby s daty přepočítanými podle toho, kterého elektrikáře má
+  // zákazník právě vybraného. projekt.joby se nemění — tohle je jen
   // odvozený pohled pro harmonogram a levý sloupec F3. Základ (0 dní
   // posunu) je ten kandidát na elektro, který má vybrana: true (Vaněk),
   // protože na jeho termínu jsou postavené všechny ostatní datumy v §2.
-  // Elektro je jediný balíček, kde kandidáti nesou vlastní od/do —
-  // ostatní balíčky mají jen jeden termín bez ohledu na kandidáta.
-  function f3EfektivniBalicky() {
-    var projekt = aktivniProjekt();
+  // Elektro je jediný job, kde kandidáti nesou vlastní od/do —
+  // ostatní joby mají jen jeden termín bez ohledu na kandidáta.
+  // Vychází z jobyAktivni(), ne z projekt.joby přímo — job „Doors and
+  // frames“ (Postponed, od/do null) by jinak spadl do posunu dat níž.
+  function f3EfektivniJoby() {
     var vybranyId = f3VybranyId(2);
-    var zaklad = balVychoziKandidat(2);
-    var kandidat = (vybranyId && balKandidat(2, vybranyId)) || zaklad;
+    var zaklad = jobVychoziKandidat(2);
+    var kandidat = (vybranyId && jobKandidat(2, vybranyId)) || zaklad;
     var posun = Math.round((new Date(kandidat.do + "T00:00:00") - new Date(zaklad.do + "T00:00:00")) / 86400000);
-    return projekt.balicky.map(function (b, i) {
+    return jobyAktivni().map(function (b, i) {
       if (i === 2) {
         return Object.assign({}, b, { od: kandidat.od, do: kandidat.do });
       }
@@ -2309,23 +2344,24 @@
   }
 
   function f3EfektivniPredani() {
-    var balicky = f3EfektivniBalicky();
-    return balicky[balicky.length - 1].do;
+    var joby = f3EfektivniJoby();
+    return joby[joby.length - 1].do;
   }
 
-  function f3CenaBalicku(i) {
+  function f3CenaJobu(i) {
     var projekt = aktivniProjekt();
-    var b = projekt.balicky[i];
+    var b = projekt.joby[i];
     if (!b.kandidati) return b.odhad;
-    var k = balKandidat(i, f3VybranyId(i));
+    var k = jobKandidat(i, f3VybranyId(i));
     return k ? k.castka : b.odhad;
   }
 
   function f3Soucet() {
     var projekt = aktivniProjekt();
+    var joby = jobyAktivni();
     var celkem = 0;
-    for (var i = 0; i < projekt.balicky.length; i++) celkem += f3CenaBalicku(i);
-    return celkem + projekt.rezervaMimoBalicky;
+    for (var i = 0; i < joby.length; i++) celkem += f3CenaJobu(i);
+    return celkem + projekt.rezervaMimoJoby;
   }
 
   function f3PocetVybranych() {
@@ -2335,7 +2371,7 @@
 
   function f3PocetSNabidkou() {
     var projekt = aktivniProjekt();
-    return projekt.balicky.filter(function (b) { return b.nabidka; }).length;
+    return projekt.joby.filter(function (b) { return b.nabidka; }).length;
   }
 
   function czk(castka) {
@@ -2528,7 +2564,7 @@
       // zadani jedné práce ta pole vůbec nemá (viz datový model výše).
       // Scope bere jméno rovnou z balíčku, je to jediná práce.
       body = '<dl class="def-list">' +
-        '<dt>Scope</dt><dd>' + (projekt.balicky[0] ? projekt.balicky[0].nazev : "—") + '</dd>' +
+        '<dt>Scope</dt><dd>' + (projekt.joby[0] ? projekt.joby[0].nazev : "—") + '</dd>' +
         '<dt>Floor area</dt><dd>' + id.plocha + ' m²</dd>' +
         '<dt>Deadline</dt><dd>' + z.terminDo + '</dd>' +
         '<dt>Budget ceiling</dt><dd>' + czk(z.strop) + '</dd>' +
@@ -2576,13 +2612,13 @@
 
   function renderB3PoNabidkach() {
     var projekt = aktivniProjekt();
-    var vybrane = balickyVybrane().map(function (b) {
+    var vybrane = jobySVybranouNabidkou().map(function (b) {
       return { label: b.nazev, amount: czk(b.nabidka.castka), tag: b.nabidka.dodavatel };
     });
-    var cekajici = balickyCekajici().map(function (b) {
+    var cekajici = jobyBezNabidky().map(function (b) {
       return { label: b.nazev, amount: czk(b.odhad), tag: "estimate", amountClass: "row__amount--muted" };
     });
-    var items = vybrane.concat(cekajici).concat([{ label: "Contingency", amount: czk(projekt.rezervaMimoBalicky) }]);
+    var items = vybrane.concat(cekajici).concat([{ label: "Contingency", amount: czk(projekt.rezervaMimoJoby) }]);
     var celkem = soucetPoSestaveniTymu();
     var strop = projekt.zadani.strop;
     var rezerva = strop - celkem;
@@ -2665,13 +2701,12 @@
   // --- B5 — dva režimy -------------------------------------------------
 
   function renderB5Prehled() {
-    var projekt = aktivniProjekt();
-    var rows = projekt.balicky.map(function (b) {
+    var rows = jobyAktivni().map(function (b) {
       var dotClass = "package-list__dot" + (b.nabidka ? " package-list__dot--filled" : "");
       return '<div class="row">' +
         '<span class="row__label">' + b.nazev + '<span class="row__meta"> · ' + fmtRange(b.od, b.do) + '</span></span>' +
         '<span class="row__amount">' + czk(b.odhad) +
-          '<span class="row__status"><span class="' + dotClass + '"></span>' + b.stav + '</span>' +
+          '<span class="row__status"><span class="' + dotClass + '"></span>' + b.stavPopisek + '</span>' +
         '</span>' +
       '</div>';
     }).join('');
@@ -2680,7 +2715,7 @@
 
   function renderB5Rozbaleny() {
     var projekt = aktivniProjekt();
-    var elektro = projekt.balicky[2]; // Electrical installation
+    var elektro = projekt.joby[2]; // Electrical installation
     var body = '<dl class="def-list">' +
       '<dt>Scope</dt><dd>Full rewire, consumer unit, 38 outlets, certification</dd>' +
       '<dt>Dates</dt><dd>' + fmtRange(elektro.od, elektro.do) + '</dd>' +
@@ -2695,13 +2730,16 @@
   // [+] Zkrácené popisky nad pruhy — autorčin obrázek je zkracuje
   // ("Water & drainage" místo "Water and drainage" atd.), aby se
   // vešly nad úzký sloupec. Používá i panel „Your team“ (stejný
-  // balíček = stejná zkrácená nálepka všude, nekreslí se podruhé jinak).
+  // job = stejná zkrácená nálepka všude, nekreslí se podruhé jinak).
   // [!] Zjištěno při N2 — bývalo to pole podle indexu (B6_KRATKE_LABELY
-  // [i]), což jsou jména sedmi balíčků Byt 3+1 na pevných pozicích 0—6.
-  // Zateplení Bystrc má na indexu 0 úplně jiný balíček ("External wall
+  // [i]), což jsou jména sedmi jobů Byt 3+1 na pevných pozicích 0—6.
+  // Zateplení Bystrc má na indexu 0 úplně jiný job ("External wall
   // insulation"), takže by mu bez opravy ukázalo popisek "Demolition".
-  // Přepsáno na mapu podle jména balíčku — nenajde-li se, spadne na
+  // Přepsáno na mapu podle jména jobu — nenajde-li se, spadne na
   // celé jméno samo (viz použití níž), místo cizího popisku.
+  // [+] brief 04 — klíč "Kitchen and doors" přejmenován na "Kitchen
+  // units and fitting" (job se rozdělil, viz projekt.joby výš); krátký
+  // popisek zůstává stejný, ať se sloupec v gridu vizuálně nezmění.
   var B6_KRATKE_LABELY = {
     "Demolition and waste removal": "Demolition",
     "Water and drainage": "Water & drainage",
@@ -2709,13 +2747,13 @@
     "Plasterboard and surfaces": "Plasterboard",
     "Tiling and flooring": "Tiling & flooring",
     "Painting": "Painting",
-    "Kitchen and doors": "Kitchen & doors"
+    "Kitchen units and fitting": "Kitchen & doors"
   };
 
   // Ikony kategorií pro panel „Your team“ — [+] tahové, jednobarevné
   // (currentColor), bez dekorativních barev podle kandidáta/profese.
   // Konkrétní ikonový set kostra nechává „doladit později" (§7); tohle
-  // je funkční zástupný set ve stejném pořadí jako projekt.balicky.
+  // je funkční zástupný set ve stejném pořadí jako projekt.joby.
   var TEAM_SLOT_IKONY = [
     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 4l12 12M16 4L4 16"/></svg>',
     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3c3 4 5 6.8 5 9.2a5 5 0 0 1-10 0C5 9.8 7 7 10 3z"/></svg>',
@@ -2731,12 +2769,12 @@
   }
 
   // Sdílené tělo B6 — rozsah dat nahoře, pak sloupce (popisek nad
-  // pruhem, šířka pruhu úměrná délce balíčku přes flex-grow). stavTrida
-  // dostane index a balíček, vrátí modifikátor pruhu (nebo "" pro
+  // pruhem, šířka pruhu úměrná délce jobu přes flex-grow). stavTrida
+  // dostane index a job, vrátí modifikátor pruhu (nebo "" pro
   // výchozí obrysový stav) — stejná sémantika jako dřívější
   // .timeline__segment--done/--active/--filled, jen v novém tvaru.
-  function renderB6Grid(balicky, rangeStart, rangeEnd, stavTrida) {
-    var cols = balicky.map(function (b, i) {
+  function renderB6Grid(joby, rangeStart, rangeEnd, stavTrida) {
+    var cols = joby.map(function (b, i) {
       var mod = stavTrida ? stavTrida(i, b) : "";
       return '<div class="b6-col" style="flex:' + b6Dny(b.od, b.do) + ' 1 0;">' +
         '<div class="b6-col__label">' + (B6_KRATKE_LABELY[b.nazev] || b.nazev) + '</div>' +
@@ -2762,7 +2800,8 @@
     var stavTrida = mode === "plan"
       ? function (i, b) { return b.nabidka ? "filled" : ""; }
       : function (i) { return i < aktualni ? "done" : (i === aktualni ? "active" : ""); };
-    var body = renderB6Grid(projekt.balicky, projekt.balicky[0].od, projekt.predani, stavTrida) +
+    var joby = jobyAktivni();
+    var body = renderB6Grid(joby, joby[0].od, projekt.predani, stavTrida) +
       renderB6Footer(projekt.predani);
     return blockCard("B6", "Schedule", mode === "plan" ? "plan" : "with status", body);
   }
@@ -2960,7 +2999,7 @@
         { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: {}, vybranaFirma: null } }, popis: "Skládání týmu — klikněte na tři nabídky naživo, panel se plní před očima." },
         { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: { 0: "novak-demolice", 1: "instalace-kriz", 2: "vanek" }, vybranaFirma: null } }, popis: "Řádek „nebo jedna firma“ — zkuste přepnout na klíč a zpět." },
         { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Řemeslník — plocha, záložka Dnes." },
-        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "balicek", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Balíček práce — elektroinstalace." },
+        { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "job", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Balíček práce — elektroinstalace." },
         { role: "remeslnik", faze: "F3", ui: { remeslnik: { view: "nabidka", nabidkaCastka: 158000, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Nabídka — cena upravená 165 000 → 158 000 Kč." },
         { role: "zakaznik", faze: "F3", ui: { f3: { cesta: "profese", vybrane: { 0: "novak-demolice", 1: "instalace-kriz", 2: "vanek", 3: "sadrokartony-holy", 5: "malby-svoboda" }, vybranaFirma: null } }, popis: "Elektroinstalace — tři nabídky, Jiří Vaněk vybraný." },
         { role: "partner", faze: "F2", ui: { partner: { otevrenaPoptavka: 0 } }, popis: "Partner — přehled a poptávky, „Byt 3+1“ rozbalená." },
@@ -3359,14 +3398,14 @@
 
   // --- F3 × řemeslník — plocha a navigace (krok 4) --------------------
 
-  // [+] N2 „Jedna práce" — obecné nalezení balíčku, který patří
+  // [+] N2 „Jedna práce" — obecné nalezení jobu, který patří
   // právě přihlášenému řemeslníkovi, místo natvrdo zapsaného
-  // balicky[2] (platilo jen pro Jiřího Vaňka na Byt 3+1). Spároval
-  // podle jména — projekt.remeslnik a balicky[i].realizator jsou dnes
+  // joby[2] (platilo jen pro Jiřího Vaňka na Byt 3+1). Spároval
+  // podle jména — projekt.remeslnik a joby[i].realizator jsou dnes
   // dvě oddělené věci (viz komentář u pole kandidati výše), tohle je
   // najde přes to jediné, co obě sdílí.
-  function remeslnikuvBalicek(projekt) {
-    return projekt.remeslnik && projekt.balicky.filter(function (b) {
+  function remeslnikuvJob(projekt) {
+    return projekt.remeslnik && projekt.joby.filter(function (b) {
       return b.realizator && b.realizator.jmeno === projekt.remeslnik.jmeno;
     })[0];
   }
@@ -3404,7 +3443,7 @@
 
   // [+] Reminders a Messages na záložce Dnes — samostatné scriptované
   // sekce mimo datový model projektu, stejná povaha jako ASISTENT výše.
-  // Statické natvrdo, žádné napojení na projekt.balicky ani kalendář.
+  // Statické natvrdo, žádné napojení na projekt.joby ani kalendář.
   var REMINDERS_DEMO = [
     { cas: "Tomorrow, 8:00", text: "Start on Královo Pole — electrical rough-in" },
     { cas: "Friday", text: "Revision in Bystrc, moved to 6 March" },
@@ -3490,7 +3529,7 @@
 
   function renderRemeslnikNav() {
     var ui = state.ui.remeslnik;
-    var active = (ui.view === "balicek" || ui.view === "nabidka" || ui.view === "montaz-nabidka") ? "prilezitosti" : (ui.view === "faktura-detail" ? "faktury" : ui.view);
+    var active = (ui.view === "job" || ui.view === "nabidka" || ui.view === "montaz-nabidka") ? "prilezitosti" : (ui.view === "faktura-detail" ? "faktury" : ui.view);
     var tabs = [
       { id: "dnes", label: "Today" },
       { id: "prilezitosti", label: "Opportunities" },
@@ -3563,7 +3602,7 @@
           '</div>';
         }).join('')
       : "";
-    return '<div class="opportunity-card" data-action="rem-open-balicek" style="cursor:pointer;">' +
+    return '<div class="opportunity-card" data-action="rem-open-job" style="cursor:pointer;">' +
         '<span class="opportunity-card__badge">Bid ready</span>' +
         '<div class="opportunity-card__title">Electrical installation</div>' +
         '<div class="opportunity-card__meta">3-room flat · Královo Pole</div>' +
@@ -3572,9 +3611,9 @@
       '<p class="block-card__note">2 more opportunities nearby.</p>';
   }
 
-  function renderRemeslnikBalicek() {
+  function renderRemeslnikJob() {
     var projekt = aktivniProjekt();
-    var b = remeslnikuvBalicek(projekt);
+    var b = remeslnikuvJob(projekt);
     return '<dl class="def-list">' +
         '<dt>Scope</dt><dd>Full rewire, consumer unit, 38 outlets, certification</dd>' +
         '<dt>Dates</dt><dd>' + fmtRange(b.od, b.do) + '</dd>' +
@@ -3587,7 +3626,7 @@
   function renderRemeslnikNabidka() {
     var projekt = aktivniProjekt();
     var ui = state.ui.remeslnik;
-    var b = remeslnikuvBalicek(projekt);
+    var b = remeslnikuvJob(projekt);
     var header = '<div class="nabidka-header">' +
         '<div class="nabidka-header__title">' + b.nazev + '</div>' +
         '<div class="nabidka-header__meta">3-room flat · Královo Pole</div>' +
@@ -3626,7 +3665,7 @@
   // explicitně žádá — "zjednodušená verze"). Zapisuje přímo do
   // partner.poptavky[i].montaz.bidy[], ne do zvláštní kopie —
   // konkrétně do bidu, který má vybrany: true (stejná konvence jako
-  // "vybraná" nabídka jinde v souboru — viz balVychoziKandidat).
+  // "vybraná" nabídka jinde v souboru — viz jobVychoziKandidat).
   function renderRemeslnikMontazNabidka() {
     var ui = state.ui.remeslnik;
     var pd = partnerData();
@@ -3696,7 +3735,7 @@
     var projekt = aktivniProjekt();
     var ui = state.ui.remeslnik;
     var f = projekt.remeslnik.faktury[0];
-    var b = remeslnikuvBalicek(projekt);
+    var b = remeslnikuvJob(projekt);
     if (ui.fakturaOdeslana) {
       return '<p class="block-card__title" style="margin-top:var(--space-3);">Invoice sent</p>' +
         '<p class="block-card__note">' + czk(f.castka) + ' for ' + f.projekt + '.</p>' +
@@ -3811,7 +3850,7 @@
     var content;
     if (ui.view === "dnes") content = renderRemeslnikDnes();
     else if (ui.view === "prilezitosti") content = renderRemeslnikPrilezitosti();
-    else if (ui.view === "balicek") content = renderRemeslnikBalicek();
+    else if (ui.view === "job") content = renderRemeslnikJob();
     else if (ui.view === "nabidka") content = renderRemeslnikNabidka();
     else if (ui.view === "montaz-nabidka") content = renderRemeslnikMontazNabidka();
     else if (ui.view === "profil") content = renderRemeslnikProfil();
@@ -4168,28 +4207,28 @@
   }
 
   function renderF3Harmonogram() {
-    var balicky = f3EfektivniBalicky();
+    var joby = f3EfektivniJoby();
     var vybrane = state.ui.f3.vybrane;
-    var rangeStart = balicky[0].od;
-    var rangeEnd = balicky[balicky.length - 1].do;
+    var rangeStart = joby[0].od;
+    var rangeEnd = joby[joby.length - 1].do;
     var stavTrida = function (i, b) {
       return (b.kandidati && vybrane[i]) ? "filled" : "";
     };
     return '<div class="block-card">' +
       '<div class="block-card__kicker"><span class="microlabel">B6 · schedule</span></div>' +
-      renderB6Grid(balicky, rangeStart, rangeEnd, stavTrida) +
+      renderB6Grid(joby, rangeStart, rangeEnd, stavTrida) +
       renderB6Footer(rangeEnd) +
     '</div>';
   }
 
-  // Karty kandidátů jsou stejná komponenta pro všech pět balíčků s
+  // Karty kandidátů jsou stejná komponenta pro všech pět jobů s
   // nabídkou (kostra §4 „Prvek z inventáře se nekreslí znovu jinak“) —
   // dřív měl jen elektro skutečný výběr ze dvou, ostatní jednu
   // pseudo-kartu „Selected bid“. Datum (fmtRange) se u ostatních
-  // balíčků nemění podle kandidáta, takže je zobrazený jen u elektra.
+  // jobů nemění podle kandidáta, takže je zobrazený jen u elektra.
   function renderF3Sekce(i) {
     var projekt = aktivniProjekt();
-    var b = projekt.balicky[i];
+    var b = projekt.joby[i];
     var sel = f3VybranyId(i);
     if (!b.kandidati) {
       return '<div class="f3-section f3-section--suppressed">' +
@@ -4209,7 +4248,7 @@
       '</div>';
     }).join('');
     return '<div class="f3-section">' +
-      '<div class="f3-section__head"><span class="f3-section__title">' + b.nazev + '</span><span class="f3-section__meta">' + b.stav + '</span></div>' +
+      '<div class="f3-section__head"><span class="f3-section__title">' + b.nazev + '</span><span class="f3-section__meta">' + b.stavPopisek + '</span></div>' +
       '<div class="candidate-row">' + kandidatiHtml + '</div>' +
     '</div>';
   }
@@ -4232,9 +4271,10 @@
     }
 
     var vybrane = f3.vybrane;
-    var slots = projekt.balicky.map(function (b, i) {
+    var joby = jobyAktivni();
+    var slots = joby.map(function (b, i) {
       var sel = vybrane[i];
-      var k = sel && b.kandidati && balKandidat(i, sel);
+      var k = sel && b.kandidati && jobKandidat(i, sel);
       var nameHtml = k
         ? '<span class="team-slot__name">' + k.jmeno + '</span>'
         : '<span class="team-slot__empty">' + (b.kandidati ? "Choose someone" : "Waiting on bids") + '</span>';
@@ -4249,18 +4289,18 @@
     }).join('');
 
     var vybraniIdx = [], nevybraniIdx = [];
-    for (var i = 0; i < projekt.balicky.length; i++) { (vybrane[i] ? vybraniIdx : nevybraniIdx).push(i); }
-    var souctVybranych = vybraniIdx.reduce(function (s, i) { return s + f3CenaBalicku(i); }, 0);
-    var souctNevybranych = nevybraniIdx.reduce(function (s, i) { return s + f3CenaBalicku(i); }, 0);
+    for (var i = 0; i < joby.length; i++) { (vybrane[i] ? vybraniIdx : nevybraniIdx).push(i); }
+    var souctVybranych = vybraniIdx.reduce(function (s, i) { return s + f3CenaJobu(i); }, 0);
+    var souctNevybranych = nevybraniIdx.reduce(function (s, i) { return s + f3CenaJobu(i); }, 0);
     var celkem = f3Soucet();
     var strop = projekt.zadani.strop;
     var rozdil = celkem - strop;
     var nejlevnejsiFirma = Math.min.apply(null, projekt.nabidkyFirem.map(function (f) { return f.castka; }));
-    // "Kompletní" = vybraný kandidát u všech pěti balíčků, které vůbec
-    // mají nabídku — ne u všech sedmi. Dva balíčky (obklady a podlahy,
-    // kuchyň a dveře) nemají kandidáty vůbec, takže "7 z 7" by nikdy
+    // "Kompletní" = vybraný kandidát u všech pěti jobů, které vůbec
+    // mají nabídku — ne u všech sedmi. Dva joby (obklady a podlahy,
+    // kuchyň) nemají kandidáty vůbec, takže "7 z 7" by nikdy
     // nenastalo a tlačítko by zůstalo navždy neaktivní.
-    var kompletni = projekt.balicky.every(function (b, i) { return !b.kandidati || !!vybrane[i]; });
+    var kompletni = joby.every(function (b, i) { return !b.kandidati || !!vybrane[i]; });
 
     return '<div class="team-panel">' +
       '<div class="team-panel__label">Draft</div>' +
@@ -4269,7 +4309,7 @@
       '<div class="team-panel__totals">' +
         '<div class="row"><span class="row__label">' + vybraniIdx.length + ' of 7 chosen</span><span class="row__amount">' + czk(souctVybranych) + '</span></div>' +
         '<div class="row"><span class="row__label">Estimate for the rest</span><span class="row__amount row__amount--muted">' + czk(souctNevybranych) + '</span></div>' +
-        '<div class="row"><span class="row__label">Contingency</span><span class="row__amount">' + czk(projekt.rezervaMimoBalicky) + '</span></div>' +
+        '<div class="row"><span class="row__label">Contingency</span><span class="row__amount">' + czk(projekt.rezervaMimoJoby) + '</span></div>' +
         totalRowHtml("Total so far", czk(celkem), rozdil > 0 ? "over" : "under") +
       '</div>' +
       '<div class="team-panel__cta"><button type="button" class="pill-btn pill-btn--primary" data-action="f3-confirm-team"' + (kompletni ? "" : " disabled") + '>Confirm your team</button></div>' +
@@ -4357,20 +4397,20 @@
   // --- F4 × zákazník — realizace (krok 7) ------------------------------
 
   // [+] N2 „Jedna práce" — obecné nalezení "aktuálně probíhajícího"
-  // balíčku (kostra §5 F4: "etapy 1—3 hotové, etapa 4 probíhá") místo
+  // jobu (kostra §5 F4: "etapy 1—3 hotové, etapa 4 probíhá") místo
   // natvrdo zapsaného indexu 3, který platil jen pro Byt 3+1. První
-  // balíček s nabídkou, který ještě nemá dokonceno: true — viz pole
-  // dokonceno na balicky[0..2] výše. Používá i renderB6("status").
+  // job s nabídkou, který ještě nemá dokonceno: true — viz pole
+  // dokonceno na joby[0..2] výše. Používá i renderB6("status").
   function f4AktualniIndex(projekt) {
-    for (var i = 0; i < projekt.balicky.length; i++) {
-      if (projekt.balicky[i].nabidka && !projekt.balicky[i].dokonceno) return i;
+    for (var i = 0; i < projekt.joby.length; i++) {
+      if (projekt.joby[i].nabidka && !projekt.joby[i].dokonceno) return i;
     }
-    return projekt.balicky.length - 1;
+    return projekt.joby.length - 1;
   }
 
   function renderF4StageCard() {
     var projekt = aktivniProjekt();
-    var b = projekt.balicky[f4AktualniIndex(projekt)];
+    var b = projekt.joby[f4AktualniIndex(projekt)];
     var photos = [1, 2, 3].map(function () {
       return '<div class="photo-placeholder"><span class="photo-placeholder__label">Photo</span></div>';
     }).join('');
@@ -4446,8 +4486,7 @@
   }
 
   function renderF5Hodnoceni() {
-    var projekt = aktivniProjekt();
-    var rows = projekt.balicky.map(function (b) {
+    var rows = jobyAktivni().map(function (b) {
       return '<div class="row"><span class="row__label">' + b.realizator.jmeno + '<span class="row__tag">' + b.realizator.profese + '</span></span>' +
         '<span class="row__amount--muted">★★★★★</span></div>';
     }).join('');
@@ -4595,12 +4634,15 @@
     }
     var projekt = aktivniProjekt();
     var isZakaznikScreen = state.role === "zakaznik" &&
-      // [+] N1 — F3—F5 zákaznická cesta předpokládá přesně sedm balíčků
-      // (kandidáti, harmonogram po indexech). Chata Vranov a Zateplení
-      // Bystrc balicky vůbec nemají — F1/F2 jim beze změny fungují,
-      // F3—F5 zatím ne. Stejný fallback na scaffold jako u řemeslníka/
-      // partnera níž, ne nová vizuální obrazovka mimo osm bloků.
-      (projekt.faze === "F1" || projekt.faze === "F2" || projekt.balicky.length > 0);
+      // [+] N1 — F3—F5 zákaznická cesta předpokládá přesně sedm jobů
+      // (kandidáti, harmonogram po indexech). Chata Vranov nemá žádný
+      // job vůbec — F1/F2 jí beze změny fungují, F3—F5 zatím ne.
+      // Zateplení Bystrc od briefu 02 jeden job má (jediný, jednoduchý),
+      // takže tahle podmínka na ni nesedí o nic víc než na Byt 3+1 —
+      // obojí je řešeno stejným fallbackem na scaffold jako u
+      // řemeslníka/partnera níž, ne novou vizuální obrazovkou mimo
+      // osm bloků.
+      (projekt.faze === "F1" || projekt.faze === "F2" || projekt.joby.length > 0);
     // [+] N1 — Chata Vranov a Zateplení Bystrc mají remeslnik/partner
     // null (brief §4: sdílení mezi projekty se tady neřeší). Bez týhle
     // podmínky by přepnutí role demo přepínačem na takovém projektu spadlo.
@@ -4664,7 +4706,7 @@
       // jako u kteréhokoli jiného projektu.
       // [+] N2 — tlačítko teď nese data-typ ("rekonstrukce" nebo
       // "jedna-prace"), takže nový projekt jde rovnou po správné,
-      // kratší cestě F1—F5. Prázdné balicky[] u obou znamená, že F3—F5
+      // kratší cestě F1—F5. Prázdné joby[] u obou znamená, že F3—F5
       // zůstanou na scaffoldu, dokud se do projektu nedostanou skutečná
       // data (stejná pojistka jako u Chaty Vranov, brief 01).
       var novyId = "novy-projekt-" + (projekty.length + 1);
@@ -4683,20 +4725,20 @@
         identita: { nazev: "New project", plocha: 0, typ: "", lokalita: "" },
         zadani: novyZadani,
         polozky: [], paky: [], poptavka: { zpusob: "oboji" },
-        balicky: [], nabidkyFirem: [], klicoveOtazky: [], vicepráce: [], vyuctovani: [],
-        rezervaMimoBalicky: 0, predani: null,
+        joby: [], nabidkyFirem: [], klicoveOtazky: [], vicepráce: [], vyuctovani: [],
+        rezervaMimoJoby: 0, predani: null,
         remeslnik: null, partner: null
       });
       setState({ aktivniProjektId: novyId, pohled: "projekt" });
     } else if (action === "rem-nav") {
       updateUi(function (ui) { ui.remeslnik.view = el.getAttribute("data-view"); });
-    } else if (action === "rem-open-balicek") {
-      updateUi(function (ui) { ui.remeslnik.view = "balicek"; });
+    } else if (action === "rem-open-job") {
+      updateUi(function (ui) { ui.remeslnik.view = "job"; });
     } else if (action === "rem-open-nabidka") {
       updateUi(function (ui) { ui.remeslnik.view = "nabidka"; });
     } else if (action === "rem-nabidka-send") {
       updateUi(function (ui) {
-        var b = remeslnikuvBalicek(projekt);
+        var b = remeslnikuvJob(projekt);
         var castka = ui.remeslnik.nabidkaCastka !== null ? ui.remeslnik.nabidkaCastka : b.odhad;
         b.nabidka.castka = castka;
         ui.remeslnik.nabidkaOdeslana = true;
