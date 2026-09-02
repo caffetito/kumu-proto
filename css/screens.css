@@ -1,0 +1,57 @@
+/* KUMU — co patří jen jedné obrazovce. Žádná barevná hodnota tu nesmí být. */
+
+/* --- Landing --------------------------------------------------------- */
+.hero--landing { display: flex; flex-wrap: wrap; gap: var(--space-5); padding: var(--space-6) var(--space-4); align-items: center; }
+.hero__text { flex: 1 1 480px; }
+.hero__social-proof { display: flex; gap: var(--space-4); font-weight: 700; }
+.hero__karta { flex: 1 1 380px; max-width: 420px; }
+.landing__priklady { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-2) 0; }
+.landing__zapati { display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-3); }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); padding: var(--space-5) var(--space-4); }
+
+/* --- Brief ----------------------------------------------------------- */
+.brief { padding-top: var(--space-4); max-width: 640px; }
+
+/* --- Budget ------------------------------------------------------------ */
+.budget { padding-top: var(--space-4); max-width: 640px; }
+
+/* --- Project ------------------------------------------------------------ */
+.projekt { padding-top: var(--space-4); }
+.projekt__hlavicka { margin-bottom: var(--space-3); }
+.projekt__sloupce { display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-4); align-items: start; }
+.projekt__sloupce--jeden { grid-template-columns: 1fr; }
+.naklic { display: flex; flex-direction: column; }
+.firma__castka { font-size: var(--fs-display); font-weight: 800; margin: var(--space-2) 0; }
+@media (max-width: 900px) {
+  .projekt__sloupce { grid-template-columns: 1fr; }
+}
+
+/* --- Job ------------------------------------------------------------- */
+.job { padding-top: var(--space-4); max-width: 640px; }
+.job__obsah { margin: var(--space-3) 0; }
+.viceprace__castka { font-size: var(--fs-display); color: var(--color-over); font-weight: 800; margin: var(--space-2) 0; }
+
+/* --- Invoicing --------------------------------------------------------- */
+.fakturace { padding-top: var(--space-4); max-width: 640px; }
+.invoice-row { display: flex; justify-content: space-between; padding: var(--space-1) 0; border-bottom: var(--border-width) solid var(--border); }
+
+/* --- My projects --------------------------------------------------------- */
+.moje-projekty { padding-top: var(--space-4); }
+.project-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-3); }
+.moje-projekty__nove { display: flex; gap: var(--space-2); margin-top: var(--space-4); }
+
+/* --- Trade ------------------------------------------------------------ */
+.opportunity { display: flex; justify-content: space-between; width: 100%; padding: var(--space-2); border-bottom: var(--border-width) solid var(--border); min-height: 44px; }
+.realizace { display: flex; justify-content: space-between; font-size: var(--fs-label); padding: var(--space-1) 0; border-top: var(--border-width) solid var(--border); }
+.asistent { position: absolute; inset: 0; background: var(--surface-raised); padding: var(--space-3); overflow-y: auto; }
+.asistent__dotaz { display: block; width: 100%; text-align: left; padding: var(--space-2); border: var(--border-width) solid var(--border); border-radius: var(--radius-card); margin-bottom: var(--space-1); min-height: 44px; }
+.phone__screen { position: relative; }
+
+/* --- Partner ---------------------------------------------------------- */
+.partner-nav { display: flex; gap: var(--space-3); padding: var(--space-2) var(--space-4); border-bottom: var(--border-width) solid var(--border); }
+.partner-nav__item { padding: var(--space-1) 0; min-height: 44px; }
+.partner-nav__item--active { font-weight: 700; border-bottom: 2px solid var(--accent); }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-3); padding: var(--space-3) var(--space-4); }
+.enquiry-table { width: 100%; border-collapse: collapse; margin: var(--space-2) 0; }
+.enquiry-table th, .enquiry-table td { text-align: left; padding: var(--space-1) var(--space-2); border-bottom: var(--border-width) solid var(--border); font-size: var(--fs-label); }
+.enquiry-table__neurcena { background: var(--surface-sunken); font-style: italic; }

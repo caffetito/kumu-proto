@@ -1,0 +1,41 @@
+/* ============================================================
+   KUMU — theme: light (výchozí)
+   Jediné místo mimo theme-dark.css, kde smí být barevná hodnota.
+   ============================================================ */
+
+:root {
+  /* pojmenovaná paleta */
+  --raw-cornsilk: #F0DF87;
+  --raw-glacier: #A0CED9;
+  --raw-malachite: #3D9E71;
+  --raw-atlantic: #133968;
+  --raw-persimmon: #E4572E;
+  --raw-violet: #7B3FA3;
+  --raw-white: #FFFFFF;
+
+  --bg: var(--raw-white);
+  --surface: #FBF8ED;
+  --surface-raised: var(--raw-white);
+  --surface-sunken: #F1EEE1;
+  --border: color-mix(in srgb, var(--raw-atlantic) 15%, transparent);
+
+  --text-primary: var(--raw-atlantic);
+  --text-secondary: color-mix(in srgb, var(--raw-atlantic) 68%, transparent);
+  --text-muted: color-mix(in srgb, var(--raw-atlantic) 42%, transparent);
+
+  --accent: var(--raw-violet);
+  --accent-contrast: var(--raw-white);
+
+  --color-over: #A6431B;   /* Persimmon ztmavený, 4,5+ na bílé */
+  --color-under: #2C7D5A;  /* Malachite ztmavený, 4,5+ na bílé */
+
+  --role-customer: var(--raw-glacier);
+  --role-trade: var(--raw-cornsilk);
+  --role-partner: var(--raw-malachite);
+
+  /* Vývojářská lišta je nástroj, ne produkt — zůstává vždy tmavá,
+     nezávisle na zvoleném schématu. Proto se tu nepřepisuje v theme-dark.css. */
+  --devbar-bg: var(--raw-atlantic);
+  --devbar-fg: var(--raw-white);
+  --devbar-fg-muted: color-mix(in srgb, var(--raw-white) 65%, transparent);
+}
