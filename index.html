@@ -1635,6 +1635,33 @@
      ========================================================== */
 
   /* ==========================================================
+     BRIEF 08 — SCÉNÁŘ PRO JEDEN JOB (S7)
+     Scénáře dřív jely natvrdo nad byt-3-1 (scenarStart() přepisovalo
+     state.aktivniProjektId bez ohledu na to, který scénář se spouští).
+     S7 potřebuje zatepleni-bystrc (jediný job), takže SCENARIOS dostaly
+     volitelné pole projektId — scenarStart() ho čte s fallbackem na
+     "byt-3-1", takže S1—S6 se nezměnily.
+
+     renderProjektScreen() se větví podle jeJednaPrace(projekt): u
+     jednoho jobu mizí renderJobyList() (nic k proklikání), renderF3TeamPanel()
+     (skládat je z čeho jen u víc profesí) a cesta "na klíč"
+     (alternativa ke skládání týmu, které tu není) — renderJobDetail()
+     jediného jobu se ukazuje rovnou. renderRozpoctovyBlok(),
+     renderF3Harmonogram(), dokoncenoBlok na T5 a renderZakaznikAsistent()
+     zůstávají beze změny — cesta je kratší, ne že by zmizelo, co drží
+     čísla pohromadě. renderBriefScreen()/renderBudgetScreen() už byly
+     větvené přes jeJednaPrace() od briefu 07 a nepotřebovaly zásah.
+
+     Vedlejší nález: f3EfektivniJoby() měla index 2 (elektro job
+     byt-3-1) zapsaný natvrdo — u projektu s jedním jobem by
+     projekt.joby[2] bylo undefined a renderF3Harmonogram() by s ním
+     spadla. Opraveno guardem (chybí-li job na indexu 2 nebo nemá
+     kandidáty, vrátí se joby beze změny data) — harmonogram tak
+     zůstává vidět i u zatepleni-bystrc, jak zadání briefu 08 žádá,
+     místo aby zmizel spolu se seznamem jobů.
+     ========================================================== */
+
+  /* ==========================================================
      DATOVÝ MODEL
      kumu-kostra.md §2. Čísla opsaná ze zdroje pravdy, ne
      dopočítaná. Ověřeno: součet položek = 1 388 000,
@@ -2656,7 +2683,16 @@
   // ostatní joby mají jen jeden termín bez ohledu na kandidáta.
   // Vychází z jobyAktivni(), ne z projekt.joby přímo — job „Doors and
   // frames“ (Postponed, od/do null) by jinak spadl do posunu dat níž.
+  //
+  // [+] brief 08 — index 2 (elektro) je specifický pro byt-3-1; u
+  // jednojobových projektů (zatepleni-bystrc, joby.length === 1)
+  // projekt.joby[2] neexistuje a jobVychoziKandidat(2)/f3VybranyId(2)
+  // by četly .kandidati z undefined. Posun podle vybraného elektrikáře
+  // dává smysl jen tam, kde elektro s kandidáty na indexu 2 skutečně
+  // je — jinde se joby vrací beze změny, harmonogram i tak zůstává.
   function f3EfektivniJoby() {
+    var elektro = aktivniProjekt().joby[2];
+    if (!elektro || !elektro.kandidati) return jobyAktivni();
     var vybranyId = f3VybranyId(2);
     var zaklad = jobVychoziKandidat(2);
     var kandidat = (vybranyId && jobKandidat(2, vybranyId)) || zaklad;
@@ -3298,6 +3334,14 @@
   // aby B1 na konci dialogu ukázalo totéž, co scénář naklikal.
   var F1_DEMO_ODPOVEDI = ["No, we're renting elsewhere", "Strip it out", "Off-the-shelf", "Painting", "We have a month's slack"];
 
+  // [+] brief 08 — stejný princip jako F1_DEMO_TEXT/F1_DEMO_ODPOVEDI výš,
+  // jen pro scénář S7 (jedna činnost) a DIALOG_JEDNA_PRACE. Odpovědi po
+  // řadě odpovídají zatepleni-bystrc: External wall insulation, pevný
+  // termín 30. 9. 2026 (proto "I have a date in mind", ne "As soon as
+  // possible"), 140 m² spadá do pásma "100–200 m²".
+  var F1_DEMO_TEXT_JEDNA_PRACE = "Our house in Brno-Bystrc was built in 1996 and was never insulated. We'd like external wall insulation before winter — around 140 m², budget roughly 350,000, and we may qualify for a subsidy.";
+  var F1_DEMO_ODPOVEDI_JEDNA_PRACE = ["Insulate the facade", "I have a date in mind", "100–200 m²"];
+
   /* ==========================================================
      KROK 8 — SCÉNÁŘE S1—S5
      kumu-kostra.md §6. Pojmenovaná cesta maticí, přehratelná
@@ -3312,7 +3356,8 @@
     { id: "S3", label: "Trade view" },
     { id: "S4", label: "Partner view" },
     { id: "S5", label: "Extra work" },
-    { id: "S6", label: "Project in motion" }
+    { id: "S6", label: "Project in motion" },
+    { id: "S7", label: "Single job" }
   ];
 
   // VSECHNY_PAKY je spočítané výš, hned za projekty[] — musí být hotové
@@ -3406,6 +3451,25 @@
         { role: "zakaznik", okamzik: "T4", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" }, projekt: { otevrenyJob: 2 }, zakaznik: { obrazovka: "job" } }, popis: "Elektro — probíhající job, den 3 z 9." },
         { role: "zakaznik", okamzik: "T4", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" }, projekt: { otevrenyJob: 4 }, zakaznik: { obrazovka: "job" } }, popis: "Obklady a podlahy — pořád jen čekání na nabídky." }
       ]
+    },
+    // [+] brief 08 — projekt s jedinou činností (zatepleni-bystrc, viz
+    // scénářovo pole projektId níž). Ukazuje, že cesta je kratší:
+    // rozpočet a harmonogram zůstávají, seznam prací a skládání týmu
+    // mizí (jeJednaPrace() v renderProjektScreen). Páky se v tomhle
+    // scénáři nezaškrtávají vůbec — f2.vybranePaky zůstává [] ve
+    // všech krocích, protože VSECHNY_PAKY je spočítané jen z byt-3-1
+    // a jeho id pák u zatepleni-bystrc nic neznamenají.
+    S7: {
+      label: "Single job",
+      projektId: "zatepleni-bystrc",
+      kroky: [
+        { role: "zakaznik", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT_JEDNA_PRACE, odeslano: false, krokDialogu: 0, odpovedi: [], dialogDraft: "", pendingOdpoved: null, mysli: false }, f2: { vybranePaky: [], poptavka: "oboji" }, zakaznik: { obrazovka: "landing" } }, popis: "Vstupní obrazovka, zadání jedné činnosti." },
+        { role: "zakaznik", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT_JEDNA_PRACE, odeslano: true, krokDialogu: 0, odpovedi: [], dialogDraft: "", pendingOdpoved: null, mysli: false }, f2: { vybranePaky: [], poptavka: "oboji" }, zakaznik: { obrazovka: "brief" } }, popis: "Kratší dialog než u rekonstrukce." },
+        { role: "zakaznik", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT_JEDNA_PRACE, odeslano: true, krokDialogu: DIALOG_JEDNA_PRACE.length, odpovedi: F1_DEMO_ODPOVEDI_JEDNA_PRACE, dialogDraft: "", pendingOdpoved: null, mysli: false }, f2: { vybranePaky: [], poptavka: "oboji" }, zakaznik: { obrazovka: "brief" } }, popis: "Shrnutí zadání." },
+        { role: "zakaznik", okamzik: "T2", ui: { f2: { vybranePaky: [], poptavka: "oboji" }, zakaznik: { obrazovka: "budget" } }, popis: "Rozpočet 338 000 Kč, dotace Nová zelená úsporám." },
+        { role: "zakaznik", okamzik: "T3", ui: { f2: { vybranePaky: [], poptavka: "oboji" }, projekt: { otevrenyJob: null }, zakaznik: { obrazovka: "projekt" } }, popis: "Bez seznamu prací a bez skládání týmu. Jedna činnost, tři nabídky." },
+        { role: "zakaznik", okamzik: "T5", ui: { f2: { vybranePaky: [], poptavka: "oboji" }, zakaznik: { obrazovka: "projekt" } }, popis: "Plán vs. skutečnost, 332 000 Kč." }
+      ]
     }
   };
 
@@ -3428,15 +3492,20 @@
   }
 
   function scenarStart(id) {
-    // Scénáře pořád pracují nad jedním, výchozím projektem (byt-3-1) —
-    // start scénáře proto vždy přepne i aktivní projekt, ať se spustí
-    // ze "Moje projekty" nebo z libovolného jiného otevřeného projektu.
+    // Scénáře většinou pracují nad výchozím projektem (byt-3-1) — start
+    // scénáře proto vždy přepne i aktivní projekt, ať se spustí ze
+    // "Moje projekty" nebo z libovolného jiného otevřeného projektu.
     // [+] brief 07 — dřív se tu natvrdo nastavovalo state.pohled =
     // "projekt", aby scénář neuvízl na přehledu. Teď o to, na které
     // obrazovce scénář začne, řekne rovnou první krok scénáře (jeho
     // ui.zakaznik.obrazovka, viz applyScenarKrok níž) — každý scénář to
     // má nastavené sám na to, co první krok skutečně ukazuje.
-    state.aktivniProjektId = "byt-3-1";
+    // [+] brief 08 — S7 jede nad zatepleni-bystrc, ne nad byt-3-1.
+    // SCENARIOS[id].projektId je volitelné pole; S1—S6 ho nemají, takže
+    // pro ně platí stejný fallback jako dřív. Přepnutí na jiný scénář
+    // (i S1—S6) tak vždy vrátí aktivniProjektId na scénářův vlastní
+    // projekt, ne na to, co bylo předtím rozkoukané ručně.
+    state.aktivniProjektId = SCENARIOS[id].projektId || "byt-3-1";
     state.scenar = id;
     state.krok = 0;
     applyScenarKrok(SCENARIOS[id].kroky[0]);
@@ -3854,11 +3923,7 @@
   // tady na místě.
   function renderProjektScreen() {
     var projekt = aktivniProjekt();
-    var naKlic = state.ui.f3.cesta === "naklic";
     var rozpoctovyBlok = renderRozpoctovyBlok(projekt);
-
-    var jobyHtml = naKlic ? renderF3NaKlic() : renderJobyList(projekt);
-    var harmonogram = naKlic ? "" : renderF3Harmonogram();
     // [+] brief 06 — dřív celoobrazovkové F5 (nadpis "Done", dokumentace,
     // hodnocení všech řemeslníků najednou). Nadpis a datum patřily jen
     // téhle fázi, teď je nese T5 samo (rozpočtový blok se přepne na
@@ -3867,6 +3932,29 @@
     var dokoncenoBlok = projekt.okamzik === "T5"
       ? '<div class="catalog__row">' + renderF5Dokumentace() + renderF5Hodnoceni() + '</div>'
       : "";
+
+    // [+] brief 08 — jednojobový projekt nemá co skládat: žádný seznam
+    // prací k proklikání (jediný job se rovnou ukazuje), žádný tým
+    // z víc profesí, žádná cesta "na klíč" (ta je alternativa ke
+    // skládání týmu, které tu není). Rozpočet a harmonogram zůstávají —
+    // "cesta je kratší", ne že by zmizelo, co drží čísla pohromadě.
+    if (jeJednaPrace(projekt)) {
+      return '<div class="screen">' +
+        renderKumuTopbar() +
+        '<div class="f2-screen" style="max-width:var(--container);">' +
+          rozpoctovyBlok +
+          renderJobDetail(projekt.joby[0], 0) +
+          renderF3Harmonogram() +
+          dokoncenoBlok +
+        '</div>' +
+        renderPhaseBarReal() +
+        renderZakaznikAsistent() +
+      '</div>';
+    }
+
+    var naKlic = state.ui.f3.cesta === "naklic";
+    var jobyHtml = naKlic ? renderF3NaKlic() : renderJobyList(projekt);
+    var harmonogram = naKlic ? "" : renderF3Harmonogram();
 
     return '<div class="screen">' +
       renderKumuTopbar() +
