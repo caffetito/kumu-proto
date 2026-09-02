@@ -1275,12 +1275,14 @@
      jinak. Liší se jen umístěním: řemeslnický sheet je position:
      absolute uvnitř .remeslnik-frame__body (position: relative,
      rozměr telefonu); zákaznické obrazovky jsou desktopové bez
-     takového rámu, takže dostávají position: fixed, plovoucí vpravo
+     takového rámu, takže dostávají position: fixed, plovoucí vlevo
      dole — přesně "plovoucí tlačítko, po rozkliknutí překryvná
-     plocha" ze zadání, ne plnoobrazovkový sheet. */
+     plocha" ze zadání, ne plnoobrazovkový sheet.
+     [+] brief 09 — vlevo, ne vpravo (bylo right). Vpravo dole je
+     plovoucí odznak Netlify, který tlačítko i překryv překrýval. */
   .zakaznik-asistent-btn {
     position: fixed;
-    right: var(--space-2);
+    left: var(--space-2);
     bottom: var(--space-2);
     z-index: 40;
     font-family: inherit;
@@ -1296,7 +1298,7 @@
   }
   .zakaznik-asistent-sheet {
     position: fixed;
-    right: var(--space-2);
+    left: var(--space-2);
     bottom: calc(var(--space-2) + 56px);
     z-index: 41;
     width: min(360px, calc(100vw - 2 * var(--space-2)));
@@ -1659,6 +1661,36 @@
      kandidáty, vrátí se joby beze změny data) — harmonogram tak
      zůstává vidět i u zatepleni-bystrc, jak zadání briefu 08 žádá,
      místo aby zmizel spolu se seznamem jobů.
+     ========================================================== */
+
+  /* ==========================================================
+     BRIEF 09 — "+ NEW PROJECT — SINGLE JOB" S ČÍSLY, NE S NULAMI
+     Akce novy-projekt zakládala jednojobový projekt jako prázdný stub
+     (strop 0, plocha 0, job bez od/do, bez položek) — dialog na Briefu
+     je jen sekvence otázek, nikdy tahle data nedoplní, takže B1,
+     rozpočet i harmonogram počítaly z nul a z null dat (harmonogram
+     končil na "NaN undefined", protože b6Dny()/fmtDate() dostaly
+     job.od/job.do === null). Oprava: větev "jedna-prace" v novy-projekt
+     teď dělá hlubokou kopii zatepleni-bystrc (JSON.parse(JSON.
+     stringify(...))), přepíše jen id, identita.nazev a okamzik — je to
+     hrubé demo, jde o čísla na cestě, ne o skutečné zadávání. Klon
+     nemá řádek v OKAMZIK_STAVY_JOBU (tabulka je volitelná, primenOkamzik()
+     se bez řádku tiše vrátí), job si nese zralost/stavTrhu přímo z
+     klonovaných dat. Větev "rekonstrukce" zůstává prázdný stub jako
+     dřív — dlouhá forma zadání se v prototypu neřeší.
+
+     renderF3Harmonogram() navíc dostal vlastní guard nezávislý na
+     zdroji dat: joby bez od/do se do mřížky nepočítají; nemá-li
+     harmonogram žádný naplánovaný job, vypíše se jedna věta
+     ("Schedule appears once the dates are set.") místo mřížky s NaN.
+     Kryje to i budoucí prázdné projekty typu "rekonstrukce", ne jen
+     tenhle konkrétní stub.
+
+     Asistent (state.ui.zakaznik) se přesunul z pravého dolního rohu do
+     levého — vpravo dole je plovoucí odznak Netlify, který tlačítko i
+     překryv zakrýval. Jen .zakaznik-asistent-btn/-sheet; řemeslnický
+     asistent je jiný vzor (překryv nad mobilní plochou, ne plovoucí
+     roh) a nemění se.
      ========================================================== */
 
   /* ==========================================================
@@ -4840,18 +4872,29 @@
 
   // --- F3 × zákazník — skládání týmu (krok 6) --------------------------
 
+  // [+] brief 09 — job bez od/do (prázdný "rekonstrukce" stub z
+  // novy-projekt, nebo cokoli budoucího bez naplánovaného termínu) by
+  // jinak vešel do b6Dny()/fmtDate() a vypsal "NaN undefined". Bez
+  // aspoň jednoho naplánovaného jobu není co kreslit — poctivá věta
+  // místo rozbité mřížky, harmonogram samotný ale zůstává (nikdy se
+  // neskrývá celý blok, viz brief 08 §7).
   function renderF3Harmonogram() {
-    var joby = f3EfektivniJoby();
+    var joby = f3EfektivniJoby().filter(function (b) { return b.od && b.do; });
     var vybrane = state.ui.f3.vybrane;
-    var rangeStart = joby[0].od;
-    var rangeEnd = joby[joby.length - 1].do;
-    var stavTrida = function (i, b) {
-      return (b.kandidati && vybrane[i]) ? "filled" : "";
-    };
+    var body;
+    if (joby.length === 0) {
+      body = '<p class="block-card__note" style="margin:0;">Schedule appears once the dates are set.</p>';
+    } else {
+      var rangeStart = joby[0].od;
+      var rangeEnd = joby[joby.length - 1].do;
+      var stavTrida = function (i, b) {
+        return (b.kandidati && vybrane[i]) ? "filled" : "";
+      };
+      body = renderB6Grid(joby, rangeStart, rangeEnd, stavTrida) + renderB6Footer(rangeEnd);
+    }
     return '<div class="block-card">' +
       '<div class="block-card__kicker"><span class="microlabel">B6 · schedule</span></div>' +
-      renderB6Grid(joby, rangeStart, rangeEnd, stavTrida) +
-      renderB6Footer(rangeEnd) +
+      body +
     '</div>';
   }
 
@@ -5284,43 +5327,49 @@
     } else if (action === "zak-asistent-send") {
       updateUi(function (ui) { ui.zakaznik.asistentDotaz = 0; });
     } else if (action === "novy-projekt") {
-      // [+] N1 §3 — žádný skutečný formulář, jen prázdný projekt na F1
-      // (kopie struktury Zateplení Bystrc bez dat), aby šlo ukázat, že
-      // "Moje projekty" umí přibývat. Dialog na F1 zadání doplní stejně
-      // jako u kteréhokoli jiného projektu.
+      // [+] N1 §3 — žádný skutečný formulář, jen nový projekt na
+      // Landingu, aby šlo ukázat, že "Moje projekty" umí přibývat.
+      // Dialog na Briefu zadání nikdy doplní doopravdy — je to
+      // sekvence otázek, ne skutečný sběr — takže se do zadani/identita
+      // nikdy nic nepropíše.
       // [+] brief 05 §5 — projekt.typ zmizelo, jeJednaPrace() se ptá na
-      // joby.length. "Jedna práce" proto dostává jeden prázdný stub
-      // job (jen aby joby.length === 1 sedělo od první chvíle), místo
-      // aby se typ pamatoval na projektu zvlášť. "Rekonstrukce" žádný
-      // job nedostává — zůstává na 0, tedy dlouhá forma, přesně jako
-      // dřív. Skutečná data do jobu (nazev, termíny, položky) dodá až
-      // reálný průchod F1—F3, který tenhle prototyp nekreslí.
+      // joby.length.
+      // [+] brief 09 — klon zatepleni-bystrc místo prázdného stubu.
+      // Prázdný jednojobový stub (strop 0, plocha 0, job bez od/do a
+      // bez položek) nechával celou cestu — B1, rozpočet, harmonogram —
+      // počítat z nul a z null dat ("NaN undefined" v harmonogramu).
+      // Je to hrubé demo: jde o to, aby cesta měla čísla, ne o to, aby
+      // se data zadávala doopravdy. "Rekonstrukce" zůstává prázdná
+      // záměrně — dlouhá forma, přesně jako dřív.
       var novyId = "novy-projekt-" + (projekty.length + 1);
       var novyTyp = el.getAttribute("data-typ") || "rekonstrukce";
-      var novyZadani = { strop: 0, terminDo: "", bydliBehem: false, svepomoci: [], terminPevny: false };
-      var novyJoby = [];
+      var novyProjekt;
       if (novyTyp === "jedna-prace") {
-        novyZadani.dotace = null;
-        novyJoby = [ { nazev: "", od: null, do: null, stavPopisek: "Waiting on bids", nabidka: null,
-          realizator: { jmeno: "", profese: "" }, zralost: "zadano", stavTrhu: "poptano",
-          polozky: [], paky: [] } ];
+        var vzor = projekty.filter(function (p) { return p.id === "zatepleni-bystrc"; })[0];
+        novyProjekt = JSON.parse(JSON.stringify(vzor));
+        novyProjekt.id = novyId;
+        novyProjekt.identita.nazev = "New project";
+        novyProjekt.okamzik = null;
+        // remeslnik/partner zůstávají null jako u vzoru. Klon nemá
+        // řádek v OKAMZIK_STAVY_JOBU (tabulka je volitelná —
+        // primenOkamzik() se bez řádku tiše vrátí), job si tak nese
+        // zralost/stavTrhu přímo z klonovaných dat.
       } else {
-        novyZadani.jadroBourat = false;
-        novyZadani.kuchynNaMiru = false;
+        novyProjekt = {
+          id: novyId,
+          okamzik: null,
+          identita: { nazev: "New project", plocha: 0, typ: "", lokalita: "" },
+          zadani: { strop: 0, terminDo: "", bydliBehem: false, svepomoci: [], terminPevny: false, jadroBourat: false, kuchynNaMiru: false },
+          poptavka: { zpusob: "oboji" },
+          joby: [], nabidkyFirem: [], klicoveOtazky: [], vicepráce: [], vyuctovani: [],
+          rezervaMimoJoby: 0, predani: null,
+          remeslnik: null, partner: null
+        };
       }
-      projekty.push({
-        id: novyId,
-        okamzik: null,
-        identita: { nazev: "New project", plocha: 0, typ: "", lokalita: "" },
-        zadani: novyZadani,
-        poptavka: { zpusob: "oboji" },
-        joby: novyJoby, nabidkyFirem: [], klicoveOtazky: [], vicepráce: [], vyuctovani: [],
-        rezervaMimoJoby: 0, predani: null,
-        remeslnik: null, partner: null
-      });
-      // [+] brief 07 — nový, prázdný projekt nemá okamzik ani odpovědi,
-      // takže patří na Landing (dřív: pohled "projekt" + okamzik null
-      // → renderF1Screen() dělalo totéž).
+      projekty.push(novyProjekt);
+      // [+] brief 07 — nový projekt nemá okamzik ani odpovědi, takže
+      // patří na Landing (dřív: pohled "projekt" + okamzik null →
+      // renderF1Screen() dělalo totéž).
       state.ui.zakaznik.obrazovka = "landing";
       setState({ aktivniProjektId: novyId });
     } else if (action === "rem-nav") {
