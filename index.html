@@ -1016,6 +1016,21 @@
 
   .f2-cta-bids { display: block; width: 100%; text-align: center; }
 
+  /* [+] brief 10 §1 — hlavička obrazovky projektu/jobu: název + popis
+     poskládaný z identita.typ/plocha/lokalita. Text, ne karta — kostra
+     §7 varuje před "rámečkem kolem každé skupiny", a hlavička není
+     obsahový blok jako B1—B8. Nadpis (jedna z pěti úrovní kostry §7),
+     stejná úroveň jako block-card__title, jen mimo kartu. */
+  .project-header { margin-bottom: var(--space-1); }
+  .project-header__title {
+    margin: 0 0 4px;
+    font-size: var(--type-heading);
+    font-weight: var(--weight-heading);
+    line-height: var(--leading-heading);
+    color: var(--text-primary);
+  }
+  .project-header__desc { margin: 0; font-size: var(--type-caption); color: var(--text-secondary); }
+
   /* ============================================================
      KROK 4 — F3 × ŘEMESLNÍK
      Mobil v rámečku telefonu (kumu-tokeny-a-komponenty.md komponenta
@@ -1372,6 +1387,20 @@
   .f3-section { border-bottom: var(--border-width) solid var(--border); padding-bottom: var(--space-2); margin-bottom: var(--space-2); }
   .f3-section:last-child { border-bottom: none; }
   .f3-section__head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-1); }
+  /* [+] brief 10 §3 — hlavička karty je teď tlačítko (data-action
+     "job-otevrit"), ne div. Reset na element, ne na celou třídu — jiné
+     použití .f3-section__head by tímhle selektorem nešlo zasáhnout,
+     protože tu žádné jiné není. */
+  button.f3-section__head {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
   .f3-section__title { font-weight: var(--weight-heading); }
   .f3-section__meta { font-size: var(--type-caption); color: var(--text-secondary); }
   .f3-section--suppressed { color: var(--text-secondary); font-size: var(--type-caption); }
@@ -1691,6 +1720,40 @@
      překryv zakrýval. Jen .zakaznik-asistent-btn/-sheet; řemeslnický
      asistent je jiný vzor (překryv nad mobilní plochou, ne plovoucí
      roh) a nemění se.
+     ========================================================== */
+
+  /* ==========================================================
+     BRIEF 10 — OBRAZOVKA BIDDING A JOB JAKO SAMOSTATNÝ PROJEKT
+     Dvě nezávislé věci. (1) Hlavička (renderScreenHlavicka(),
+     renderProjektHlavicka()) — jméno + typ · plocha · lokalita
+     poskládané z identita, nová malá funkce, žádná nová data. Na
+     obrazovce projektu ve všech okamžicích (renderProjektScreen()),
+     na obrazovce jobu jen jméno jobu (renderJobScreen()).
+
+     (2) V T3 s víc než jedním jobem (a mimo cestu "na klíč")
+     renderProjektScreen() skládá jinak: harmonogram nad karty prací
+     (renderF3Sekce(0..n)) vlevo, panel týmu vpravo jako sticky sloupec
+     — .f3-layout/.f3-layout__main/__side, CSS, které tu leželo
+     nepoužité od kroku 6 (kumu-kostra.md §9), teď konečně nese obsah.
+     Kompaktní řádkový seznam (renderJobyList) v T3 mizí, karty ho
+     nahrazují. T2/T4/T5 a cesta "na klíč" i v T3 zůstávají na starém
+     layoutu beze změny, jen s hlavičkou navíc.
+
+     Hlavička karty (renderF3Sekce, .f3-section__head) je teď tlačítko
+     s data-action="job-otevrit" — otevírá obrazovku jobu, u obou
+     variant (s kandidáty i potlačené bez nich). Dlaždice kandidátů
+     (.candidate-row) leží v DOM stromu mimo tohle tlačítko, ne uvnitř
+     něj, takže klik na "f3-toggle-kandidat" se do otevření jobu nikdy
+     nepromítne — netřeba stopPropagation, události se prostě nepotkají.
+
+     Obrazovka jobu (renderJobScreen()) dostala vlastní rozpočtový blok
+     (renderJobRozpoctovyBlok() — částka + rozpis položek + jejich
+     součet, žádný strop, žádný řádek Rozdíl, ten je projektový) a
+     vlastní harmonogram (renderJobHarmonogram() — jen fmtRange() toho
+     jednoho jobu, věta "Dates set once a trade is confirmed.", když
+     termín ještě není; žádná nová mřížka pro jeden job). Job ve stavu
+     "napad" tenhle nový rámec nedostává — zůstává na zástupném textu
+     jako dřív, protože nemá položky ani termín, co by ukázal.
      ========================================================== */
 
   /* ==========================================================
@@ -3810,6 +3873,26 @@
     });
   }
 
+  // [+] brief 10 §1 — hlavička obrazovky: název + volitelný popis pod
+  // ním. Sdílená mezi renderProjektScreen() (název a popis projektu) a
+  // renderJobScreen() (název jobu, bez popisu) — jeden render, ne dvě
+  // skoro stejné šablony.
+  function renderScreenHlavicka(nazev, popis) {
+    return '<div class="project-header">' +
+      '<h2 class="project-header__title">' + nazev + '</h2>' +
+      (popis ? '<p class="project-header__desc">' + popis + '</p>' : "") +
+    '</div>';
+  }
+
+  // Popis se skládá jen z toho, co identita už má — typ · plocha m² ·
+  // lokalita — a prázdná pole (nový projekt má typ: "", plocha: 0)
+  // se i s oddělovačem vynechají, ať věta nekončí osamělou tečkou.
+  function renderProjektHlavicka(projekt) {
+    var id = projekt.identita;
+    var casti = [id.typ, id.plocha ? id.plocha + " m²" : "", id.lokalita].filter(function (c) { return c; });
+    return renderScreenHlavicka(id.nazev, casti.length ? casti.join(" · ") : null);
+  }
+
   // [+] brief 07 §3c — obrazovka Budget. Skládá dohromady kusy, které
   // dřív žily na dvou různých místech (B1/B2 na konci dialogu, páky
   // jako překryv nad seznamem jobů) — žádný nový obsah, jen jedno
@@ -3955,6 +4038,9 @@
   // tady na místě.
   function renderProjektScreen() {
     var projekt = aktivniProjekt();
+    // [+] brief 10 §1 — hlavička (název + typ · plocha · lokalita) na
+    // obrazovce projektu ve všech okamžicích, ne jen v T3.
+    var hlavicka = renderProjektHlavicka(projekt);
     var rozpoctovyBlok = renderRozpoctovyBlok(projekt);
     // [+] brief 06 — dřív celoobrazovkové F5 (nadpis "Done", dokumentace,
     // hodnocení všech řemeslníků najednou). Nadpis a datum patřily jen
@@ -3974,6 +4060,7 @@
       return '<div class="screen">' +
         renderKumuTopbar() +
         '<div class="f2-screen" style="max-width:var(--container);">' +
+          hlavicka +
           rozpoctovyBlok +
           renderJobDetail(projekt.joby[0], 0) +
           renderF3Harmonogram() +
@@ -3985,12 +4072,40 @@
     }
 
     var naKlic = state.ui.f3.cesta === "naklic";
+
+    // [+] brief 10 §2 — v T3 (skládání týmu, víc než jeden job, cesta
+    // "profese") nahrazuje kompaktní řádkový seznam (renderJobyList)
+    // karta na job (renderF3Sekce) s dlaždicemi nabídek rovnou vidět,
+    // harmonogram jde nad karty, panel týmu vpravo jako sticky sloupec
+    // vedle nich — .f3-layout je starší, dřív nepoužité CSS ze stejné
+    // doby jako krok 6 (kumu-kostra.md §9), teď konečně nese obsah.
+    // T2/T4/T5 a cesta "na klíč" i v T3 zůstávají na řádkovém seznamu
+    // beze změny — jen s hlavičkou navíc.
+    if (projekt.okamzik === "T3" && !naKlic) {
+      var karty = projekt.joby.map(function (b, i) { return renderF3Sekce(i); }).join('');
+      return '<div class="screen">' +
+        renderKumuTopbar() +
+        '<div class="f2-screen" style="max-width:var(--container);">' +
+          hlavicka +
+          rozpoctovyBlok +
+          renderF3Harmonogram() +
+          '<div class="f3-layout">' +
+            '<div class="f3-layout__main">' + karty + '</div>' +
+            '<div class="f3-layout__side">' + renderF3TeamPanel() + '</div>' +
+          '</div>' +
+        '</div>' +
+        renderPhaseBarReal() +
+        renderZakaznikAsistent() +
+      '</div>';
+    }
+
     var jobyHtml = naKlic ? renderF3NaKlic() : renderJobyList(projekt);
     var harmonogram = naKlic ? "" : renderF3Harmonogram();
 
     return '<div class="screen">' +
       renderKumuTopbar() +
       '<div class="f2-screen" style="max-width:var(--container);">' +
+        hlavicka +
         rozpoctovyBlok +
         '<div class="joby-wrap">' + jobyHtml + '</div>' +
         harmonogram +
@@ -4002,22 +4117,75 @@
     '</div>';
   }
 
-  // [+] brief 07 §3e — tenký obal kolem renderJobDetail(), beze změny.
-  // Vrací se sama na "projekt", pokud otevrenyJob ukazuje mimo rozsah
-  // (typicky po přepnutí demo přepínačem na jiný okamžik/projekt, kde
-  // starý index sedí na jiný, nebo na žádný job) — jinak by tu spadla
-  // na undefined místo tichého návratu na seznam.
+  // [+] brief 10 §4 — rozpočtový blok jobu, samostatný z existujících
+  // dílů (ne kopie renderRozpoctovyBlok() — ta počítá přes celý
+  // projekt). castka je totéž číslo, které už dnes ukazuje řádkový
+  // seznam jobů (job.nabidka, je-li nabídka přijatá, jinak jobOdhad) —
+  // headline řádek. Pod ním rozpis položek se svým vlastním součtem
+  // (jobPolozkySoucet), stejné dva kusy, které dnes skládají B3 v
+  // renderJobDetail() pro stav "nepoptano" (komponenta 10/11 se
+  // nekreslí znovu jinak). Žádný strop, žádný řádek Rozdíl — strop je
+  // vlastnost projektu, ne jobu.
+  function renderJobRozpoctovyBlok(job) {
+    var castka = job.nabidka ? job.nabidka.castka : jobOdhad(job);
+    var items = (job.polozky || []).map(function (p) {
+      return { label: p.nazev, amount: czk(p.castka), tag: p.znacka };
+    });
+    var body = totalRowHtml("Total", czk(castka), "neutral") +
+      rowListHtml(items) +
+      totalRowHtml("Job total", czk(jobPolozkySoucet(job)), "neutral");
+    return blockCard("B3", job.nazev, null, body);
+  }
+
+  // [+] brief 10 §4 — harmonogram jobu je jen termín toho jednoho jobu,
+  // ne mřížka (renderF3Harmonogram() kreslí celý projekt). fmtRange()
+  // na null/null by spadla stejně jako b6Dny() v briefu 09 — guard
+  // beze mřížky, jedna věta místo ní, když termín ještě není.
+  function renderJobHarmonogram(job) {
+    var text = (job.od && job.do) ? fmtRange(job.od, job.do) : "Dates set once a trade is confirmed.";
+    return blockCard("B6", "Schedule", null, '<p class="block-card__note" style="margin:0;">' + text + '</p>');
+  }
+
+  // [+] brief 07 §3e — tenký obal kolem renderJobDetail(). Vrací se sama
+  // na "projekt", pokud otevrenyJob ukazuje mimo rozsah (typicky po
+  // přepnutí demo přepínačem na jiný okamžik/projekt, kde starý index
+  // sedí na jiný, nebo na žádný job) — jinak by tu spadla na undefined
+  // místo tichého návratu na seznam.
+  // [+] brief 10 §4 — obrazovka jobu teď funguje samostatně: vlastní
+  // hlavička, vlastní rozpočtový blok, vlastní harmonogram — stejná
+  // stavba jako jednojobový projekt (brief 08), jen bez dokoncenoBlok
+  // (dokumentace a hodnocení zůstávají projektové, ne jobové). Job ve
+  // stavu "napad" (ještě ani ne upřesňovaný — nemá položky ani termín,
+  // co by tenhle rozpočet a harmonogram ukázal) zůstává na zástupném
+  // textu, přesně jak fungoval před tímhle briefem.
   function renderJobScreen() {
     var projekt = aktivniProjekt();
     var i = state.ui.projekt.otevrenyJob;
     if (i === null || !projekt.joby[i]) {
       return renderProjektScreen();
     }
+    var job = projekt.joby[i];
+    var zpet = '<button type="button" class="pill-btn pill-btn--secondary" data-action="zpet-na-projekt">← ' + projekt.identita.nazev + '</button>';
+
+    if (job.zralost === "napad") {
+      return '<div class="screen">' +
+        renderKumuTopbar() +
+        '<div class="f2-screen" style="max-width:var(--container);">' +
+          zpet +
+          renderJobDetail(job, i) +
+        '</div>' +
+        renderZakaznikAsistent() +
+      '</div>';
+    }
+
     return '<div class="screen">' +
       renderKumuTopbar() +
       '<div class="f2-screen" style="max-width:var(--container);">' +
-        '<button type="button" class="pill-btn pill-btn--secondary" data-action="zpet-na-projekt">← ' + projekt.identita.nazev + '</button>' +
-        renderJobDetail(projekt.joby[i], i) +
+        zpet +
+        renderScreenHlavicka(job.nazev, null) +
+        renderJobRozpoctovyBlok(job) +
+        renderJobDetail(job, i) +
+        renderJobHarmonogram(job) +
       '</div>' +
       renderZakaznikAsistent() +
     '</div>';
@@ -4903,13 +5071,24 @@
   // dřív měl jen elektro skutečný výběr ze dvou, ostatní jednu
   // pseudo-kartu „Selected bid“. Datum (fmtRange) se u ostatních
   // jobů nemění podle kandidáta, takže je zobrazený jen u elektra.
+  // [+] brief 10 §3 — hlavička karty (.f3-section__head) je teď
+  // tlačítko s data-action="job-otevrit", ne div — otevírá obrazovku
+  // jobu (brief 07 §3e). Dlaždice kandidátů (.candidate-row) jsou mimo
+  // tohle tlačítko, ne uvnitř něj — jejich vlastní data-action
+  // "f3-toggle-kandidat" tak zůstává jediné, co na klik zareaguje;
+  // událost z karty kandidáta se do tlačítka nikdy nedostane, protože v
+  // DOM stromu pod ním vůbec neleží. Stejné tlačítko i pro potlačenou
+  // variantu bez kandidátů (.f3-section--suppressed) — i ta se dá
+  // otevřít, i když nemá co porovnávat.
   function renderF3Sekce(i) {
     var projekt = aktivniProjekt();
     var b = projekt.joby[i];
     var sel = f3VybranyId(i);
     if (!b.kandidati) {
       return '<div class="f3-section f3-section--suppressed">' +
-        '<div class="f3-section__title" style="color:var(--text-primary);">' + b.nazev + '</div>' +
+        '<button type="button" class="f3-section__head" data-action="job-otevrit" data-index="' + i + '">' +
+          '<span class="f3-section__title" style="color:var(--text-primary);">' + b.nazev + '</span>' +
+        '</button>' +
         '<p>Request sent 20 Feb. Bids usually arrive within 10 days.</p>' +
       '</div>';
     }
@@ -4925,7 +5104,9 @@
       '</div>';
     }).join('');
     return '<div class="f3-section">' +
-      '<div class="f3-section__head"><span class="f3-section__title">' + b.nazev + '</span><span class="f3-section__meta">' + b.stavPopisek + '</span></div>' +
+      '<button type="button" class="f3-section__head" data-action="job-otevrit" data-index="' + i + '">' +
+        '<span class="f3-section__title">' + b.nazev + '</span><span class="f3-section__meta">' + b.stavPopisek + '</span>' +
+      '</button>' +
       '<div class="candidate-row">' + kandidatiHtml + '</div>' +
     '</div>';
   }
