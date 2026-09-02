@@ -1267,6 +1267,52 @@
     line-height: 1;
   }
 
+  /* [+] brief 07 §4 — asistent na zákaznických obrazovkách (Brief,
+     Budget, Projekt, Job, Moje projekty). Stejný vzor jako řemeslnický
+     .assistant-sheet — tlačítko a překryvná plocha, ne položka
+     navigace — a stejné vnitřní třídy (.assistant-sheet__close,
+     __answer, __footnote), aby se text/tlačítka nekreslily podruhé
+     jinak. Liší se jen umístěním: řemeslnický sheet je position:
+     absolute uvnitř .remeslnik-frame__body (position: relative,
+     rozměr telefonu); zákaznické obrazovky jsou desktopové bez
+     takového rámu, takže dostávají position: fixed, plovoucí vpravo
+     dole — přesně "plovoucí tlačítko, po rozkliknutí překryvná
+     plocha" ze zadání, ne plnoobrazovkový sheet. */
+  .zakaznik-asistent-btn {
+    position: fixed;
+    right: var(--space-2);
+    bottom: var(--space-2);
+    z-index: 40;
+    font-family: inherit;
+    font-size: var(--type-caption);
+    color: var(--text-inverse);
+    background: var(--surface-inverse);
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 12px 20px;
+    min-height: var(--hit-min);
+    cursor: pointer;
+    box-shadow: 0 12px 28px -12px color-mix(in srgb, var(--text-primary) 45%, transparent);
+  }
+  .zakaznik-asistent-sheet {
+    position: fixed;
+    right: var(--space-2);
+    bottom: calc(var(--space-2) + 56px);
+    z-index: 41;
+    width: min(360px, calc(100vw - 2 * var(--space-2)));
+    max-height: min(480px, calc(100vh - 120px));
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    background: var(--surface-raised);
+    border: var(--border-width) solid var(--border-strong);
+    border-radius: var(--radius-card);
+    padding: var(--space-2);
+    overflow-y: auto;
+    box-shadow: 0 18px 40px -18px color-mix(in srgb, var(--text-primary) 45%, transparent);
+  }
+  .zakaznik-asistent-sheet .assistant-sheet__close { align-self: flex-end; }
+
   /* Sekce Settings — řádek šablony a přepínač */
   .template-row { border-bottom: var(--row-line); padding: var(--space-2) 0; }
   .template-row:last-of-type { border-bottom: none; }
@@ -1455,21 +1501,13 @@
     margin: 0 0 var(--space-1);
   }
 
-  /* [+] brief 06 §3 — seznam jobů a překryv pák nad ním. Ne modální
-     okno uprostřed obrazovky (CLAUDE.md zakazuje modál pro B8) — jde o
-     obsah zavěšený v ploše samotného seznamu jobů, rozpočtový blok nad
-     ním zůstává na místě a v plné velikosti po celou dobu. */
+  /* [+] brief 06 §3 — seznam jobů. .joby-wrap dřív nesl i .paky-overlay
+     (překryv pák nad seznamem jobů) — [+] brief 07 odstranilo překryv,
+     páky mají teď vlastní obrazovku Budget (CLAUDE.md nadále zakazuje
+     modál pro B8 — Budget je stránka, ne okno). position: relative na
+     .joby-wrap zůstává, i když teď nic absolutně pozicovaného nekryje —
+     neutrální, nic nerozbije, kdyby se sem něco takového vrátilo. */
   .joby-wrap { position: relative; }
-  .paky-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    background: var(--surface);
-    border: var(--border-width) solid var(--border-strong);
-    border-radius: var(--radius-card);
-    padding: var(--space-2);
-    overflow-y: auto;
-  }
   .job-list { display: flex; flex-direction: column; }
   .job-row {
     display: flex;
@@ -1554,6 +1592,49 @@
   "use strict";
 
   /* ==========================================================
+     BRIEF 07 — ŠEST OBRAZOVEK ZÁKAZNICKÉ CESTY
+     Zákaznická část dřív routovala odvozeně z dat: renderScreen()
+     četla state.pohled ("moje-projekty" vs. zbytek) a
+     projekt.okamzik (null → renderF1Screen(), jinak →
+     renderProjektScreen()) — dvě různá pole, dvě různá místa,
+     a okamzik dělal dvojí práci (data pro primenOkamzik() a
+     zároveň router). Journey mapa chce šest samostatných obrazovek
+     (Landing, Brief, Budget, Project, Job detail, My projects),
+     mezi kterými se dá pohybovat oběma směry — to z dat odvodit nejde,
+     protože B1/B2/páky/detail jobu byly obsahové kusy uvnitř dvou
+     přetížených funkcí, ne samostatné kroky.
+
+     Rozdělení: renderF1Screen() se rozpadla na renderLandingScreen()
+     (hero/koláž/patička, beze změny obsahu) a renderBriefScreen()
+     (jen dialog — B1/B2 z ní odešly). renderB8VyberInteractive()
+     (dřív obsah překryvu nad seznamem jobů) a B1/B2 teď skládají
+     renderBudgetScreen(). Detail otevřeného jobu (renderJobDetail(),
+     beze změny) dostal vlastní tenký obal renderJobScreen() místo
+     inline rozbalení v renderProjektScreen(). Ta zůstává jako
+     obrazovka Project — rozpočtový souhrn + seznam jobů + harmonogram
+     + panel týmu, bez pák a bez detailu.
+
+     Klíče stavu: vznikl state.ui.zakaznik { obrazovka, asistentOtevren,
+     asistentDotaz } — jediné místo, které renderScreen() čte pro roli
+     zákazník (viz renderZakaznikScreen()). Zanikly state.pohled
+     (obě jeho hodnoty jsou teď dvě z šesti hodnot obrazovka) a
+     ui.projekt.pakyOtevreny (páky mají vlastní obrazovku, ne překryv).
+     Akce paky-otevrit/paky-zavrit/job-zavrit zanikly s nimi; přibyly
+     brief-hotovo, goto-brief, goto-budget, budget-hotovo,
+     zpet-na-projekt a zak-asistent-toggle/-send.
+
+     Okamzik (T1—T5) přestal routovat — zůstal výhradně daty pro
+     primenOkamzik() (zralost/stavTrhu jednotlivých jobů). Dřív "okamzik
+     je null" znamenalo i "ukaž Landing" a "okamzik je nastavený"
+     znamenalo "ukaž Project" — to plete dohromady, co se STALO s
+     projektem (na jakém je bodě časové osy), s tím, KAM se uživatel
+     právě dívá. Obojí teď žije zvlášť: okamzik na projektu, obrazovka
+     ve state.ui.zakaznik. Demo přepínač "Moment" proto teď nepřepíná
+     obrazovku sám od sebe (dřív díky staré vazbě ano) — jen data;
+     kam se uživatel dívá, řídí výhradně navigace v produktu.
+     ========================================================== */
+
+  /* ==========================================================
      DATOVÝ MODEL
      kumu-kostra.md §2. Čísla opsaná ze zdroje pravdy, ne
      dopočítaná. Ověřeno: součet položek = 1 388 000,
@@ -1568,7 +1649,8 @@
   // [+] brief 06 §1 — faze ("F1"—"F5") nahrazena okamzik ("T1"—"T5").
   // null = projekt ještě není na ose vůbec — to je přesně "F1" dřív:
   // vstupní obrazovka s dialogem, ne bod na časové ose (viz
-  // renderF1Screen a jeho volání v renderScreen()).
+  // renderLandingScreen/renderBriefScreen a state.ui.zakaznik.obrazovka,
+  // brief 07 §2).
   var projekty = [
   {
     id: "byt-3-1",
@@ -2244,11 +2326,20 @@
       f4: { vicepraceSchvalena: false, probratKliknuto: false },
       // [+] brief 06 §2/§3 — sjednocená obrazovka projektu. otevrenyJob
       // drží INDEX jobu v projekt.joby (ne id — joby nemají id), null =
-      // žádný detail rozbalený. pakyOtevreny přepíná překryv nad
-      // seznamem jobů (§3) — schválně samostatné od f2.vybranePaky
-      // (to drží, CO je zaškrtnuté; tohle jen JESTLI se to zrovna
-      // upravuje).
-      projekt: { otevrenyJob: null, pakyOtevreny: false }
+      // žádný job otevřený.
+      // [+] brief 07 — pakyOtevreny (překryv pák) zmizelo. Páky teď
+      // žijí jako plnohodnotný obsah samostatné obrazovky Budget, ne
+      // jako překryv nad seznamem jobů — viz ui.zakaznik.obrazovka.
+      projekt: { otevrenyJob: null },
+      // [+] brief 07 — router zákaznické cesty. Dřív se odvozoval ze
+      // dvou různých míst najednou (state.pohled pro "moje-projekty" vs
+      // zbytek, projekt.okamzik pro F1 vs zbytek) — okamzik teď zůstává
+      // výhradně daty (řídí stav jobů přes primenOkamzik), routování je
+      // celé tady. Výchozí "moje-projekty", ať demo dál startuje tam,
+      // kde dnes. asistentOtevren/asistentDotaz — stejný vzor jako
+      // ui.remeslnik, plovoucí asistent dostupný na pěti ze šesti
+      // obrazovek (ne na landing, tam je vstupní pole samo tím vstupem).
+      zakaznik: { obrazovka: "moje-projekty", asistentOtevren: false, asistentDotaz: null }
     };
   }
 
@@ -2257,9 +2348,10 @@
     // (brief 06) žije na projektu (viz projekty[].okamzik výše),
     // aktivniProjektId říká jen KTERÝ projekt se právě dívá.
     aktivniProjektId: "byt-3-1",
-    // [+] N1 — "moje-projekty" (přehled) nebo "projekt" (osa okamžiků
-    // otevřeného projektu). Výchozí při načtení stránky je přehled.
-    pohled: "moje-projekty",
+    // [+] brief 07 — "moje-projekty" bylo tady jako samostatná osa,
+    // teď je to jedna z šesti hodnot state.ui.zakaznik.obrazovka
+    // (vychoziUi()), stejná plocha, kde žijí i landing/brief/budget/
+    // projekt/job. Viz renderScreen().
     role: "zakaznik",
     scenar: null,
     krok: 0,
@@ -3234,20 +3326,23 @@
     S1: {
       label: "Full walkthrough",
       kroky: [
-        { role: "zakaznik", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: false, krokDialogu: 0, odpovedi: [], dialogDraft: "", pendingOdpoved: null, mysli: false } }, popis: "Vstupní obrazovka, pilulka „I have a rough idea“." },
-        { role: "zakaznik", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: true, krokDialogu: 0, odpovedi: [], dialogDraft: "", pendingOdpoved: null, mysli: false } }, popis: "Ukázkový text vložen, dialog rozjetý — teď se dá odpovídat volným textem." },
-        { role: "zakaznik", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: true, krokDialogu: 5, odpovedi: F1_DEMO_ODPOVEDI, dialogDraft: "", pendingOdpoved: null, mysli: false } }, popis: "B1 — shrnutí zadání." },
-        { role: "zakaznik", okamzik: "T2", ui: { f2: { vybranePaky: [], poptavka: "oboji" }, f4: { vicepraceSchvalena: false, probratKliknuto: false }, projekt: { otevrenyJob: null, pakyOtevreny: false } }, popis: "Seznam jobů a rozpočtový blok, 1 388 000 Kč — přes strop." },
-        { role: "zakaznik", okamzik: "T2", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" } }, popis: "Páky zaškrtnuté — 1 181 000 Kč. Peak dema." },
-        { role: "zakaznik", okamzik: "T2", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" } }, popis: "Zavřený překryv pák — seznam jobů s promítnutou změnou." },
-        { role: "zakaznik", okamzik: "T3", ui: { f3: { cesta: "profese", vybrane: {}, vybranaFirma: null } }, popis: "Skládání týmu — klikněte na tři nabídky naživo, panel se plní před očima." },
-        { role: "zakaznik", okamzik: "T3", ui: { f3: { cesta: "profese", vybrane: { 0: "novak-demolice", 1: "instalace-kriz", 2: "vanek" }, vybranaFirma: null } }, popis: "Řádek „nebo jedna firma“ — zkuste přepnout na klíč a zpět." },
+        { role: "zakaznik", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: false, krokDialogu: 0, odpovedi: [], dialogDraft: "", pendingOdpoved: null, mysli: false }, zakaznik: { obrazovka: "landing" } }, popis: "Vstupní obrazovka, pilulka „I have a rough idea“." },
+        { role: "zakaznik", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: true, krokDialogu: 0, odpovedi: [], dialogDraft: "", pendingOdpoved: null, mysli: false }, zakaznik: { obrazovka: "brief" } }, popis: "Ukázkový text vložen, dialog rozjetý — teď se dá odpovídat volným textem." },
+        // [+] brief 07 — B1 se přestěhovalo z konce dialogu na obrazovku
+        // Budget (renderBudgetScreen), takže "B1 — shrnutí zadání" je
+        // teď tenhle krok tam, ne uvnitř Brief.
+        { role: "zakaznik", ui: { f1: { pilulka: "predstava", textZadany: F1_DEMO_TEXT, odeslano: true, krokDialogu: 5, odpovedi: F1_DEMO_ODPOVEDI, dialogDraft: "", pendingOdpoved: null, mysli: false }, zakaznik: { obrazovka: "budget" } }, popis: "B1 — shrnutí zadání." },
+        { role: "zakaznik", okamzik: "T2", ui: { f2: { vybranePaky: [], poptavka: "oboji" }, f4: { vicepraceSchvalena: false, probratKliknuto: false }, projekt: { otevrenyJob: null }, zakaznik: { obrazovka: "projekt" } }, popis: "Seznam jobů a rozpočtový blok, 1 388 000 Kč — přes strop." },
+        { role: "zakaznik", okamzik: "T2", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" }, zakaznik: { obrazovka: "budget" } }, popis: "Páky zaškrtnuté — 1 181 000 Kč. Peak dema." },
+        { role: "zakaznik", okamzik: "T2", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" }, zakaznik: { obrazovka: "projekt" } }, popis: "Zpátky na projekt — seznam jobů s promítnutou změnou." },
+        { role: "zakaznik", okamzik: "T3", ui: { f3: { cesta: "profese", vybrane: {}, vybranaFirma: null }, zakaznik: { obrazovka: "projekt" } }, popis: "Skládání týmu — klikněte na tři nabídky naživo, panel se plní před očima." },
+        { role: "zakaznik", okamzik: "T3", ui: { f3: { cesta: "profese", vybrane: { 0: "novak-demolice", 1: "instalace-kriz", 2: "vanek" }, vybranaFirma: null }, zakaznik: { obrazovka: "projekt" } }, popis: "Řádek „nebo jedna firma“ — zkuste přepnout na klíč a zpět." },
         { role: "remeslnik", okamzik: "T3", ui: { remeslnik: { view: "dnes", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Řemeslník — plocha, záložka Dnes." },
         { role: "remeslnik", okamzik: "T3", ui: { remeslnik: { view: "job", nabidkaCastka: null, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Balíček práce — elektroinstalace." },
         { role: "remeslnik", okamzik: "T3", ui: { remeslnik: { view: "nabidka", nabidkaCastka: 158000, nabidkaOdeslana: false, nabidkaPoznamka: null, nabidkaSablona: null, fakturaOdeslana: false, asistentOtevren: false, asistentDotaz: null } }, popis: "Nabídka — cena upravená 165 000 → 158 000 Kč." },
-        { role: "zakaznik", okamzik: "T3", ui: { f3: { cesta: "profese", vybrane: { 0: "novak-demolice", 1: "instalace-kriz", 2: "vanek", 3: "sadrokartony-holy", 5: "malby-svoboda" }, vybranaFirma: null } }, popis: "Elektroinstalace — tři nabídky, Jiří Vaněk vybraný." },
+        { role: "zakaznik", okamzik: "T3", ui: { f3: { cesta: "profese", vybrane: { 0: "novak-demolice", 1: "instalace-kriz", 2: "vanek", 3: "sadrokartony-holy", 5: "malby-svoboda" }, vybranaFirma: null }, zakaznik: { obrazovka: "projekt" } }, popis: "Elektroinstalace — tři nabídky, Jiří Vaněk vybraný." },
         { role: "partner", okamzik: "T2", ui: { partner: { otevrenaPoptavka: 0 } }, popis: "Partner — přehled a poptávky, „Byt 3+1“ rozbalená." },
-        { role: "zakaznik", okamzik: "T5", ui: {}, popis: "Plán vs. skutečnost." }
+        { role: "zakaznik", okamzik: "T5", ui: { zakaznik: { obrazovka: "projekt" } }, popis: "Plán vs. skutečnost." }
       ]
     },
     S2: {
@@ -3257,9 +3352,9 @@
         // scénář, který začíná rovnou v T3 (bez vlastního průchodu T2),
         // musí páky zaškrtnout sám — jinak by "1 124 000" a "1 181 000"
         // v tomhle kroku neseděly.
-        { role: "zakaznik", okamzik: "T3", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" }, f3: { cesta: "profese", vybrane: { 0: "novak-demolice", 1: "instalace-kriz", 2: "vanek", 3: "sadrokartony-holy", 5: "malby-svoboda" }, vybranaFirma: null }, projekt: { otevrenyJob: null, pakyOtevreny: false } }, popis: "Řádek „nebo jedna firma — od 1 124 000 Kč“." },
-        { role: "zakaznik", okamzik: "T3", ui: { f3: { cesta: "naklic", vybrane: { 0: "novak-demolice", 1: "instalace-kriz", 2: "vanek", 3: "sadrokartony-holy", 5: "malby-svoboda" }, vybranaFirma: 0 } }, popis: "Výběr Stavby Konečný — panel „Co by se změnilo“." },
-        { role: "zakaznik", okamzik: "T3", ui: { f3: { cesta: "profese", vybrane: { 0: "novak-demolice", 1: "instalace-kriz", 2: "vanek", 3: "sadrokartony-holy", 5: "malby-svoboda" }, vybranaFirma: 0 } }, popis: "Návrat — výběry v týmu zůstaly zachované." }
+        { role: "zakaznik", okamzik: "T3", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" }, f3: { cesta: "profese", vybrane: { 0: "novak-demolice", 1: "instalace-kriz", 2: "vanek", 3: "sadrokartony-holy", 5: "malby-svoboda" }, vybranaFirma: null }, projekt: { otevrenyJob: null }, zakaznik: { obrazovka: "projekt" } }, popis: "Řádek „nebo jedna firma — od 1 124 000 Kč“." },
+        { role: "zakaznik", okamzik: "T3", ui: { f3: { cesta: "naklic", vybrane: { 0: "novak-demolice", 1: "instalace-kriz", 2: "vanek", 3: "sadrokartony-holy", 5: "malby-svoboda" }, vybranaFirma: 0 }, zakaznik: { obrazovka: "projekt" } }, popis: "Výběr Stavby Konečný — panel „Co by se změnilo“." },
+        { role: "zakaznik", okamzik: "T3", ui: { f3: { cesta: "profese", vybrane: { 0: "novak-demolice", 1: "instalace-kriz", 2: "vanek", 3: "sadrokartony-holy", 5: "malby-svoboda" }, vybranaFirma: 0 }, zakaznik: { obrazovka: "projekt" } }, popis: "Návrat — výběry v týmu zůstaly zachované." }
       ]
     },
     S3: {
@@ -3287,7 +3382,12 @@
         // [+] brief 05 — stejný důvod jako u S2: T4 tu čte
         // rozpocetPoPakach(), který teď potřebuje zaškrtnuté páky, ať
         // vyjde 1 181 000 → 1 199 000, ne 1 388 000 → 1 406 000.
-        { role: "zakaznik", okamzik: "T4", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" }, f4: { vicepraceSchvalena: false, probratKliknuto: false }, projekt: { otevrenyJob: null, pakyOtevreny: false } }, popis: "Karta víceprací — nález vlhkosti, +18 000 Kč." },
+        // [+] brief 07 — otevrenyJob opraveno z null na 2 (elektro, jediný
+        // job se stavTrhu "probiha" na T4) a obrazovka na "job": karta
+        // víceprací (renderF4Vicepráce) se kreslí jen uvnitř
+        // renderJobDetail() pro otevřený job, takže s otevrenyJob: null
+        // by se vůbec neukázala, přestože to popis kroku slibuje.
+        { role: "zakaznik", okamzik: "T4", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" }, f4: { vicepraceSchvalena: false, probratKliknuto: false }, projekt: { otevrenyJob: 2 }, zakaznik: { obrazovka: "job" } }, popis: "Karta víceprací — nález vlhkosti, +18 000 Kč." },
         { role: "zakaznik", okamzik: "T4", ui: { f4: { vicepraceSchvalena: true, probratKliknuto: false } }, popis: "Schváleno — částka se překlopila do celkové sumy." },
         { role: "zakaznik", okamzik: "T4", ui: { f4: { vicepraceSchvalena: true, probratKliknuto: false } }, popis: "Celkem 1 199 000 Kč — pořád pod stropem 1 200 000 Kč." }
       ]
@@ -3302,9 +3402,9 @@
     S6: {
       label: "Project in motion",
       kroky: [
-        { role: "zakaznik", okamzik: "T4", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" }, f4: { vicepraceSchvalena: false, probratKliknuto: false }, projekt: { otevrenyJob: null, pakyOtevreny: false } }, popis: "T4 — elektro probíhá, obklady a podlahy i kuchyň čekají na nabídky, bourání a voda hotovo." },
-        { role: "zakaznik", okamzik: "T4", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" }, projekt: { otevrenyJob: 2, pakyOtevreny: false } }, popis: "Elektro — probíhající job, den 3 z 9." },
-        { role: "zakaznik", okamzik: "T4", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" }, projekt: { otevrenyJob: 4, pakyOtevreny: false } }, popis: "Obklady a podlahy — pořád jen čekání na nabídky." }
+        { role: "zakaznik", okamzik: "T4", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" }, f4: { vicepraceSchvalena: false, probratKliknuto: false }, projekt: { otevrenyJob: null }, zakaznik: { obrazovka: "projekt" } }, popis: "T4 — elektro probíhá, obklady a podlahy i kuchyň čekají na nabídky, bourání a voda hotovo." },
+        { role: "zakaznik", okamzik: "T4", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" }, projekt: { otevrenyJob: 2 }, zakaznik: { obrazovka: "job" } }, popis: "Elektro — probíhající job, den 3 z 9." },
+        { role: "zakaznik", okamzik: "T4", ui: { f2: { vybranePaky: VSECHNY_PAKY, poptavka: "oboji" }, projekt: { otevrenyJob: 4 }, zakaznik: { obrazovka: "job" } }, popis: "Obklady a podlahy — pořád jen čekání na nabídky." }
       ]
     }
   };
@@ -3329,11 +3429,14 @@
 
   function scenarStart(id) {
     // Scénáře pořád pracují nad jedním, výchozím projektem (byt-3-1) —
-    // start scénáře proto vždy přepne i pohled/aktivní projekt, ať se
-    // spustí ze "Moje projekty" nebo z libovolného jiného otevřeného
-    // projektu.
+    // start scénáře proto vždy přepne i aktivní projekt, ať se spustí
+    // ze "Moje projekty" nebo z libovolného jiného otevřeného projektu.
+    // [+] brief 07 — dřív se tu natvrdo nastavovalo state.pohled =
+    // "projekt", aby scénář neuvízl na přehledu. Teď o to, na které
+    // obrazovce scénář začne, řekne rovnou první krok scénáře (jeho
+    // ui.zakaznik.obrazovka, viz applyScenarKrok níž) — každý scénář to
+    // má nastavené sám na to, co první krok skutečně ukazuje.
     state.aktivniProjektId = "byt-3-1";
-    state.pohled = "projekt";
     state.scenar = id;
     state.krok = 0;
     applyScenarKrok(SCENARIOS[id].kroky[0]);
@@ -3459,9 +3562,10 @@
   }
 
   function renderHero() {
-    // Volá se jen dokud se neodešle pole (viz renderF1Screen) — jakmile
-    // se odešle, celá marketingová stránka mizí, tenhle blok se
-    // nevykresluje vůbec. Proto tu žádné odeslano rozhodování není.
+    // Volá se jen z renderLandingScreen() — jakmile se pole odešle,
+    // router (ui.zakaznik.obrazovka) přepne na "brief" a celá
+    // marketingová stránka i tenhle blok s ní zmizí. Proto tu žádné
+    // odeslano rozhodování není.
     return '<div class="hero"><div class="page-container hero__inner">' +
       '<div class="hero__headline">' +
         '<h1>Describe your project.<br>We\'ll handle the<br>budget, the materials<br>and the trades.</h1>' +
@@ -3543,29 +3647,11 @@
     '</footer>';
   }
 
-  function renderF1Screen() {
-    var projekt = aktivniProjekt();
-    var ui = state.ui.f1;
-    // [+] N2 „Jedna práce" — kratší dialog, žádné B2 (kostra §5 F1:
-    // "cenový rozptyl" u jednoho dodavatele nedává smysl — viz brief
-    // 02, sekce 3).
-    var jednaPrace = jeJednaPrace(projekt);
-    var dialog = jednaPrace ? DIALOG_JEDNA_PRACE : DIALOG;
-
-    // Po odeslání zmizí celá marketingová stránka — nadpis, hodnocení,
-    // koláž, "jak to funguje", patička. Nahradí ji samostatný,
-    // vycentrovaný pohled: jen horní pruh a dialog (pak B1+B2). Je to
-    // přechod ze stránky do produktu, ne rozbalení sekce uvnitř hera.
-    if (ui.odeslano) {
-      var content = ui.krokDialogu >= dialog.length
-        ? renderB1() + (jednaPrace ? "" : renderB2())
-        : renderDialogView(dialog);
-      return '<div class="screen">' +
-        renderKumuTopbar() +
-        '<div class="f2-screen">' + content + '</div>' +
-      '</div>';
-    }
-
+  // [+] brief 07 §3a — dřív první (nepodmíněná) větev renderF1Screen().
+  // Beze změny obsahu — jen dostala vlastní jméno a router jí teď řídí
+  // viditelnost přes ui.zakaznik.obrazovka === "landing", ne přes
+  // ui.f1.odeslano === false.
+  function renderLandingScreen() {
     return '<div class="screen">' +
       renderKumuTopbar() +
       renderHero() +
@@ -3573,6 +3659,32 @@
       renderHowItWorks() +
       renderPhaseBarReal() +
       renderSiteFooter() +
+    '</div>';
+  }
+
+  // [+] brief 07 §3b — dřív druhá větev renderF1Screen() (ui.f1.odeslano
+  // === true), ale jen dialogová část — B1/B2 se přestěhovaly na
+  // renderBudgetScreen(). Dokud dialog neskončil, ukazuje se
+  // renderDialogView(); jakmile skončí (krokDialogu >= dialog.length),
+  // místo automatického skoku na Budget se ukáže tlačítko
+  // "brief-hotovo" — uživatel má vidět, že dialog doopravdy dojel, ne
+  // aby obrazovka zmizela sama pod rukama.
+  function renderBriefScreen() {
+    var projekt = aktivniProjekt();
+    var ui = state.ui.f1;
+    // [+] N2 „Jedna práce" — kratší dialog, žádné B2 (kostra §5 F1:
+    // "cenový rozptyl" u jednoho dodavatele nedává smysl — viz brief
+    // 02, sekce 3).
+    var jednaPrace = jeJednaPrace(projekt);
+    var dialog = jednaPrace ? DIALOG_JEDNA_PRACE : DIALOG;
+    var content = ui.krokDialogu >= dialog.length
+      ? blockCard("", null, null, '<p class="block-card__note" style="margin:0 0 var(--space-1);">Your brief is ready.</p>' +
+          '<div class="block-card__cta"><button type="button" class="pill-btn pill-btn--primary" data-action="brief-hotovo">Continue to the budget</button></div>')
+      : renderDialogView(dialog);
+    return '<div class="screen">' +
+      renderKumuTopbar() +
+      '<div class="f2-screen">' + content + '</div>' +
+      renderZakaznikAsistent() +
     '</div>';
   }
 
@@ -3597,12 +3709,38 @@
     });
   }
 
+  // [+] brief 07 §3c — obrazovka Budget. Skládá dohromady kusy, které
+  // dřív žily na dvou různých místech (B1/B2 na konci dialogu, páky
+  // jako překryv nad seznamem jobů) — žádný nový obsah, jen jedno
+  // místo pro rozhodování o rozpočtu. renderRozpoctovyBlok() tu
+  // nenabízí vlastní tlačítko na páky (viz jeho ctaViditelna níž) —
+  // páky jsou tady rovnou vidět jako obsah stránky, ne za druhým
+  // kliknutím.
+  function renderBudgetScreen() {
+    var projekt = aktivniProjekt();
+    return '<div class="screen">' +
+      renderKumuTopbar() +
+      '<div class="f2-screen" style="max-width:var(--container);">' +
+        renderB1() +
+        (jeJednaPrace(projekt) ? "" : renderB2()) +
+        renderRozpoctovyBlok(projekt) +
+        renderB8VyberInteractive() +
+        '<div class="block-card__cta" style="display:flex;gap:8px;">' +
+          '<button type="button" class="pill-btn pill-btn--secondary" data-action="goto-brief">Back to brief</button>' +
+          '<button type="button" class="pill-btn pill-btn--primary" data-action="budget-hotovo">Continue</button>' +
+        '</div>' +
+      '</div>' +
+      renderZakaznikAsistent() +
+    '</div>';
+  }
+
   // [+] brief 06 §3 — rozpočtový blok drží vrchol dema: strop, aktuální
-  // součet, řádek Rozdíl, tlačítko na páky (překryv, viz paky-otevrit
-  // v handleAction a .paky-overlay). Zůstává nahoře v plné velikosti,
-  // ne zmenšený vedle jobů — proto zvláštní blok, ne znovu renderB3Odhad
-  // (ten je vázaný na aktivniProjekt() a plný seznam položek, tady
-  // stačí tři čísla).
+  // součet, řádek Rozdíl. [+] brief 07 — tlačítko na páky (dřív
+  // otevíralo překryv, viz paky-otevrit) teď vede na obrazovku Budget
+  // (akce goto-budget). Zůstává nahoře v plné velikosti, ne zmenšený
+  // vedle jobů — proto zvláštní blok, ne znovu renderB3Odhad (ten je
+  // vázaný na aktivniProjekt() a plný seznam položek, tady stačí tři
+  // čísla).
   //
   // Na T5 je to jinak: joby jsou hotovo, takže se přepíná na skutečnost
   // (soucetVyuctovani()) se stejnou neutrální sémantikou Rozdílu jako
@@ -3630,6 +3768,11 @@
     var rozdil = soucet - strop;
     // [+] N2 „Jedna práce" — dotace (brief 02, sekce 3) zobrazená jako
     // poznámka pod rozpočtem, přesně jako dřív v renderF2Rozpocet().
+    // [+] brief 07 — tlačítko na páky teď vede na samostatnou obrazovku
+    // Budget (dřív otevíralo překryv rovnou tady). Na Budget obrazovce
+    // samotné je zbytečné — páky jsou tam už vidět jako obsah stránky
+    // pod tímhle blokem — proto se tam vůbec nekreslí.
+    var naBudgetu = state.ui.zakaznik.obrazovka === "budget";
     return blockCard("B3", "Budget", null,
       totalRowHtml("Total", czk(soucet), "neutral") +
         totalRowHtml("Your budget", czk(strop), "neutral") +
@@ -3638,8 +3781,8 @@
           : totalRowHtml("Headroom", czk(-rozdil), "under")),
       {
         note: projekt.zadani.dotace ? "Subject to a subsidy: " + projekt.zadani.dotace : null,
-        cta: "Adjust cost-saving levers",
-        ctaAction: "paky-otevrit"
+        cta: naBudgetu ? null : "Adjust budget",
+        ctaAction: naBudgetu ? null : "goto-budget"
       });
   }
 
@@ -3701,33 +3844,20 @@
   // [+] brief 06 §2 — nahrazuje renderF1Screen()…renderF5Screen() a
   // mapu zakaznikRenderers v renderScreen(). Stavba shora dolů přesně
   // podle zadání: topbar, rozpočtový blok, seznam jobů (nebo — na cestě
-  // "na klíč" — tři nabídky firem), detail otevřeného jobu, harmonogram
-  // a panel "Váš tým" (oba projektové, ne jobové), fázový pruh.
+  // "na klíč" — tři nabídky firem), harmonogram a panel "Váš tým" (oba
+  // projektové, ne jobové), fázový pruh.
+  // [+] brief 07 §3d — překryv pák (ui.projekt.pakyOtevreny) i detail
+  // otevřeného jobu (detailHtml) odsud odešly. Páky mají vlastní
+  // obrazovku Budget (renderBudgetScreen), detail jobu vlastní
+  // obrazovku Job (renderJobScreen) — klik na job teď routuje tam
+  // (viz akce job-otevrit v handleAction), ne že by rozbaloval panel
+  // tady na místě.
   function renderProjektScreen() {
     var projekt = aktivniProjekt();
-    var ui = state.ui.projekt;
     var naKlic = state.ui.f3.cesta === "naklic";
     var rozpoctovyBlok = renderRozpoctovyBlok(projekt);
 
-    if (ui.pakyOtevreny) {
-      return '<div class="screen">' +
-        renderKumuTopbar() +
-        '<div class="f2-screen" style="max-width:var(--container);">' +
-          rozpoctovyBlok +
-          '<div class="joby-wrap"><div class="paky-overlay">' +
-            renderB8VyberInteractive() +
-            '<div class="block-card__cta"><button type="button" class="pill-btn pill-btn--primary" data-action="paky-zavrit">Done</button></div>' +
-          '</div></div>' +
-        '</div>' +
-        renderPhaseBarReal() +
-      '</div>';
-    }
-
     var jobyHtml = naKlic ? renderF3NaKlic() : renderJobyList(projekt);
-    var detailHtml = "";
-    if (!naKlic && ui.otevrenyJob !== null && projekt.joby[ui.otevrenyJob]) {
-      detailHtml = '<div class="job-detail">' + renderJobDetail(projekt.joby[ui.otevrenyJob], ui.otevrenyJob) + '</div>';
-    }
     var harmonogram = naKlic ? "" : renderF3Harmonogram();
     // [+] brief 06 — dřív celoobrazovkové F5 (nadpis "Done", dokumentace,
     // hodnocení všech řemeslníků najednou). Nadpis a datum patřily jen
@@ -3743,12 +3873,64 @@
       '<div class="f2-screen" style="max-width:var(--container);">' +
         rozpoctovyBlok +
         '<div class="joby-wrap">' + jobyHtml + '</div>' +
-        detailHtml +
         harmonogram +
         renderF3TeamPanel() +
         dokoncenoBlok +
       '</div>' +
       renderPhaseBarReal() +
+      renderZakaznikAsistent() +
+    '</div>';
+  }
+
+  // [+] brief 07 §3e — tenký obal kolem renderJobDetail(), beze změny.
+  // Vrací se sama na "projekt", pokud otevrenyJob ukazuje mimo rozsah
+  // (typicky po přepnutí demo přepínačem na jiný okamžik/projekt, kde
+  // starý index sedí na jiný, nebo na žádný job) — jinak by tu spadla
+  // na undefined místo tichého návratu na seznam.
+  function renderJobScreen() {
+    var projekt = aktivniProjekt();
+    var i = state.ui.projekt.otevrenyJob;
+    if (i === null || !projekt.joby[i]) {
+      return renderProjektScreen();
+    }
+    return '<div class="screen">' +
+      renderKumuTopbar() +
+      '<div class="f2-screen" style="max-width:var(--container);">' +
+        '<button type="button" class="pill-btn pill-btn--secondary" data-action="zpet-na-projekt">← ' + projekt.identita.nazev + '</button>' +
+        renderJobDetail(projekt.joby[i], i) +
+      '</div>' +
+      renderZakaznikAsistent() +
+    '</div>';
+  }
+
+  // [+] brief 07 §4 — plovoucí asistent, dostupný na pěti obrazovkách
+  // z šesti (ne na landing — tam je vstupní pole v heru samo tím
+  // vstupem). Stejný vzor jako renderRemeslnikAsistent(): tlačítko →
+  // překryvná plocha, ne položka navigace. Obsah je demo, ne skutečná
+  // logika — pevná odpověď podle toho, na které obrazovce se ptá.
+  var ZAKAZNIK_ASISTENT_ODPOVEDI = {
+    brief: "Answer what you can — I'll ask about anything that's still missing.",
+    budget: "The levers on this screen are the fastest way to move under your ceiling. Tick any of them and the total updates straight away.",
+    projekt: "Open any job below to see its bids or its progress. The schedule and your team both update as you choose.",
+    job: "This job's price and status come straight from its own bids or its own build progress — nothing here is estimated separately.",
+    "moje-projekty": "Open a project to see its budget, its team and its schedule."
+  };
+
+  function renderZakaznikAsistent() {
+    var ui = state.ui.zakaznik;
+    var btn = '<button type="button" class="zakaznik-asistent-btn" data-action="zak-asistent-toggle">Assistant</button>';
+    if (!ui.asistentOtevren) return btn;
+    var odpoved = ui.asistentDotaz !== null
+      ? '<div class="assistant-sheet__answer">' + ZAKAZNIK_ASISTENT_ODPOVEDI[ui.obrazovka] + '</div>'
+      : "";
+    return btn + '<div class="zakaznik-asistent-sheet">' +
+      '<button type="button" class="assistant-sheet__close" data-action="zak-asistent-toggle">Close</button>' +
+      '<div class="dialog__input-row">' +
+        '<input type="text" class="dialog__input" data-bind="zak-asistent-dotaz" placeholder="Ask about this project…" />' +
+        '<button type="button" class="pill-btn pill-btn--primary pill-btn--small" data-action="zak-asistent-send">Send</button>' +
+      '</div>' +
+      odpoved +
+      '<p class="assistant-sheet__footnote">Answers come from this project in Kumu.</p>' +
     '</div>';
   }
 
@@ -4896,26 +5078,29 @@
           '<button type="button" class="pill-btn pill-btn--secondary" data-action="novy-projekt" data-typ="jedna-prace">+ New project — single job</button>' +
         '</div>' +
       '</div>' +
+      renderZakaznikAsistent() +
     '</div>';
+  }
+
+  // [+] brief 07 §2 — jediné místo, které čte state.ui.zakaznik.obrazovka.
+  // Nahrazuje dřívější dvojí rozhodování (state.pohled pro "moje-projekty"
+  // vs. zbytek, projekt.okamzik === null pro F1 vs. renderProjektScreen).
+  // projekt.okamzik se tu nečte vůbec — zůstává výhradně daty pro
+  // primenOkamzik(), routování je celé na jednom řezu stavu.
+  function renderZakaznikScreen() {
+    var obrazovka = state.ui.zakaznik.obrazovka;
+    if (obrazovka === "moje-projekty") return renderMojeProjektyScreen();
+    if (obrazovka === "landing") return renderLandingScreen();
+    if (obrazovka === "brief") return renderBriefScreen();
+    if (obrazovka === "budget") return renderBudgetScreen();
+    if (obrazovka === "job") return renderJobScreen();
+    return renderProjektScreen();
   }
 
   function renderScreen() {
     var el = document.querySelector('[data-screen]');
     var scaffold = document.querySelector('[data-scaffold]');
-    // [+] N1 — nová obrazovka nad celou F1—F5 osou. Nemá roli ani fázi,
-    // takže se rozhoduje dřív a samostatně, ne jako čtvrtá větev matice.
-    if (state.pohled === "moje-projekty") {
-      el.innerHTML = renderMojeProjektyScreen();
-      scaffold.style.display = "none";
-      return;
-    }
     var projekt = aktivniProjekt();
-    // [+] brief 06 §2 — pět fázových obrazovek se sloučilo do jedné
-    // (renderProjektScreen). F1 zůstává mimo osu: vykresluje se, dokud
-    // projekt nemá zvolený okamzik (projekt.okamzik je null — "ještě
-    // jsme nezačali"), přesně jak dělaly S1 kroky 1—3 dřív pro faze
-    // "F1". Jakmile má projekt okamzik (ať zvoleno scénářem, demo
-    // přepínačem, nebo B1 tlačítkem), jede renderProjektScreen().
     var isZakaznikScreen = state.role === "zakaznik";
     // [+] N1 — Chata Vranov a Zateplení Bystrc mají remeslnik/partner
     // null (brief §4: sdílení mezi projekty se tady neřeší). Bez týhle
@@ -4924,7 +5109,7 @@
       (projekt.okamzik === "T3" || projekt.okamzik === "T4" || projekt.okamzik === "T5");
     var isPartnerScreen = state.role === "partner" && !!projekt.partner && !!projekt.okamzik && projekt.okamzik !== "T1";
     if (isZakaznikScreen) {
-      el.innerHTML = projekt.okamzik ? renderProjektScreen() : renderF1Screen();
+      el.innerHTML = renderZakaznikScreen();
       scaffold.style.display = "none";
     } else if (isRemeslnikScreen) {
       el.innerHTML = renderRemeslnikScreen();
@@ -4946,7 +5131,12 @@
     if (action === "f1-pilulka") {
       updateUi(function (ui) { ui.f1.pilulka = el.getAttribute("data-pilulka-id"); });
     } else if (action === "f1-submit") {
-      updateUi(function (ui) { ui.f1.odeslano = true; });
+      // [+] brief 07 — dřív jen ui.f1.odeslano = true (renderF1Screen
+      // samo přepínalo mezi hero a dialogem podle týž příznaku). Teď
+      // ho ponechává (renderDialogView/renderB1 ho nikde nečtou, ale
+      // scénáře S1 ho pořád nastavují ve svých krocích, viz SCENARIOS)
+      // a navíc routuje na obrazovku Brief.
+      updateUi(function (ui) { ui.f1.odeslano = true; ui.zakaznik.obrazovka = "brief"; });
     } else if (action === "f1-dialog-quick") {
       if (state.ui.f1.mysli) return;
       submitDialogAnswer(el.getAttribute("data-answer"));
@@ -4966,23 +5156,45 @@
       updateUi(function (ui) { ui.f2.poptavka = el.getAttribute("data-value"); });
     } else if (action === "goto-f2") {
       // [+] brief 06 — B1 tlačítko "That's right — calculate the
-      // budget" opouští vstupní obrazovku na osu okamžiků. Jméno akce
-      // (goto-f2) zůstává z briefu 01, ať se nemusí přejmenovávat
-      // odkaz v renderB1() — jen teď nastavuje okamzik, ne fázi.
+      // budget" nastavuje okamzik na ose. Jméno akce (goto-f2) zůstává
+      // z briefu 01, ať se nemusí přejmenovávat odkaz v renderB1().
+      // [+] brief 07 — B1 teď žije na obrazovce Budget (kde se
+      // renderRozpoctovyBlok() beztak řídí okamzikem), takže tahle
+      // akce sama o sobě obrazovku neřeší, jen data.
       setState({ okamzik: "T2" });
+    } else if (action === "brief-hotovo") {
+      updateUi(function (ui) { ui.zakaznik.obrazovka = "budget"; });
+    } else if (action === "goto-brief") {
+      updateUi(function (ui) { ui.zakaznik.obrazovka = "brief"; });
+    } else if (action === "goto-budget") {
+      updateUi(function (ui) { ui.zakaznik.obrazovka = "budget"; });
+    } else if (action === "budget-hotovo") {
+      // [+] brief 07 — pojistka: kdyby se na Budget dorazilo, aniž by
+      // B1 tlačítko (goto-f2) kdy nastavilo okamzik (např. přímým
+      // proklikem přes "Continue" bez toho, že by kdo předtím klikl
+      // "That's right — calculate the budget"), Projekt obrazovka by
+      // jinak ukázala joby ve stavu "Idea" navzdory viditelnému
+      // rozpočtu. "Continue" proto sám okamzik nastaví, pokud ještě
+      // není — beze změny, když už je (T3+ zůstává T3+, ne resetne na T2).
+      updateUi(function (ui) { ui.zakaznik.obrazovka = "projekt"; });
+      if (!projekt.okamzik) setState({ okamzik: "T2" });
     } else if (action === "job-otevrit") {
       var jobIndex = Number(el.getAttribute("data-index"));
-      updateUi(function (ui) { ui.projekt.otevrenyJob = ui.projekt.otevrenyJob === jobIndex ? null : jobIndex; });
-    } else if (action === "job-zavrit") {
-      updateUi(function (ui) { ui.projekt.otevrenyJob = null; });
-    } else if (action === "paky-otevrit") {
-      updateUi(function (ui) { ui.projekt.pakyOtevreny = true; });
-    } else if (action === "paky-zavrit") {
-      updateUi(function (ui) { ui.projekt.pakyOtevreny = false; });
+      updateUi(function (ui) { ui.projekt.otevrenyJob = jobIndex; ui.zakaznik.obrazovka = "job"; });
+    } else if (action === "zpet-na-projekt") {
+      updateUi(function (ui) { ui.zakaznik.obrazovka = "projekt"; });
     } else if (action === "goto-moje-projekty") {
-      setState({ pohled: "moje-projekty" });
+      updateUi(function (ui) { ui.zakaznik.obrazovka = "moje-projekty"; });
     } else if (action === "otevrit-projekt") {
-      setState({ aktivniProjektId: el.getAttribute("data-project-id"), pohled: "projekt" });
+      state.ui.zakaznik.obrazovka = "projekt";
+      setState({ aktivniProjektId: el.getAttribute("data-project-id") });
+    } else if (action === "zak-asistent-toggle") {
+      updateUi(function (ui) {
+        ui.zakaznik.asistentOtevren = !ui.zakaznik.asistentOtevren;
+        ui.zakaznik.asistentDotaz = null;
+      });
+    } else if (action === "zak-asistent-send") {
+      updateUi(function (ui) { ui.zakaznik.asistentDotaz = 0; });
     } else if (action === "novy-projekt") {
       // [+] N1 §3 — žádný skutečný formulář, jen prázdný projekt na F1
       // (kopie struktury Zateplení Bystrc bez dat), aby šlo ukázat, že
@@ -5018,7 +5230,11 @@
         rezervaMimoJoby: 0, predani: null,
         remeslnik: null, partner: null
       });
-      setState({ aktivniProjektId: novyId, pohled: "projekt" });
+      // [+] brief 07 — nový, prázdný projekt nemá okamzik ani odpovědi,
+      // takže patří na Landing (dřív: pohled "projekt" + okamzik null
+      // → renderF1Screen() dělalo totéž).
+      state.ui.zakaznik.obrazovka = "landing";
+      setState({ aktivniProjektId: novyId });
     } else if (action === "rem-nav") {
       updateUi(function (ui) { ui.remeslnik.view = el.getAttribute("data-view"); });
     } else if (action === "rem-open-job") {
