@@ -1,0 +1,59 @@
+/* ============================================================
+   KUMU — tokeny (kontrakt)
+   Definuje, JAKÉ proměnné existují a CO znamenají. Žádná konkrétní
+   barva tu není — hodnoty jsou v theme-light.css a theme-dark.css.
+   Sémantické názvy, ne popisné: --surface-raised, ne --white.
+   ============================================================ */
+
+:root {
+  /* --- plochy --------------------------------------------- */
+  --bg: initial;                 /* pozadí stránky */
+  --surface: initial;            /* plocha karty */
+  --surface-raised: initial;     /* plocha nad kartou (překryvy, panel) */
+  --surface-sunken: initial;     /* potlačená plocha (odložené joby) */
+  --border: initial;             /* linka */
+
+  /* --- text -------------------------------------------------*/
+  --text-primary: initial;
+  --text-secondary: initial;
+  --text-muted: initial;
+
+  /* --- akce ---------------------------------------------------*/
+  --accent: initial;             /* interaktivní prvky — nikdy peněžní částka */
+  --accent-contrast: initial;    /* text na accentu */
+
+  /* --- rozpočtová semantika — vyhrazená, jen na peněžních částkách --- */
+  --color-over: initial;         /* částka nad rozpočtem */
+  --color-under: initial;        /* částka pod rozpočtem */
+
+  /* --- role ---------------------------------------------------*/
+  --role-customer: initial;
+  --role-trade: initial;
+  --role-partner: initial;
+
+  /* ============================================================
+     Rozměrové a typografické tokeny — nejsou barvy, smí mít hodnotu
+     přímo tady (pravidlo o barvách v theme-*.css se týká jen barev).
+     ============================================================ */
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --fs-display-xl: 64px;
+  --fs-display: 40px;
+  --fs-heading: 20px;
+  --fs-body: 15px;
+  --fs-label: 12px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 48px;
+  --space-6: 72px;
+  --space-7: 96px;
+
+  --radius-card: 10px;
+  --radius-pill: 999px;
+
+  --border-width: 1px;
+}
