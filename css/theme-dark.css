@@ -1,0 +1,34 @@
+/* ============================================================
+   KUMU — theme: dark
+   Aktivuje se přes [data-theme="dark"] na <html>. Přepínač je ve
+   vývojářské liště, ne v produktovém rozhraní.
+   ============================================================ */
+
+[data-theme="dark"] {
+  --raw-cornsilk: #F0DF87;
+  --raw-glacier: #A0CED9;
+  --raw-malachite: #3D9E71;
+  --raw-atlantic: #133968;
+  --raw-persimmon: #E4572E;
+  --raw-violet: #7B3FA3;
+
+  --bg: #0E1B2E;
+  --surface: #16243A;
+  --surface-raised: #1E3050;
+  --surface-sunken: #0B1626;
+  --border: color-mix(in srgb, white 16%, transparent);
+
+  --text-primary: #F2F5FA;
+  --text-secondary: color-mix(in srgb, white 72%, transparent);
+  --text-muted: color-mix(in srgb, white 46%, transparent);
+
+  --accent: #B98BE0;
+  --accent-contrast: #1E1030;
+
+  --color-over: #F0946E;   /* Persimmon posvětlený, čitelný na tmavé */
+  --color-under: #74D3A8;  /* Malachite posvětlený, čitelný na tmavé */
+
+  --role-customer: var(--raw-glacier);
+  --role-trade: var(--raw-cornsilk);
+  --role-partner: var(--raw-malachite);
+}

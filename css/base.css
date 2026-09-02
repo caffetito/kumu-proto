@@ -1,0 +1,55 @@
+/* KUMU — reset, typografie, layout primitiva. Žádná barevná hodnota tu nesmí být. */
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+#app { min-height: 100vh; }
+
+h1, h2, h3 { margin: 0 0 var(--space-2); font-weight: 600; }
+h2 { font-size: var(--fs-heading); }
+h3 { font-size: var(--fs-heading); }
+p { margin: 0 0 var(--space-2); }
+ul { list-style: none; margin: 0; padding: 0; }
+a { color: inherit; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: none; }
+textarea { width: 100%; resize: vertical; }
+
+.display-xl {
+  font-size: var(--fs-display-xl);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  margin: 0 0 var(--space-3);
+}
+.display {
+  font-size: var(--fs-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.micro {
+  font-size: var(--fs-label);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.screen { padding: 0 var(--space-4) var(--space-6); max-width: 1100px; margin: 0 auto; }
+.screen--zakaznik, .screen--partner { background: var(--surface); }
+
+.def-list li { display: flex; justify-content: space-between; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: var(--border-width) solid var(--border); }
+.def-list li:last-child { border-bottom: none; }
+
+.text-over { color: var(--color-over); }
+.text-under { color: var(--color-under); }
+
+@media (max-width: 900px) {
+  .screen--zakaznik, .screen--partner { padding: 0 var(--space-3) var(--space-5); }
+}

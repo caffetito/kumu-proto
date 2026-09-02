@@ -1,0 +1,149 @@
+/* KUMU — karty, řádky, dlaždice, tlačítka, lišty. Žádná barevná hodnota tu nesmí být. */
+
+/* --- tlačítka a pilulky ------------------------------------------ */
+.btn {
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  min-height: 44px;
+}
+.btn--primary { background: var(--text-primary); color: var(--bg); }
+.btn--primary[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn--secondary { border: var(--border-width) solid var(--border); background: transparent; }
+.pill { padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); border: var(--border-width) solid var(--border); min-height: 44px; }
+.pill--active { background: var(--accent); color: var(--accent-contrast); border-color: transparent; }
+
+/* --- karty --------------------------------------------------------- */
+.card {
+  padding: var(--space-3);
+  border-radius: var(--radius-card);
+  border: var(--border-width) solid var(--border);
+  margin-bottom: var(--space-3);
+}
+.card--raised { background: var(--surface-raised); }
+.card--over { border-width: 2px; border-color: var(--text-primary); }
+
+/* --- rozpočtový blok -------------------------------------------- */
+.budget-block { display: flex; flex-direction: column; gap: var(--space-1); }
+.sum-row { display: flex; justify-content: space-between; padding: var(--space-1) 0; }
+.sum-row__castka { font-variant-numeric: tabular-nums; }
+.sum-row--over .sum-row__castka { color: var(--color-over); font-weight: 700; }
+.sum-row--under .sum-row__castka { color: var(--color-under); font-weight: 700; }
+
+.gauge { position: relative; height: 8px; border-radius: var(--radius-pill); background: var(--surface-sunken); margin-top: var(--space-2); overflow: hidden; }
+.gauge__fill { position: absolute; inset: 0; }
+.gauge__fill--over { background: var(--color-over); }
+.gauge__fill--under { background: var(--color-under); }
+
+/* --- položky ------------------------------------------------------- */
+.line-items { display: flex; flex-direction: column; }
+.line-item { display: flex; justify-content: space-between; padding: var(--space-1) 0; border-bottom: var(--border-width) solid var(--border); }
+.line-item__znacka { color: var(--text-muted); font-size: var(--fs-label); }
+
+/* --- páky ------------------------------------------------------ */
+.lever { display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-2); align-items: center; padding: var(--space-2); border-radius: var(--radius-card); }
+.lever--active { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.lever input { width: 20px; height: 20px; }
+.lever__body { display: flex; flex-direction: column; }
+.lever__popis { font-weight: 600; }
+.lever__dopad { font-size: var(--fs-label); color: var(--text-secondary); }
+.lever__uspora { color: var(--color-under); font-weight: 700; }
+
+/* --- kandidáti / dlaždice --------------------------------------- */
+.candidate {
+  display: flex; align-items: center; gap: var(--space-2);
+  width: 100%; padding: var(--space-2); border-radius: var(--radius-card);
+  border: var(--border-width) solid var(--border); margin-bottom: var(--space-1);
+  background: var(--surface-raised); text-align: left;
+}
+.candidate--selected { border-color: var(--accent); border-width: 2px; }
+.candidate:not(.candidate--selected):hover { opacity: 0.85; }
+.candidate__avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-sunken); display: flex; align-items: center; justify-content: center; font-size: var(--fs-label); font-weight: 700; }
+.candidate__info { display: flex; flex-direction: column; flex: 1; }
+.candidate__jmeno { font-weight: 600; }
+.candidate__meta { font-size: var(--fs-label); color: var(--text-secondary); }
+.candidate__castka { font-weight: 700; }
+
+/* --- štítky stavu ------------------------------------------------- */
+.tag {
+  display: inline-block; padding: 2px var(--space-2); border-radius: var(--radius-pill);
+  font-size: var(--fs-label); text-transform: uppercase; letter-spacing: 0.04em;
+  background: var(--surface-sunken); color: var(--text-secondary);
+}
+.tag--probiha, .tag--zadano-remeslnikovi { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--text-primary); }
+.tag--hotovo { background: var(--text-primary); color: var(--bg); }
+
+/* --- karta práce --------------------------------------------------- */
+.job-card { border: var(--border-width) solid var(--border); border-radius: var(--radius-card); padding: var(--space-2); margin-bottom: var(--space-3); background: var(--surface-raised); }
+.job-card__header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); width: 100%; text-align: left; padding: var(--space-1) 0; }
+.job-card__nazev { font-weight: 600; flex: 1; }
+.job-card__castka { font-weight: 700; font-variant-numeric: tabular-nums; }
+.job-card__kandidati { margin-top: var(--space-2); }
+.job-card__cekame { color: var(--text-secondary); margin-top: var(--space-1); }
+
+/* --- panel týmu ----------------------------------------------------- */
+.team-panel { position: sticky; top: var(--space-3); }
+.team-panel__stitek { font-size: var(--fs-label); letter-spacing: 0.06em; color: var(--text-secondary); }
+.team-panel__sloty { display: flex; flex-direction: column; gap: var(--space-1); margin: var(--space-2) 0; }
+.team-slot { display: flex; justify-content: space-between; padding: var(--space-1) 0; border-bottom: var(--border-width) solid var(--border); font-size: var(--fs-label); }
+.team-slot__profese { font-weight: 700; letter-spacing: 0.04em; }
+.team-slot__prazdny { color: var(--text-muted); }
+.team-panel__soucet { margin: var(--space-2) 0; }
+.team-panel__naklic { display: block; margin-top: var(--space-2); text-decoration: underline; color: var(--text-secondary); font-size: var(--fs-label); }
+
+/* --- harmonogram ---------------------------------------------------- */
+.timeline { position: relative; height: 28px; background: var(--surface-sunken); border-radius: var(--radius-card); margin-bottom: var(--space-4); overflow: hidden; }
+.timeline__segment { position: absolute; top: 4px; height: 20px; border-radius: 4px; }
+.timeline__segment--plny { background: var(--accent); }
+.timeline__segment--obrys { border: 2px dashed var(--border); }
+
+/* --- rám telefonu -------------------------------------------------- */
+.phone { width: 375px; max-width: 100%; margin: var(--space-4) auto; border: 10px solid var(--text-primary); border-radius: 36px; background: var(--surface-raised); overflow: hidden; }
+.phone__notch { height: 20px; }
+.phone__screen { min-height: 640px; display: flex; flex-direction: column; }
+.phone__obsah { flex: 1; padding: var(--space-3); overflow-y: auto; }
+.phone-nav { display: flex; border-top: var(--border-width) solid var(--border); }
+.phone-nav__item { flex: 1; padding: var(--space-2) 0; min-height: 44px; font-size: var(--fs-label); }
+.phone-nav__item--active { font-weight: 700; color: var(--accent); }
+
+/* --- chat ------------------------------------------------------------ */
+.chat { display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-3); }
+.chat__msg { max-width: 80%; padding: var(--space-2); border-radius: var(--radius-card); }
+.chat__msg--asistent, .chat__msg--remeslnik { background: var(--surface-sunken); align-self: flex-start; }
+.chat__msg--zakaznik { background: color-mix(in srgb, var(--accent) 16%, transparent); align-self: flex-end; }
+
+/* --- ostatní drobnosti ----------------------------------------------- */
+.step { padding: var(--space-3) 0; border-top: var(--border-width) solid var(--border); }
+.step__cislo { color: var(--text-muted); font-weight: 700; }
+.footer { border-top: var(--border-width) solid var(--border); padding: var(--space-5) var(--space-4); display: flex; flex-wrap: wrap; gap: var(--space-5); justify-content: space-between; }
+.footer__odkazy { display: flex; gap: var(--space-5); }
+.footer__odkazy div { display: flex; flex-direction: column; gap: var(--space-1); }
+.footer__provozovatel { width: 100%; }
+.photos { display: flex; gap: var(--space-2); margin: var(--space-2) 0; }
+.photo-placeholder { width: 88px; height: 66px; background: var(--surface-sunken); border-radius: 6px; }
+.metric { text-align: left; }
+.metric__hodnota { font-size: var(--fs-display); font-weight: 800; }
+.surface-cool { background: var(--surface-cool, var(--surface-sunken)); }
+
+/* --- horní pruh, patka, walkthrough, devbar ---------------------- */
+.topbar { display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) var(--space-4); }
+.topbar__brand { font-weight: 800; font-size: var(--fs-heading); }
+.topbar__login { text-decoration: underline; }
+
+.walkthrough { display: flex; gap: 2px; padding: var(--space-1) var(--space-2); background: var(--text-primary); overflow-x: auto; }
+.walkthrough__item { padding: var(--space-1) var(--space-2); color: var(--bg); opacity: 0.5; display: flex; flex-direction: column; align-items: flex-start; min-width: max-content; border-left: 3px solid transparent; }
+.walkthrough__item--aktivni { opacity: 1; font-weight: 700; }
+.walkthrough__item--minuly { opacity: 0.75; }
+.walkthrough__role { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.7; }
+.walkthrough__item.role-zakaznik { border-left-color: var(--role-customer); }
+.walkthrough__item.role-remeslnik { border-left-color: var(--role-trade); }
+.walkthrough__item.role-partner { border-left-color: var(--role-partner); }
+
+.devbar { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; padding: var(--space-1) var(--space-3); background: var(--devbar-bg); color: var(--devbar-fg); font-size: var(--fs-label); }
+.devbar .micro { color: var(--devbar-fg-muted); }
+.devbar__skupina { display: flex; align-items: center; gap: 4px; }
+.devbar__btn { padding: 2px 8px; border-radius: var(--radius-pill); border: 1px solid color-mix(in srgb, var(--devbar-fg) 30%, transparent); color: var(--devbar-fg); }
+.devbar__btn--active { background: var(--accent); border-color: transparent; color: var(--accent-contrast); }
+.devbar select, .devbar button { color: var(--devbar-fg); }
+.devbar select { background: var(--devbar-bg); border: 1px solid color-mix(in srgb, var(--devbar-fg) 30%, transparent); border-radius: 4px; }
